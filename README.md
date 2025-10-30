@@ -72,6 +72,14 @@ El proyecto se plantea como el desarrollo individual de un sistema completo de f
 │
 └── README.md
 ```
+---
+
+## 🎨 Diseño en Figma
+El diseño visual y las maquetas responsivas del portal inmobiliario se están desarrollando en **Figma**.  
+Incluyen las versiones para **móvil (393×849)**, **tablet (1280×800)** y **monitor (1440×1024)**, siguiendo la identidad visual definida para el proyecto.
+
+📎 **Enlace al diseño:**  
+[https://www.figma.com/design/69B6hKjCAikIMAUKihlpLt/Inmobiliaria?node-id=0-1&t=4vVK0OMVWpbpNsSG-1](https://www.figma.com/design/69B6hKjCAikIMAUKihlpLt/Inmobiliaria?node-id=0-1&t=4vVK0OMVWpbpNsSG-1)
 
 ---
 
