@@ -1,0 +1,33 @@
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Configuración local
+.env
+config/*.php
+
+# Archivos temporales y de caché
+*.log
+*.tmp
+.cache/
+session/
+
+# Dependencias o librerías externas
+/vendor/
+node_modules/
+
+# Archivos de IDE
+.idea/
+.vscode/
+
+# Archivos del sistema operativo
+*.swp
+*.bak
+
+# Archivos de respaldo o exportación
+*.zip
+*.tar
+*.gz
+
+# Datos sensibles o personales
+/private/
