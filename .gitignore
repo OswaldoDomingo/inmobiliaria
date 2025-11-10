@@ -30,4 +30,12 @@ node_modules/
 *.gz
 
 # Datos sensibles o personales
+token.txt
 /private/
+/app/config/token.txt
+/public/api/cache/
+/vendor/
+.env
+.env.local
+.env.*.local
+
