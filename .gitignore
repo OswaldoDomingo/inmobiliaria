@@ -11,6 +11,7 @@ config/*.php
 *.tmp
 .cache/
 session/
+pruebas/
 
 # Dependencias o librerías externas
 /vendor/
@@ -38,4 +39,9 @@ token.txt
 .env
 .env.local
 .env.*.local
+tira.js
+inmovilla.php
+placeholedr.jpg
+indexPrueba.php
+estilosPrueba.css
 
