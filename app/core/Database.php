@@ -1,55 +1,52 @@
 <?php
 // app/core/Database.php
 
-// 2 niveles hacia arriba: /inmobiliaria
-require_once dirname(__DIR__, 2) . '/config/database.php';
-
 class Database
 {
-    // Instancia única de PDO
-    private static $instancia = null;
-    private $conexion;
+    // Instancia única de la clase
+    private static ?Database $instancia = null;
 
-    // Constructor privado: Nadie puede hacer "new Database()" desde fuera
+    // Conexión PDO
+    private \PDO $conexion;
+
+    // Constructor privado
     private function __construct()
     {
+        // Cargar config.php (local/servidor)
+        $config = require dirname(__DIR__, 2) . '/config/config.php';
+        $db     = $config['db'];
+
+        // DSN de conexión
+        $dsn = sprintf(
+            'mysql:host=%s;dbname=%s;charset=%s',
+            $db['host'],
+            $db['dbname'],
+            $db['charset']
+        );
+
+        $opciones = [
+            \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
+            \PDO::ATTR_EMULATE_PREPARES   => false,
+        ];
+
         try {
-            // Obtenemos la configuración desde config/database.php (que a su vez lee .env)
-            $config = getDatabaseConfig();
-
-            // Cadena de conexión (DSN)
-            $dsn = sprintf(
-                'mysql:host=%s;dbname=%s;charset=%s',
-                $config['host'],
-                $config['dbname'],
-                $config['charset']
-            );
-
-            // Opciones avanzadas de PDO
-            $opciones = [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // errores como excepciones
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,         // $fila->campo
-                PDO::ATTR_EMULATE_PREPARES   => false,                  // seguridad extra en prepares
-            ];
-
-            $this->conexion = new PDO(
+            $this->conexion = new \PDO(
                 $dsn,
-                $config['user'],
-                $config['password'],
+                $db['user'],
+                $db['pass'],
                 $opciones
             );
-
-        } catch (PDOException $e) {
-            // Si falla la conexión, matamos el proceso y mostramos mensaje
+        } catch (\PDOException $e) {
             die("❌ Error de Conexión a BD: " . $e->getMessage());
         }
     }
 
     // Método estático para obtener la conexión
-    public static function conectar()
+    public static function conectar(): \PDO
     {
         if (self::$instancia === null) {
-            self::$instancia = new Database();
+            self::$instancia = new self();
         }
 
         return self::$instancia->conexion;

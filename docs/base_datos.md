@@ -2,7 +2,7 @@
 
 ## 1. Objetivo de la base de datos
 
-La base de datos `inmobiliaria_chatgpt` tiene como finalidad dar soporte a un **CRM inmobiliario** sencillo pero realista, centrado en dos perfiles:
+La base de datos `inmobiliaria_db` tiene como finalidad dar soporte a un **CRM inmobiliario** sencillo pero realista, centrado en dos perfiles:
 
 * **Administrador / Coordinador**
 * **Comercial**
@@ -280,16 +280,16 @@ Este script se puede usar **tanto en phpMyAdmin** como en **MySQL Workbench**:
   3. Pegar el script.
   4. Ejecutar.
 
-> ⚠️ El script borra la base de datos `inmobiliaria_chatgpt` si ya existe, para dejar todo limpio.
+> ⚠️ El script borra la base de datos `inmobiliaria_db` si ya existe, para dejar todo limpio.
 
 ```sql
-DROP DATABASE IF EXISTS `inmobiliaria_chatgpt`;
+DROP DATABASE IF EXISTS `inmobiliaria_db`;
 
-CREATE DATABASE `inmobiliaria_chatgpt`
+CREATE DATABASE `inmobiliaria_db`
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_0900_ai_ci;
 
-USE `inmobiliaria_chatgpt`;
+USE `inmobiliaria_db`;
 
 -- =========================
 -- 1) USUARIOS
