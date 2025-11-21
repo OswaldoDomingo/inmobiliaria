@@ -13,42 +13,55 @@
 
 ## 📚 Descripción general
 
-El **Proyecto Inmobiliaria** consiste en el desarrollo de un portal web inmobiliario desde cero, sin el uso de frameworks externos.
-El objetivo es crear una aplicación web funcional y profesional que permita mostrar, gestionar y publicar propiedades en venta y en alquiler.
+El **Proyecto Inmobiliaria** consiste en el desarrollo de un portal web inmobiliario desde cero, sin el uso de frameworks externos.  
+El objetivo es construir una aplicación web funcional y profesional que permita mostrar, gestionar y publicar propiedades en venta y alquiler mediante una arquitectura clara y mantenible.
 
-El proyecto se plantea como el desarrollo individual de un sistema completo de **frontend**, **backend** y **base de datos**, siguiendo la estructura y metodología propias de un entorno de desarrollo real.
+Este proyecto incorpora:
+
+- **Frontend** (HTML, CSS, JavaScript)  
+- **Backend en PHP orientado a objetos (POO)**  
+- **Arquitectura MVC propia**  
+- **Base de datos MySQL/MariaDB**  
+- **Documentación completa conforme a las fases del módulo de Proyecto del IES Abastos**
 
 ---
 
 ## 🌟 Objetivos
 
-* Desarrollar un **portal inmobiliario completo y funcional**.
-* Aplicar los principios básicos de la **arquitectura MVC (Modelo–Vista–Controlador)**.
-* Integrar una **base de datos MySQL/MariaDB** para la gestión de propiedades, clientes y operaciones.
-* Implementar una interfaz clara, moderna y **responsive** mediante HTML, CSS y JavaScript.
-* Documentar el proceso de desarrollo según las fases establecidas por el IES Abastos (identificación, diseño, desarrollo, control y defensa).
+* Desarrollar un **portal inmobiliario completo y funcional**.  
+* Aplicar los principios de la **arquitectura MVC (Modelo–Vista–Controlador)**.  
+* Integrar y gestionar datos mediante **MySQL/MariaDB**.  
+* Crear una interfaz clara, moderna y **responsive**, apta para móvil, tablet y escritorio.  
+* Documentar todas las fases del proyecto según las directrices del IES Abastos.
 
 ---
 
 ## 🧩 Alcance del proyecto
 
 ### 🔹 Frontend
-
-* Páginas principales: Inicio, Acerca de, Propiedades en venta, Propiedades en alquiler, Vende tu piso.
-* Formularios de contacto y alta de inmuebles.
-* Diseño adaptable a distintos dispositivos (móvil, tablet, monitor).
+* Home (landing page)  
+* Sección de inmuebles en venta  
+* Sección de alquiler  
+* Ficha individual de propiedad  
+* Página “Vende tu piso”  
+* Formulario de contacto  
+* Diseño responsive completo (móvil/tablet/desktop)
 
 ### 🔹 Backend
-
-* Gestión de propiedades y usuarios desde el panel administrativo.
-* Validación de formularios y tratamiento de datos con PHP.
-* Generación dinámica de vistas y comunicación con la base de datos.
+* Panel administrativo para gestión de propiedades  
+* Gestión de usuarios  
+* Validación de formularios  
+* Enrutamiento interno mediante controladores  
+* Generación dinámica de vistas
 
 ### 🔹 Base de datos
-
-* Diseño relacional en **MySQL/MariaDB**.
-* Tablas relacionadas para propiedades, clientes, usuarios y operaciones.
-  *(El diseño concreto se definirá más adelante.)*
+* Sistema relacional en MySQL/MariaDB  
+* Tablas para:
+  - Usuarios
+  - Propiedades
+  - Clientes
+  - Operaciones (venta/alquiler)  
+* Relaciones y claves foráneas para garantizar integridad
 
 ---
 
@@ -64,24 +77,33 @@ El proyecto se plantea como el desarrollo individual de un sistema completo de *
 
 ---
 
-## 🗁️ Estructura inicial del proyecto
+## 🗁️ Estructura actual del proyecto
 
 ```bash
 /inmobiliaria/
-├── /app/
-│   ├── /models/          # Lógica de datos y consultas SQL
-│   ├── /views/           # Plantillas HTML/PHP
-│   └── /controllers/     # Controladores de flujo de la aplicación
+├── app/
+│   ├── controllers/     # Controladores de la aplicación
+│   ├── core/            # Núcleo del MVC (Database, Autoloader, Router más adelante)
+│   ├── models/          # Modelos y acceso a datos
+│   └── views/           # Plantillas HTML/PHP
 │
-├── /public/
-│   ├── /css/             # Hojas de estilo
-│   ├── /js/              # Scripts JavaScript
-│   └── /images/          # Recursos gráficos
+├── config/
+│   ├── env.php          # Carga del archivo .env
+│   ├── database.php     # Configuración de conexión
+│   └── paths.php        # Constantes de rutas absolutas
 │
-├── /config/              # Configuración general y conexión a BD
+├── public/
+│   ├── index.php        # Punto de entrada del MVC
+│   └── assets/
+│       ├── css/
+│       ├── js/
+│       └── img/
 │
-├── /docs/                # Documentación para el tribunal (memoria, anexos, etc.)
+├── storage/             # Logs, archivos temporales, etc.
 │
+├── docs/                # Documentación técnica y académica
+│
+├── .env                 # Variables de entorno (no se sube a GitHub)
 └── README.md
 ```
 
@@ -89,51 +111,60 @@ El proyecto se plantea como el desarrollo individual de un sistema completo de *
 
 ## 🎨 Diseño en Figma
 
-El diseño visual y las maquetas responsivas del portal inmobiliario se están desarrollando en **Figma**.
-Incluyen las versiones para **móvil (393×849)**, **tablet (1280×800)** y **monitor (1440×1024)**, siguiendo la identidad visual definida para el proyecto.
+El diseño visual del portal, incluyendo versiones para móvil (393×849), tablet (1280×800) y escritorio (1440×1024), se desarrolla en **Figma** siguiendo una línea moderna, limpia y coherente.
 
-💎 **Enlace al diseño:**
-[🔗 Ver prototipo en Figma](https://www.figma.com/design/69B6hKjCAikIMAUKihlpLt/Inmobiliaria?node-id=0-1&t=4vVK0OMVWpbpNsSG-1)
+🔗 **Enlace al prototipo en Figma:**  
+https://www.figma.com/design/69B6hKjCAikIMAUKihlpLt/Inmobiliaria?node-id=0-1
 
-> ⚠️ El enlace se mantiene en modo *solo lectura* para garantizar la integridad del diseño.
+> El prototipo está en modo lectura para preservar la integridad del diseño y evitar modificaciones no autorizadas.
 
 ---
 
-## 🦯 Estado actual
+## 🦯 Estado actual del proyecto
 
-Este repositorio contiene la **estructura base del proyecto** y el archivo `README.md` inicial.
-A medida que avance el desarrollo, se añadirán los componentes del modelo, las vistas, los controladores y la base de datos correspondiente.
+Actualmente el proyecto incluye:
+
+- ✔ Estructura MVC inicial organizada  
+- ✔ Sistema de configuración basado en `.env`  
+- ✔ Archivos de configuración (`env.php`, `paths.php`, `database.php`)  
+- ✔ Clase `Database` modernizada y completamente funcional  
+- ✔ Punto de entrada (`public/index.php`) operativo  
+- ✔ Conexión a la base de datos probada exitosamente  
+- ✔ Documentación inicial (`avances.md` y `memoria.md`)  
+
+El siguiente paso será implementar el **Router**, seguido de los primeros controladores y vistas.
 
 ---
 
 ## 📄 Documentación
 
-Toda la documentación técnica y académica se incluirá en la carpeta `/docs/`, conforme a las **instrucciones del IES Abastos** para la presentación del módulo de Proyecto.
-Las fases se seguirán según lo descrito en el documento oficial:
+Toda la documentación del proyecto (memoria, anexos, diagramas, avances diarios…) se encuentra en `docs/`.
 
-> * Fase I: Identificación y análisis de necesidades
-> * Fase II: Diseño del proyecto
-> * Fase III: Desarrollo
-> * Fase IV: Control y evaluación
-> * Fase V: Defensa y presentación
+El proyecto sigue las fases establecidas por el IES Abastos para el módulo de Proyecto:
+
+1️⃣ **Fase I:** Identificación y análisis de necesidades  
+2️⃣ **Fase II:** Diseño del proyecto  
+3️⃣ **Fase III:** Desarrollo  
+4️⃣ **Fase IV:** Control y evaluación  
+5️⃣ **Fase V:** Defensa del proyecto  
 
 ---
 
 ## 🧠 Filosofía de trabajo
 
-El desarrollo se realiza de forma **modular, documentada y controlada mediante Git**, siguiendo el flujo descrito en `00_inicio_proyecto.md`:
-
-* Control de versiones y registro de progreso (`DEVLOG.md` o `notas_proyecto.md`).
-* Trabajo incremental en fases (análisis, diseño, desarrollo, evaluación).
-* Revisión y validación antes de cada commit importante.
+- Metodología incremental en fases  
+- Control de versiones con Git  
+- Commits documentados y estructurados  
+- Uso de `avances.md` como diario de desarrollo  
+- Documentación continua y actualizada  
 
 ---
 
 ## 👨‍💻 Autor
 
-**Oswaldo Domingo Pérez**
-📧 [oswaldodomingop@gmail.com](mailto:oswaldo.domingo@gmail.com)
-🌐 [github.com/OswaldoDomingo/inmobiliaria](https://github.com/OswaldoDomingo/inmobiliaria)
+**Oswaldo Domingo Pérez**  
+📧 [oswaldodomingop@gmail.com](mailto:oswaldodomingop@gmail.com)  
+🌐 https://github.com/OswaldoDomingo/inmobiliaria  
 
 ---
 
