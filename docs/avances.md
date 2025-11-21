@@ -57,3 +57,55 @@ Se ha modificado el diseño inicial que incluye:
 
 ---
 
+
+# 📅 Avances — 21/11/2025
+
+## 🧩 Reestructuración general del proyecto
+Se realizó una reorganización completa de la estructura del proyecto con el objetivo de dejar una arquitectura limpia, modular y segura. Se eliminaron directorios duplicados, configuraciones obsoletas y archivos heredados de pruebas previas.  
+El proyecto queda estructurado sobre un patrón MVC básico: `app/`, `config/`, `public/`, `storage/`, `docs/`.
+
+Esta reestructuración permite un desarrollo más ordenado y coherente para las fases siguientes del proyecto.
+
+---
+
+## 🔐 FASE 1 — Seguridad básica y configuración
+
+### ✔ Configuración de archivo `.env`
+- Se creó el archivo `.env` en la raíz del proyecto.
+- Se añadieron las credenciales de la base de datos.
+- Se añadió `.env` a `.gitignore` para evitar exposición de credenciales.
+
+### ✔ Carpeta `config/`
+Se estableció la estructura definitiva de configuración con los archivos:
+- `env.php` → carga de variables de entorno.
+- `paths.php` → rutas absolutas del proyecto.
+- `database.php` → configuración central de conexión a MySQL.
+
+### ✔ Actualización de `Database.php`
+- Adaptación completa de la clase `Database` al sistema de configuración basado en `.env`.
+- Uso de PDO con opciones avanzadas (errores por excepción, fetch por objetos, prepares seguros).
+- Integración con `getDatabaseConfig()` para evitar constantes hardcodeadas.
+
+### ✔ Punto de entrada `public/index.php`
+- Carga automática de `env.php`, `paths.php` y el autoloader.
+- Prueba de inicialización del sistema.
+- Test real de conexión a la base de datos.
+
+### ✔ Verificación con consulta real
+La consulta al usuario administrador en la tabla `usuarios` devolvió datos correctos, confirmando:
+- Conexión funcionando
+- Base de datos accesible
+- Entorno correctamente configurado
+
+---
+
+## 📌 Estado final
+| Elemento | Estado |
+|---------|--------|
+| Estructura MVC establecida | ✔ |
+| Variables de entorno funcionando | ✔ |
+| Configuración centralizada | ✔ |
+| Conexión a BD validada | ✔ |
+| Preparado para fase 2 (Router) | ✔ |
+
+

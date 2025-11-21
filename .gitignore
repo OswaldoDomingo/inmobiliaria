@@ -1,6 +1,7 @@
 # Archivos del sistema
 .DS_Store
 Thumbs.db
+.env
 
 # Configuración local
 .env
@@ -44,4 +45,4 @@ inmovilla.php
 placeholedr.jpg
 indexPrueba.php
 estilosPrueba.css
-
+.htaccess

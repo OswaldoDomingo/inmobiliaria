@@ -8,5 +8,7 @@
     RewriteCond %{REQUEST_FILENAME} !-f
 
     # Si no existe, redirige todo a index.php
-    RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
+    # RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
+    RewriteRule ^([a-zA-Z0-9-]+)$ index.php?url=$1 [QSA,L]
+    
 </IfModule>

@@ -1,6 +1,6 @@
 <?php
 // public/index.php
-
+require_once dirname(__DIR__) . '/config/env.php';
 // 1. Cargar Configuración
 require_once '../config/config.php';
 
