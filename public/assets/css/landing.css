@@ -1,0 +1,33 @@
+.hero-landing {
+    background-image: url("../img/cabecera-031.png");
+    /* usa la que tengas */
+    background-size: cover;
+    background-position: center;
+    height: 300px;
+    /* ajusta según el diseño de Figma */
+}
+
+.section-title {
+    color: #191A2E;
+    text-align: center;
+    font-family: Montserrat;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+.propiedad-card .card-body {
+    padding: 1rem 1.25rem;
+}
+
+.propiedad-card img {
+    object-fit: cover;
+    height: 180px;
+}
+
+.valoracion-box {
+    background-color: #f5f5f5;
+    /* o el gris de Figma */
+    border-radius: 4px;
+}

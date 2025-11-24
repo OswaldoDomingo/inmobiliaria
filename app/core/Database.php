@@ -1,22 +1,37 @@
 <?php
-// app/core/Database.php
+declare(strict_types=1);
 
-class Database
+namespace App\Core;
+
+use PDO;
+use PDOException;
+
+/**
+ * Clase Database
+ * Singleton + Devuelve una conexión PDO en cada llamada.
+ * 
+ * Rutas implicadas:
+ *   ROOT   -> inmobiliaria/
+ *   CONFIG -> inmobiliaria/config/
+ */
+final class Database
 {
-    // Instancia única de la clase
+    /** @var Database|null */
     private static ?Database $instancia = null;
 
-    // Conexión PDO
-    private \PDO $conexion;
+    /** @var PDO */
+    private PDO $conexion;
 
-    // Constructor privado
+    /**
+     * Constructor privado
+     * Carga los datos de config.php y abre la conexión
+     */
     private function __construct()
     {
-        // Cargar config.php (local/servidor)
         $config = require dirname(__DIR__, 2) . '/config/config.php';
         $db     = $config['db'];
 
-        // DSN de conexión
+        // DSN
         $dsn = sprintf(
             'mysql:host=%s;dbname=%s;charset=%s',
             $db['host'],
@@ -25,25 +40,27 @@ class Database
         );
 
         $opciones = [
-            \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_OBJ,
-            \PDO::ATTR_EMULATE_PREPARES   => false,
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+            PDO::ATTR_EMULATE_PREPARES   => false,
         ];
 
         try {
-            $this->conexion = new \PDO(
+            $this->conexion = new PDO(
                 $dsn,
                 $db['user'],
                 $db['pass'],
                 $opciones
             );
-        } catch (\PDOException $e) {
-            die("❌ Error de Conexión a BD: " . $e->getMessage());
+        } catch (PDOException $e) {
+            die("❌ Error de Conexión a la Base de Datos: " . $e->getMessage());
         }
     }
 
-    // Método estático para obtener la conexión
-    public static function conectar(): \PDO
+    /**
+     * Devuelve una conexión PDO lista para usar
+     */
+    public static function conectar(): PDO
     {
         if (self::$instancia === null) {
             self::$instancia = new self();
