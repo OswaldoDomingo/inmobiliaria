@@ -163,8 +163,9 @@ El proyecto sigue las fases establecidas por el IES Abastos para el módulo de P
 ## 👨‍💻 Autor
 
 **Oswaldo Domingo Pérez**  
-📧 [oswaldodomingop@gmail.com](mailto:oswaldodomingop@gmail.com)  
-🌐 https://github.com/OswaldoDomingo/inmobiliaria  
+📧 [oswaldodomingop@gmail.com](mailto:oswaldo.domingop@gmail.com)  
+🌐 https://github.com/OswaldoDomingo/inmobiliaria
+🌐 https://inmobiliaria.oswaldo.dev
 
 ---
 
