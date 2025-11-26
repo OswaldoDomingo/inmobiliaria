@@ -139,6 +139,7 @@ El siguiente paso será implementar el **Router**, seguido de los primeros contr
 ## 📄 Documentación
 
 Toda la documentación del proyecto (memoria, anexos, diagramas, avances diarios…) se encuentra en `docs/`.
+Toda la información detallada de la FCT (empresa, contexto, tareas, evidencias y presentación) se encuentra en la carpeta: `docs/fct/`
 
 El proyecto sigue las fases establecidas por el IES Abastos para el módulo de Proyecto:
 
