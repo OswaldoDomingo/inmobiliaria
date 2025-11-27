@@ -249,3 +249,22 @@ Se ha implementado el sistema de gestión de usuarios (CRUD) con un enfoque estr
 *   `app/views/admin/users/create.php`
 
 
+#### 3. Gestión de Usuarios (Parte 2: Ciclo de Vida)
+*   **Edición de Usuarios:** Implementación de la vista y lógica para modificar datos de usuarios existentes.
+    *   Validación de unicidad de email (excluyendo al propio usuario).
+    *   Gestión opcional de cambio de contraseña.
+*   **Baja de Usuarios (Soft Delete):**
+    *   Implementación de borrado lógico (`activo = 0`, `archivado = 1`).
+    *   **Protección Anti-Suicidio:** Bloqueo de intentos de auto-desactivación por parte del usuario logueado.
+*   **Login Reforzado:** Actualización del `AuthController` para impedir el acceso a usuarios inactivos o archivados.
+*   **Dashboard:** Añadido botón de acceso rápido a "Gestionar Usuarios" para administradores.
+
+### 📝 Archivos clave creados/modificados
+*   `app/Controllers/UserController.php` (Métodos `edit`, `update`, `delete`)
+*   `app/Controllers/AuthController.php` (Check de estado)
+*   `app/views/admin/users/edit.php`
+*   `app/views/admin/users/index.php`
+*   `app/views/admin/dashboard.php`
+
+
+
