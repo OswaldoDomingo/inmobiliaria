@@ -174,3 +174,43 @@ Se ha completado la migración de la herramienta de tasación independiente a la
 #### 4. Correcciones en Producción (Hotfixes)
 *   **Autoloader Case-Sensitivity:** Se actualizó `App\Autoloader` para soportar directorios en minúsculas (fallback), solucionando el error `Class not found` en entornos Linux (producción).
 *   **Renombrado de Directorios:** Se renombró `app/controllers` a `app/Controllers` para cumplir estrictamente con PSR-4.
+
+---
+
+## 🗓️ 2025-11-27 (Sesión Nocturna)
+
+**Tema:** Implementación de Autenticación (Login) y Dashboard
+**Tipo de avance:** Backend / Seguridad / UI
+
+### 🚀 Resumen
+Se ha implementado el sistema completo de autenticación de usuarios, incluyendo login seguro, protección de rutas y un panel de control (Dashboard) con vistas diferenciadas por rol.
+
+### 🔧 Cambios Realizados
+
+#### 1. Arquitectura y Seguridad
+*   **Modelo de Usuario (`App\Models\User`):** Implementación de acceso a datos para verificación de credenciales.
+*   **Controlador de Autenticación (`AuthController`):** Gestión de inicio de sesión (`login`), autenticación (`authenticate`) y cierre de sesión (`logout`).
+*   **Seguridad:**
+    *   Uso de `password_hash` y `password_verify` para almacenamiento seguro de contraseñas.
+    *   Gestión de sesiones PHP (`session_start`, `session_regenerate_id`).
+    *   Protección de rutas: El Dashboard redirige al login si no hay sesión activa.
+
+#### 2. Interfaz de Usuario (UI)
+*   **Vista Login:** Formulario de acceso integrado con el layout principal.
+*   **Vista Dashboard:** Panel de bienvenida que adapta el mensaje según el rol del usuario (`admin`, `coordinador`, `comercial`).
+*   **Header Dinámico:** El menú de navegación ahora muestra "Acceso Profesionales" para visitantes y "Mi Panel" para usuarios logueados.
+
+#### 3. Enrutamiento
+*   **Router:** Registro de nuevas rutas:
+    *   `GET /login`, `POST /login`
+    *   `GET /logout`
+    *   `GET /dashboard` (Protegida)
+
+### 📝 Archivos clave creados/modificados
+*   `app/Models/User.php`
+*   `app/Controllers/AuthController.php`
+*   `app/views/auth/login.php`
+*   `app/views/admin/dashboard.php`
+*   `app/views/layouts/header.php`
+*   `public/index.php`
+

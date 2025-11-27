@@ -32,6 +32,13 @@
                         <li class="nav-item"><a class="nav-link" href="#">Vende</a></li>
                         <li class="nav-item"><a class="nav-link fw-bold text-primary" href="/tasacion">Tasador Online</a></li>
                         <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
+                        <li class="nav-item ms-2">
+                            <?php if (isset($_SESSION['user_id'])): ?>
+                                <a class="btn btn-outline-primary btn-sm" href="/dashboard">Mi Panel</a>
+                            <?php else: ?>
+                                <a class="nav-link text-secondary" href="/login"><small>Acceso Profesionales</small></a>
+                            <?php endif; ?>
+                        </li>
                     </ul>
                 </div>
             </div>

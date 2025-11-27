@@ -68,6 +68,22 @@ $router->get('/tasacion', [TasacionController::class, 'index']);
 $router->post('/tasacion/enviar', [TasacionController::class, 'enviar']);
 
 // ===============================
+// RUTAS DE AUTENTICACIÓN
+// ===============================
+use App\Controllers\AuthController;
+
+$router->get('/login', [AuthController::class, 'login']);
+$router->post('/login', [AuthController::class, 'authenticate']);
+$router->get('/logout', [AuthController::class, 'logout']);
+
+// ===============================
+// RUTAS DE ADMINISTRACIÓN
+// ===============================
+$router->get('/dashboard', function() {
+    require VIEW . '/admin/dashboard.php';
+});
+
+// ===============================
 // 5. Despachar la petición
 // ===============================
 $router->dispatch();
