@@ -1,0 +1,76 @@
+<?php require VIEW . '/layouts/header.php'; ?>
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestión de Usuarios</h1>
+        <a href="/admin/usuarios/nuevo" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Nuevo Usuario
+        </a>
+    </div>
+
+    <?php if (isset($_GET['msg']) && $_GET['msg'] === 'created'): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Usuario creado correctamente.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($users)): ?>
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">No hay usuarios registrados.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($users as $user): ?>
+                                <tr>
+                                    <td class="ps-4">#<?= $user->id_usuario ?></td>
+                                    <td class="fw-medium"><?= htmlspecialchars($user->nombre) ?></td>
+                                    <td><?= htmlspecialchars($user->email) ?></td>
+                                    <td>
+                                        <?php
+                                        $badges = [
+                                            'admin' => 'bg-primary',
+                                            'coordinador' => 'bg-success',
+                                            'comercial' => 'bg-info text-dark'
+                                        ];
+                                        $badgeClass = $badges[$user->rol] ?? 'bg-secondary';
+                                        ?>
+                                        <span class="badge <?= $badgeClass ?>"><?= ucfirst($user->rol) ?></span>
+                                    </td>
+                                    <td>
+                                        <?php if ($user->activo): ?>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">Activo</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Inactivo</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-outline-secondary" title="Editar">
+                                            Editar
+                                        </button>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php require VIEW . '/layouts/footer.php'; ?>

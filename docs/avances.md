@@ -214,3 +214,38 @@ Se ha implementado el sistema completo de autenticación de usuarios, incluyendo
 *   `app/views/layouts/header.php`
 *   `public/index.php`
 
+
+## 🗓️ 2025-11-27 (Gestión de Usuarios y Seguridad)
+
+**Tema:** CRUD de Usuarios y Refactorización de Seguridad
+**Tipo de avance:** Backend / Seguridad
+
+### 🚀 Resumen
+Se ha implementado el sistema de gestión de usuarios (CRUD) con un enfoque estricto en la seguridad, y se ha refactorizado el controlador de tasación para blindar la entrada de datos.
+
+### 🔧 Cambios Realizados
+
+#### 1. Gestión de Usuarios (CRUD)
+*   **Controlador (`UserController`):** Implementación de métodos para listar (`index`), crear (`create`) y guardar (`store`) usuarios.
+    *   **Acceso Restringido:** Solo los administradores pueden acceder a estas rutas.
+*   **Modelo (`User`):** Nuevos métodos `getAll()` y `create()` utilizando sentencias preparadas PDO.
+*   **Vistas:**
+    *   `admin/users/index.php`: Listado de usuarios con indicadores de estado y rol.
+    *   `admin/users/create.php`: Formulario de alta con validación visual de errores.
+
+#### 2. Seguridad y Validación (Política de Tolerancia Cero)
+*   **Sanitización Universal:** Aplicación de `trim()` y `strip_tags()` a todas las entradas de usuario.
+*   **Validación Estricta:**
+    *   Verificación de email único en BD.
+    *   Validación de formato de email (`filter_var`).
+    *   Longitud mínima de contraseña.
+    *   Validación de tipos de datos (numéricos, longitud mínima) en el tasador.
+*   **Refactorización `TasacionController`:** Reescribimos el método `enviar()` para asegurar que ningún dato malicioso llegue al sistema de correos, utilizando `htmlspecialchars` en la construcción del mensaje HTML.
+
+### 📝 Archivos clave creados/modificados
+*   `app/Controllers/UserController.php`
+*   `app/Controllers/TasacionController.php` (Refactorizado)
+*   `app/views/admin/users/index.php`
+*   `app/views/admin/users/create.php`
+
+

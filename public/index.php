@@ -84,6 +84,15 @@ $router->get('/dashboard', function() {
 });
 
 // ===============================
+// RUTAS DE GESTIÓN DE USUARIOS (CRUD)
+// ===============================
+use App\Controllers\UserController;
+
+$router->get('/admin/usuarios', [UserController::class, 'index']);
+$router->get('/admin/usuarios/nuevo', [UserController::class, 'create']);
+$router->post('/admin/usuarios/guardar', [UserController::class, 'store']);
+
+// ===============================
 // 5. Despachar la petición
 // ===============================
 $router->dispatch();

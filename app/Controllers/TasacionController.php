@@ -66,6 +66,10 @@ class TasacionController
      * Procesa el envío del formulario y manda los correos.
      * Ruta: POST /tasacion/enviar
      */
+    /**
+     * Procesa el envío del formulario y manda los correos.
+     * Ruta: POST /tasacion/enviar
+     */
     public function enviar(): void
     {
         // Configuración de cabeceras para respuesta JSON
@@ -85,27 +89,51 @@ class TasacionController
                 throw new Exception('No se recibieron datos o el JSON es inválido');
             }
 
+            // 1. SANITIZACIÓN ESTRICTA
+            $email_cliente = trim(filter_var($data['to_email'] ?? '', FILTER_SANITIZE_EMAIL));
+            $telefono = trim(strip_tags($data['user_phone'] ?? ''));
+            $cp = trim(strip_tags($data['cp'] ?? ''));
+            $barrio = trim(strip_tags($data['barrio'] ?? ''));
+            $zona = trim(strip_tags($data['zona'] ?? ''));
+            $superficie = trim(strip_tags($data['superficie'] ?? ''));
+            $precio_min = trim(strip_tags($data['precio_min'] ?? ''));
+            $precio_max = trim(strip_tags($data['precio_max'] ?? ''));
+            $caracteristicas = trim(strip_tags($data['caracteristicas'] ?? ''));
+            $fecha = date('d/m/Y H:i');
+
+            // 2. VALIDACIÓN ESTRICTA
+            $errors = [];
+
+            if (empty($email_cliente) || !filter_var($email_cliente, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = "El email no es válido.";
+            }
+
+            if (empty($telefono)) {
+                $errors[] = "El teléfono es obligatorio.";
+            }
+
+            if (empty($cp) || strlen($cp) < 4) {
+                $errors[] = "El código postal no es válido.";
+            }
+
+            if (empty($barrio)) {
+                $errors[] = "El barrio es obligatorio.";
+            }
+
+            if (empty($superficie) || !is_numeric($superficie)) {
+                $errors[] = "La superficie debe ser un número válido.";
+            }
+
+            // Si hay errores de validación, devolverlos
+            if (!empty($errors)) {
+                echo json_encode(['status' => 'error', 'message' => implode(' ', $errors)]);
+                return;
+            }
+
             // Configuración (Idealmente esto iría en config/config.php o .env)
             $to_agency = 'no-responder@oswaldo.dev'; // Email de la agencia
             $subject_agency = 'Nuevo Lead de Tasación Online';
             $subject_client = 'Tu valoración inmobiliaria - Confirmación';
-
-            // Extraer datos
-            $email_cliente = $data['to_email'] ?? '';
-            $telefono = $data['user_phone'] ?? '';
-            $cp = $data['cp'] ?? '';
-            $barrio = $data['barrio'] ?? '';
-            $zona = $data['zona'] ?? '';
-            $superficie = $data['superficie'] ?? '';
-            $precio_min = $data['precio_min'] ?? '';
-            $precio_max = $data['precio_max'] ?? '';
-            $caracteristicas = $data['caracteristicas'] ?? '';
-            $fecha = $data['date'] ?? date('d/m/Y H:i');
-
-            // Validar email
-            if (!filter_var($email_cliente, FILTER_VALIDATE_EMAIL)) {
-                throw new Exception('Dirección de correo inválida');
-            }
 
             // --- EMAIL PARA LA AGENCIA ---
             $message_agency = "
@@ -118,19 +146,19 @@ class TasacionController
               <p><strong>Fecha:</strong> $fecha</p>
               <h3>Datos del Cliente</h3>
               <ul>
-                <li><strong>Email:</strong> $email_cliente</li>
-                <li><strong>Teléfono:</strong> $telefono</li>
+                <li><strong>Email:</strong> " . htmlspecialchars($email_cliente) . "</li>
+                <li><strong>Teléfono:</strong> " . htmlspecialchars($telefono) . "</li>
               </ul>
               <h3>Datos del Inmueble</h3>
               <ul>
-                <li><strong>CP:</strong> $cp</li>
-                <li><strong>Barrio:</strong> $barrio</li>
-                <li><strong>Zona:</strong> $zona</li>
-                <li><strong>Superficie:</strong> $superficie m²</li>
-                <li><strong>Características:</strong> $caracteristicas</li>
+                <li><strong>CP:</strong> " . htmlspecialchars($cp) . "</li>
+                <li><strong>Barrio:</strong> " . htmlspecialchars($barrio) . "</li>
+                <li><strong>Zona:</strong> " . htmlspecialchars($zona) . "</li>
+                <li><strong>Superficie:</strong> " . htmlspecialchars($superficie) . " m²</li>
+                <li><strong>Características:</strong> " . htmlspecialchars($caracteristicas) . "</li>
               </ul>
               <h3>Valoración Estimada</h3>
-              <p><strong>Rango:</strong> $precio_min - $precio_max</p>
+              <p><strong>Rango:</strong> " . htmlspecialchars($precio_min) . " - " . htmlspecialchars($precio_max) . "</p>
             </body>
             </html>
             ";
@@ -152,14 +180,14 @@ class TasacionController
               
               <div style='background-color: #f3f4f6; padding: 20px; border-radius: 10px; margin: 20px 0;'>
                 <h3 style='color: #4f46e5; margin-top: 0;'>Valoración Estimada</h3>
-                <p style='font-size: 24px; font-weight: bold;'>$precio_min - $precio_max</p>
+                <p style='font-size: 24px; font-weight: bold;'>" . htmlspecialchars($precio_min) . " - " . htmlspecialchars($precio_max) . "</p>
               </div>
 
               <h3>Detalles de tu inmueble:</h3>
               <ul>
-                <li><strong>Ubicación:</strong> $barrio, $zona ($cp)</li>
-                <li><strong>Superficie:</strong> $superficie m²</li>
-                <li><strong>Extras:</strong> $caracteristicas</li>
+                <li><strong>Ubicación:</strong> " . htmlspecialchars($barrio) . ", " . htmlspecialchars($zona) . " (" . htmlspecialchars($cp) . ")</li>
+                <li><strong>Superficie:</strong> " . htmlspecialchars($superficie) . " m²</li>
+                <li><strong>Extras:</strong> " . htmlspecialchars($caracteristicas) . "</li>
               </ul>
 
               <p>Un agente se pondrá en contacto contigo pronto para validar estos datos y ofrecerte una valoración más precisa.</p>
