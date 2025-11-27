@@ -170,3 +170,7 @@ Se ha completado la migración de la herramienta de tasación independiente a la
 #### 3. Correcciones de Estilo (Hotfixes)
 *   **Conflicto Bootstrap vs Tailwind:** Se desactivó el `preflight` de Tailwind y se forzó la visibilidad de la clase `.collapse` en el controlador para recuperar el menú de navegación.
 *   **Checkboxes:** Se añadieron reglas `!important` en `tasacion.css` para asegurar la visualización de los estados seleccionados.
+
+#### 4. Correcciones en Producción (Hotfixes)
+*   **Autoloader Case-Sensitivity:** Se actualizó `App\Autoloader` para soportar directorios en minúsculas (fallback), solucionando el error `Class not found` en entornos Linux (producción).
+*   **Renombrado de Directorios:** Se renombró `app/controllers` a `app/Controllers` para cumplir estrictamente con PSR-4.
