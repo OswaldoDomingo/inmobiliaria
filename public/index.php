@@ -38,20 +38,10 @@ if (file_exists($autoloadPath)) {
 }
 
 // ===============================
-// 3. Cargar Database (Legacy fallback)
+// 3. Cargar Database
 // ===============================
-// Mantenemos esto por si algún script antiguo depende de ello, 
-// pero idealmente el Autoloader ya se encarga de App\Core\Database.
-$dbPathCore = APP . '/core/Database.php';
-$dbPathRoot = APP . '/Database.php';
-
-if (file_exists($dbPathCore)) {
-    require_once $dbPathCore;
-} elseif (file_exists($dbPathRoot)) {
-    require_once $dbPathRoot;
-} else {
-    // Si el autoloader funciona, esto podría sobrar, pero lo dejamos por seguridad.
-}
+// El Autoloader se encargará de cargar App\Core\Database cuando sea necesario.
+// Eliminamos la carga manual para evitar conflictos de rutas/casing.
 
 // ===============================
 // 4. Inicializar Router y Definir Rutas

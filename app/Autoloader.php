@@ -52,16 +52,30 @@ final class Autoloader
 
         // Sustituimos "\" por "/" y construimos la ruta del fichero
         // App\Controllers\HomeController -> app/Controllers/HomeController.php
-        $file = self::$baseDir
-              . DIRECTORY_SEPARATOR . 'app'
-              . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $relativeClass)
-              . '.php';
+        $path = str_replace('\\', DIRECTORY_SEPARATOR, $relativeClass);
+        $file = self::$baseDir . '/app/' . $path . '.php';
 
-        if (is_file($file)) {
+        if (file_exists($file)) {
             require_once $file;
-        } else {
-            // En desarrollo puedes descomentar esto para ver qué intenta cargar:
-            // error_log("Autoloader: no se encontró el archivo para {$class} en {$file}");
+            return;
         }
+
+        // FALLBACK: Intentar con directorios en minúsculas (para compatibilidad Linux/Windows)
+        // Ejemplo: App\Core\Router -> app/core/Router.php
+        // Ejemplo: App\Controllers\Home -> app/controllers/Home.php
+        $parts = explode('\\', $relativeClass);
+        $className = array_pop($parts);
+        $dirs = array_map('strtolower', $parts);
+        $pathLowerDirs = implode(DIRECTORY_SEPARATOR, $dirs);
+        
+        $fileLowerDirs = self::$baseDir . '/app/' . $pathLowerDirs . '/' . $className . '.php';
+        
+        if (file_exists($fileLowerDirs)) {
+            require_once $fileLowerDirs;
+            return;
+        }
+
+        // Si llegamos aquí, no se encontró el archivo.
+        // error_log("Autoloader: No se encontró $class en $file ni en $fileLowerDirs");
     }
 }
