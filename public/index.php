@@ -91,6 +91,9 @@ use App\Controllers\UserController;
 $router->get('/admin/usuarios', [UserController::class, 'index']);
 $router->get('/admin/usuarios/nuevo', [UserController::class, 'create']);
 $router->post('/admin/usuarios/guardar', [UserController::class, 'store']);
+$router->get('/admin/usuarios/editar', [UserController::class, 'edit']);
+$router->post('/admin/usuarios/actualizar', [UserController::class, 'update']);
+$router->post('/admin/usuarios/baja', [UserController::class, 'delete']);
 
 // ===============================
 // 5. Despachar la petición

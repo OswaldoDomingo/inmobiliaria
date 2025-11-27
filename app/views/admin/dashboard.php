@@ -31,6 +31,9 @@ require VIEW . '/layouts/header.php';
                         case 'admin':
                             echo "<h3 class='card-title text-primary'>Hola Admin $nombre</h3>";
                             echo "<p class='card-text'>Tienes acceso total al sistema. Puedes gestionar usuarios y propiedades.</p>";
+                            echo '<div class="mt-3">';
+                            echo '<a href="/admin/usuarios" class="btn btn-primary"><i class="bi bi-people"></i> Gestionar Usuarios</a>';
+                            echo '</div>';
                             break;
                         case 'coordinador':
                             echo "<h3 class='card-title text-success'>Hola Coordinador $nombre</h3>";

@@ -54,6 +54,18 @@ class AuthController
         $user = $userModel->findByEmail($email);
 
         if ($user && password_verify($password, $user->password_hash)) {
+            // Verificar si el usuario está activo
+            // Nota: Asumimos que 'activo' es 1 para activo, 0 para inactivo.
+            // Y 'archivado' es 0 para no archivado, 1 para archivado.
+            // Si la columna archivado no existe en la BD aún, esto fallará si intentamos acceder a ella.
+            // El usuario dijo "aprovechar las columnas activo y archivado que ya tenemos".
+            // Así que asumimos que existen.
+            
+            if ((int)$user->activo === 0 || (isset($user->archivado) && (int)$user->archivado === 1)) {
+                echo "Usuario desactivado. Contacta con el administrador.";
+                return;
+            }
+
             // Login correcto
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();

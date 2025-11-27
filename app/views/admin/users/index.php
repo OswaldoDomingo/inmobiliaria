@@ -59,9 +59,22 @@
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <button class="btn btn-sm btn-outline-secondary" title="Editar">
-                                            Editar
-                                        </button>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="/admin/usuarios/editar?id=<?= $user->id_usuario ?>" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="bi bi-pencil"></i> Editar
+                                            </a>
+                                            
+                                            <?php if ($user->activo): ?>
+                                                <form action="/admin/usuarios/baja" method="POST" onsubmit="return confirm('¿Estás seguro de desactivar este usuario?');" style="display:inline;">
+                                                    <input type="hidden" name="id" value="<?= $user->id_usuario ?>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Dar de Baja">
+                                                        <i class="bi bi-person-x"></i> Baja
+                                                    </button>
+                                                </form>
+                                            <?php else: ?>
+                                                <button class="btn btn-sm btn-secondary" disabled>Inactivo</button>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
