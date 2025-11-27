@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 use App\Core\Database;
+use App\Core\Router;
 
 // ===============================
 // DEBUG SOLO EN DESARROLLO
@@ -24,7 +25,7 @@ define('VIEW', APP . '/views');          // ...\inmobiliaria\app\views
 $config = require CONFIG . '/config.php';
 
 // ===============================
-// 2. Cargar Autoloader (si lo tienes ya creado)
+// 2. Cargar Autoloader
 // ===============================
 $autoloadPath = APP . '/Autoloader.php';
 
@@ -37,8 +38,10 @@ if (file_exists($autoloadPath)) {
 }
 
 // ===============================
-// 3. Cargar Database (tal y como la tienes ahora)
+// 3. Cargar Database (Legacy fallback)
 // ===============================
+// Mantenemos esto por si algún script antiguo depende de ello, 
+// pero idealmente el Autoloader ya se encarga de App\Core\Database.
 $dbPathCore = APP . '/core/Database.php';
 $dbPathRoot = APP . '/Database.php';
 
@@ -47,29 +50,34 @@ if (file_exists($dbPathCore)) {
 } elseif (file_exists($dbPathRoot)) {
     require_once $dbPathRoot;
 } else {
-    die("<h1>Error de arranque</h1>
-         <p>No se ha encontrado <code>Database.php</code> ni en <code>app/core</code> ni en <code>app/</code>.</p>");
+    // Si el autoloader funciona, esto podría sobrar, pero lo dejamos por seguridad.
 }
 
 // ===============================
-// 4. Lógica mínima: probar BD
+// 4. Inicializar Router y Definir Rutas
 // ===============================
 
-$admin   = null;
-$dbError = null;
+$router = new Router();
 
-try {
-    // OJO: aquí usamos la clase Database que ya te funcionaba
-    $db = Database::conectar();
+// Ruta Raíz (Landing Page)
+use App\Controllers\HomeController;
 
-    $sql   = "SELECT * FROM usuarios WHERE rol = 'admin' LIMIT 1";
-    $query = $db->query($sql);
-    $admin = $query->fetch();
-} catch (Throwable $e) {
-    $dbError = $e->getMessage();
-}
+$router->get('/', [HomeController::class, 'index']);
+
+// Ruta de prueba para verificar 404 u otras páginas
+$router->get('/prueba', function () {
+    echo "<h1>¡El Router funciona!</h1>";
+});
 
 // ===============================
-// 5. Cargar la vista de la landing
+// RUTAS DE TASACIÓN
 // ===============================
-require VIEW . '/landing.php';
+use App\Controllers\TasacionController;
+
+$router->get('/tasacion', [TasacionController::class, 'index']);
+$router->post('/tasacion/enviar', [TasacionController::class, 'enviar']);
+
+// ===============================
+// 5. Despachar la petición
+// ===============================
+$router->dispatch();

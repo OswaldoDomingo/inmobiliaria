@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inmobiliaria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/landing.css">
+    <!-- Estilos adicionales (opcional) -->
+    <?php if (isset($extraCss)) echo $extraCss; ?>
+</head>
+<body>
+
+    <!-- 1. Navbar + Hero -->
+    <header class="mb-4">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <img src="/assets/img/logo.png" alt="Logo" height="38" class="me-2">
+                    Inmobiliaria
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#mainNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Propiedades</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Vende</a></li>
+                        <li class="nav-item"><a class="nav-link fw-bold text-primary" href="/tasacion">Tasador Online</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero (Solo si estamos en home, o lo hacemos condicional) -->
+        <?php if (isset($showHero) && $showHero): ?>
+        <div class="hero-landing d-flex align-items-center">
+            <div class="container text-center text-white">
+                <h1 class="display-4 fw-bold mb-0">Inmobiliaria</h1>
+            </div>
+        </div>
+        <?php endif; ?>
+    </header>
+    
+    <main>
