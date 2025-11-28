@@ -82,6 +82,8 @@
                                                 <i class="bi bi-pencil"></i> Editar
                                             </a>
                                             
+                                            <?php if ($user->id_usuario != 1 && $user->id_usuario != $_SESSION['user_id']): ?>
+
                                             <?php if ($user->activo): ?>
                                                 <form action="/admin/usuarios/baja" method="POST" onsubmit="return confirm('¿Estás seguro de desactivar este usuario?');" style="display:inline;">
                                                     <input type="hidden" name="id" value="<?= $user->id_usuario ?>">
@@ -92,6 +94,8 @@
                                             <?php else: ?>
                                                 <button class="btn btn-sm btn-secondary" disabled>Inactivo</button>
                                             <?php endif; ?>
+
+                                        <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
