@@ -94,6 +94,7 @@ $router->post('/admin/usuarios/guardar', [UserController::class, 'store']);
 $router->get('/admin/usuarios/editar', [UserController::class, 'edit']);
 $router->post('/admin/usuarios/actualizar', [UserController::class, 'update']);
 $router->post('/admin/usuarios/baja', [UserController::class, 'delete']);
+$router->post('/admin/usuarios/cambiar-bloqueo', [UserController::class, 'toggleBlock']);
 
 // ===============================
 // 5. Despachar la petición

@@ -267,4 +267,33 @@ Se ha implementado el sistema de gestión de usuarios (CRUD) con un enfoque estr
 *   `app/views/admin/dashboard.php`
 
 
+## 🗓️ 2025-11-28 (Seguridad y Gestión de Bloqueos)
 
+**Tema:** Seguridad en Login y Gestión de Bloqueos
+**Tipo de avance:** Seguridad / Backend / UX
+
+### 🚀 Resumen
+Se ha reforzado la seguridad del sistema de autenticación implementando protección contra ataques de fuerza bruta y un sistema de gestión manual de bloqueos para administradores.
+
+### 🔧 Cambios Realizados
+
+#### 1. Seguridad en Login (Fuerza Bruta)
+*   **Base de Datos:** Nuevas columnas `intentos_fallidos` y `cuenta_bloqueada` en la tabla `usuarios`.
+*   **Lógica de Bloqueo:**
+    *   Incremento de contador tras fallo.
+    *   **Bloqueo automático** al alcanzar 3 intentos fallidos.
+    *   Reseteo de contador tras login exitoso.
+*   **UX:** Implementación de **Flash Messages** (`$_SESSION['error']`) para mostrar alertas visuales en lugar de páginas en blanco.
+
+#### 2. Gestión Manual (Admin)
+*   **Panel de Usuarios:** Nueva funcionalidad para bloquear/desbloquear usuarios manualmente.
+*   **Indicadores Visuales:** Botones de estado (Verde/Naranja) según el estado de bloqueo.
+*   **Protección:** Restricción para evitar que un administrador se bloquee a sí mismo.
+
+### 📝 Archivos clave creados/modificados
+*   `app/Controllers/AuthController.php`
+*   `app/Controllers/UserController.php`
+*   `app/Models/User.php`
+*   `app/views/auth/login.php`
+*   `app/views/admin/users/index.php`
+*   `public/index.php` (Nuevas rutas)

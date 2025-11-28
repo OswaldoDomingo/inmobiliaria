@@ -40,7 +40,7 @@ class User
     public function getAll(): array
     {
         $pdo = Database::conectar();
-        $sql = "SELECT id_usuario, nombre, email, rol, activo FROM usuarios ORDER BY id_usuario DESC";
+        $sql = "SELECT id_usuario, nombre, email, rol, activo, cuenta_bloqueada FROM usuarios ORDER BY id_usuario DESC";
         $stmt = $pdo->query($sql);
         return $stmt->fetchAll();
     }
@@ -150,6 +150,30 @@ class User
         // Voy a asumir que la columna existe.
         
         $sql = "UPDATE usuarios SET activo = 0, archivado = 1, fecha_baja = NOW() WHERE id_usuario = :id";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        
+        return $stmt->execute();
+    }
+    /**
+     * Bloquea o desbloquea un usuario.
+     *
+     * @param int $id ID del usuario
+     * @param int $status 1 para bloquear, 0 para desbloquear
+     * @return bool
+     */
+    public function toggleBlock(int $id, int $status): bool
+    {
+        $pdo = Database::conectar();
+        
+        if ($status === 0) {
+            // Desbloquear: Resetear cuenta_bloqueada y intentos_fallidos
+            $sql = "UPDATE usuarios SET cuenta_bloqueada = 0, intentos_fallidos = 0 WHERE id_usuario = :id";
+        } else {
+            // Bloquear: Solo poner cuenta_bloqueada = 1
+            $sql = "UPDATE usuarios SET cuenta_bloqueada = 1 WHERE id_usuario = :id";
+        }
         
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);

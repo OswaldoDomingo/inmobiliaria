@@ -60,6 +60,24 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
+                                            <!-- Botón Bloquear/Desbloquear -->
+                                            <?php if ($user->id_usuario != $_SESSION['user_id']): ?>
+                                                <form action="/admin/usuarios/cambiar-bloqueo" method="POST" style="display:inline;">
+                                                    <input type="hidden" name="id" value="<?= $user->id_usuario ?>">
+                                                    <?php if ((int)$user->cuenta_bloqueada === 1): ?>
+                                                        <input type="hidden" name="status" value="0">
+                                                        <button type="submit" class="btn btn-sm btn-success" title="Desbloquear Cuenta">
+                                                            <i class="bi bi-unlock"></i> Desbloquear
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <input type="hidden" name="status" value="1">
+                                                        <button type="submit" class="btn btn-sm btn-warning" title="Bloquear Cuenta" onclick="return confirm('¿Estás seguro de bloquear a este usuario?');">
+                                                            <i class="bi bi-lock"></i> Bloquear
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </form>
+                                            <?php endif; ?>
+
                                             <a href="/admin/usuarios/editar?id=<?= $user->id_usuario ?>" class="btn btn-sm btn-outline-primary" title="Editar">
                                                 <i class="bi bi-pencil"></i> Editar
                                             </a>

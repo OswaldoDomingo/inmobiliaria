@@ -45,28 +45,55 @@ class AuthController
         $password = $_POST['password'] ?? '';
 
         if (empty($email) || empty($password)) {
-            // Podrías guardar error en sesión flash
-            echo "Email y contraseña son obligatorios.";
-            return;
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['error'] = "Email y contraseña son obligatorios.";
+            header('Location: /login');
+            exit;
         }
 
         $userModel = new User();
         $user = $userModel->findByEmail($email);
 
-        if ($user && password_verify($password, $user->password_hash)) {
-            // Verificar si el usuario está activo
-            // Nota: Asumimos que 'activo' es 1 para activo, 0 para inactivo.
-            // Y 'archivado' es 0 para no archivado, 1 para archivado.
-            // Si la columna archivado no existe en la BD aún, esto fallará si intentamos acceder a ella.
-            // El usuario dijo "aprovechar las columnas activo y archivado que ya tenemos".
-            // Así que asumimos que existen.
-            
+        // Si el usuario no existe, error genérico
+        if (!$user) {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['error'] = "Credenciales incorrectas.";
+            header('Location: /login');
+            exit;
+        }
+
+        // Paso A: Verificar Bloqueo Previo
+        if ((int)$user->cuenta_bloqueada === 1) {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['error'] = "Su cuenta ha sido bloqueada por seguridad. Contacte con el administrador.";
+            header('Location: /login');
+            exit;
+        }
+
+        // Paso B: Verificar Credenciales
+        if (password_verify($password, $user->password_hash)) {
+            // Verificar si el usuario está activo (lógica existente)
             if ((int)$user->activo === 0 || (isset($user->archivado) && (int)$user->archivado === 1)) {
-                echo "Usuario desactivado. Contacta con el administrador.";
-                return;
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                $_SESSION['error'] = "Usuario desactivado. Contacta con el administrador.";
+                header('Location: /login');
+                exit;
             }
 
-            // Login correcto
+            // Resetea intentos_fallidos a 0
+            $pdo = \App\Core\Database::conectar();
+            $stmt = $pdo->prepare("UPDATE usuarios SET intentos_fallidos = 0 WHERE id_usuario = :id");
+            $stmt->execute([':id' => $user->id_usuario]);
+
+            // Inicia sesión normalmente
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
@@ -81,9 +108,35 @@ class AuthController
             header('Location: /dashboard');
             exit;
         } else {
-            // Login incorrecto
-            echo "Credenciales incorrectas.";
-            // O redirigir con error: header('Location: /login?error=1');
+            // Contraseña INCORRECTA
+            $pdo = \App\Core\Database::conectar();
+            
+            // Incrementa el contador intentos_fallidos en +1
+            $stmt = $pdo->prepare("UPDATE usuarios SET intentos_fallidos = intentos_fallidos + 1 WHERE id_usuario = :id");
+            $stmt->execute([':id' => $user->id_usuario]);
+
+            // Obtener el nuevo valor de intentos
+            $stmt = $pdo->prepare("SELECT intentos_fallidos FROM usuarios WHERE id_usuario = :id");
+            $stmt->execute([':id' => $user->id_usuario]);
+            $intentos = $stmt->fetchColumn();
+
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            // Comprobación de Límite
+            if ($intentos >= 3) {
+                // Actualiza cuenta_bloqueada = 1
+                $stmt = $pdo->prepare("UPDATE usuarios SET cuenta_bloqueada = 1 WHERE id_usuario = :id");
+                $stmt->execute([':id' => $user->id_usuario]);
+
+                $_SESSION['error'] = "Cuenta bloqueada.";
+            } else {
+                $_SESSION['error'] = "Credenciales incorrectas.";
+            }
+
+            header('Location: /login');
+            exit;
         }
     }
 

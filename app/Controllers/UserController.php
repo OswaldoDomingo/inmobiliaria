@@ -255,4 +255,39 @@ class UserController
             exit;
         }
     }
+    /**
+     * Cambia el estado de bloqueo de un usuario.
+     * POST /admin/usuarios/cambiar-bloqueo
+     */
+    public function toggleBlock(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/usuarios');
+            exit;
+        }
+
+        $id = $_POST['id'] ?? null;
+        $status = $_POST['status'] ?? null; // 1 para bloquear, 0 para desbloquear
+
+        if (!$id || !is_numeric($id) || !is_numeric($status)) {
+            header('Location: /admin/usuarios');
+            exit;
+        }
+
+        // PROTECCIÓN: No bloquearse a uno mismo
+        if ((int)$id === (int)$_SESSION['user_id']) {
+            header('Location: /admin/usuarios?error=selfblock');
+            exit;
+        }
+
+        $userModel = new User();
+        if ($userModel->toggleBlock((int)$id, (int)$status)) {
+            $msg = ((int)$status === 1) ? 'blocked' : 'unblocked';
+            header("Location: /admin/usuarios?msg=$msg");
+            exit;
+        } else {
+            header('Location: /admin/usuarios?error=db');
+            exit;
+        }
+    }
 }

@@ -7,10 +7,15 @@
                 <div class="card-body p-4">
                     <h2 class="text-center mb-4">Acceso Profesionales</h2>
                     
-                    <?php if (isset($_GET['error'])): ?>
+                    <?php 
+                    if (session_status() === PHP_SESSION_NONE) {
+                        session_start();
+                    }
+                    if (isset($_SESSION['error'])): ?>
                         <div class="alert alert-danger">
-                            Credenciales incorrectas. Inténtalo de nuevo.
+                            <?= htmlspecialchars($_SESSION['error']) ?>
                         </div>
+                        <?php unset($_SESSION['error']); ?>
                     <?php endif; ?>
 
                     <form action="/login" method="POST">
