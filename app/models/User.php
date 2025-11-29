@@ -13,7 +13,7 @@ use PDO;
 class User
 {
     /**
-     * Busca un usuario por su email.
+     * Busco un usuario por su email.
      *
      * @param string $email
      * @return object|null Devuelve el objeto usuario o null si no existe.
@@ -33,20 +33,20 @@ class User
     }
 
     /**
-     * Obtiene todos los usuarios.
+     * Obtengo todos los usuarios.
      *
      * @return array
      */
     public function getAll(): array
     {
         $pdo = Database::conectar();
-        $sql = "SELECT id_usuario, nombre, email, rol, activo, cuenta_bloqueada FROM usuarios ORDER BY id_usuario DESC";
+        $sql = "SELECT id_usuario, nombre, email, rol, activo, cuenta_bloqueada, foto_perfil FROM usuarios ORDER BY id_usuario DESC";
         $stmt = $pdo->query($sql);
         return $stmt->fetchAll();
     }
 
     /**
-     * Crea un nuevo usuario.
+     * Creo un nuevo usuario.
      *
      * @param array $data Datos del usuario (nombre, email, password_hash, rol, activo)
      * @return bool True si se creó correctamente.
@@ -55,8 +55,8 @@ class User
     {
         $pdo = Database::conectar();
         
-        $sql = "INSERT INTO usuarios (nombre, email, password_hash, rol, activo) 
-                VALUES (:nombre, :email, :password_hash, :rol, :activo)";
+        $sql = "INSERT INTO usuarios (nombre, email, password_hash, rol, foto_perfil, activo) 
+                VALUES (:nombre, :email, :password_hash, :rol, :foto_perfil, :activo)";
         
         $stmt = $pdo->prepare($sql);
         
@@ -65,11 +65,12 @@ class User
             ':email'         => $data['email'],
             ':password_hash' => $data['password_hash'],
             ':rol'           => $data['rol'],
+            ':foto_perfil'   => $data['foto_perfil'] ?? null,
             ':activo'        => $data['activo'] ?? 1
         ]);
     }
     /**
-     * Busca un usuario por su ID.
+     * Busco un usuario por su ID.
      *
      * @param int $id
      * @return object|null
@@ -87,7 +88,7 @@ class User
     }
 
     /**
-     * Actualiza los datos de un usuario.
+     * Actualizo los datos de un usuario.
      *
      * @param int $id
      * @param array $data
@@ -106,6 +107,11 @@ class User
             ':rol'    => $data['rol']
         ];
 
+        if (array_key_exists('foto_perfil', $data)) {
+            $fields .= ", foto_perfil = :foto_perfil";
+            $params[':foto_perfil'] = $data['foto_perfil'];
+        }
+
         if (!empty($data['password_hash'])) {
             $fields .= ", password_hash = :password_hash";
             $params[':password_hash'] = $data['password_hash'];
@@ -118,7 +124,7 @@ class User
     }
 
     /**
-     * Da de baja lógica a un usuario (Soft Delete).
+     * Doy de baja lógica a un usuario (Soft Delete).
      *
      * @param int $id
      * @return bool
@@ -126,28 +132,7 @@ class User
     public function softDelete(int $id): bool
     {
         $pdo = Database::conectar();
-        // activo = 0, archivado = 1, fecha_baja = NOW() (si existiera la columna, si no solo activo/archivado)
-        // Asumiendo que no tenemos fecha_baja en la estructura inicial dada por el usuario, 
-        // pero el usuario pidió "pone fecha_baja = NOW()". 
-        // Si la columna no existe, fallará. Asumiré que existe o que debo añadirla.
-        // El usuario dijo: "Ya tengo la tabla usuarios creada... id_usuario, nombre, email, password_hash, rol, activo".
-        // NO mencionó 'archivado' ni 'fecha_baja' en la estructura inicial, pero en el requerimiento 2 dice:
-        // "Actualiza la columna activo = 0 y archivado = 1 y pone fecha_baja = NOW()."
-        // Voy a asumir que las columnas existen o que debo intentar usarlas.
-        // Si falla, el usuario me lo dirá. Pero para prevenir, usaré solo activo si falla.
-        // Mencionó "aprovechar las columnas activo y archivado que ya tenemos".
-        
-        $sql = "UPDATE usuarios SET activo = 0, archivado = 1 WHERE id_usuario = :id";
-        // Nota: Si fecha_baja existe, sería: , fecha_baja = NOW()
-        // Voy a arriesgarme a incluir fecha_baja porque lo pidió explícitamente.
-        // Si da error, lo corregiremos.
-        // Espera, revisando el prompt inicial: "Contexto de Datos... activo (tinyint)". No mencionó archivado ni fecha_baja.
-        // Pero en este prompt dice: "aprovechar las columnas activo y archivado que ya tenemos".
-        // Haré la query con activo y archivado. fecha_baja lo omitiré si no estoy seguro, pero lo pidió.
-        // Mejor: UPDATE usuarios SET activo = 0, archivado = 1 ...
-        
-        // CORRECCIÓN: El usuario dijo "pone fecha_baja = NOW()".
-        // Voy a asumir que la columna existe.
+        // activo = 0, archivado = 1, fecha_baja = NOW()
         
         $sql = "UPDATE usuarios SET activo = 0, archivado = 1, fecha_baja = NOW() WHERE id_usuario = :id";
         
@@ -157,7 +142,7 @@ class User
         return $stmt->execute();
     }
     /**
-     * Bloquea o desbloquea un usuario.
+     * Bloqueo o desbloqueo un usuario.
      *
      * @param int $id ID del usuario
      * @param int $status 1 para bloquear, 0 para desbloquear

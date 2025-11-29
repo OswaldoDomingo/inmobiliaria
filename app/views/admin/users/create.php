@@ -21,8 +21,15 @@
                         </div>
                     <?php endif; ?>
 
-                    <form action="/admin/usuarios/guardar" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
+                    <form action="/admin/usuarios/guardar" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
+                        
+                        <div class="mb-3">
+                            <label for="foto_perfil" class="form-label">Foto de Perfil</label>
+                            <input type="file" class="form-control" id="foto_perfil" name="foto_perfil" accept="image/jpeg,image/png,image/webp">
+                            <div class="form-text">Formatos: JPG, PNG, WEBP. Máx: 2MB.</div>
+                        </div>
+
                         <div class="mb-3">
                             <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nombre" name="nombre" 

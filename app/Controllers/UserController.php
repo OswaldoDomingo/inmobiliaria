@@ -26,7 +26,7 @@ class UserController
     }
 
     /**
-     * Lista todos los usuarios.
+     * Listo todos los usuarios.
      * GET /admin/usuarios
      */
     public function index(): void
@@ -39,7 +39,7 @@ class UserController
     }
 
     /**
-     * Muestra el formulario de creacion.
+     * Muestro el formulario de creacion.
      * GET /admin/usuarios/nuevo
      */
     public function create(): void
@@ -49,7 +49,7 @@ class UserController
     }
 
     /**
-     * Guarda un nuevo usuario.
+     * Guardo un nuevo usuario.
      * POST /admin/usuarios/guardar
      */
     public function store(): void
@@ -66,7 +66,7 @@ class UserController
             return;
         }
 
-        // 1. Sanitizacion
+        // 1. Sanitizo
         $nombre = trim(strip_tags($_POST['nombre'] ?? ''));
         $email = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
         $password = $_POST['password'] ?? '';
@@ -74,7 +74,7 @@ class UserController
 
         $errors = [];
 
-        // 2. Validacion
+        // 2. Valido
         if (empty($nombre)) {
             $errors[] = "El nombre es obligatorio.";
         }
@@ -92,42 +92,57 @@ class UserController
             $errors[] = "El rol seleccionado no es valido.";
         }
 
-        // Verificar unicidad del email
+        // Verifico unicidad del email
         $userModel = new User();
         if ($userModel->findByEmail($email)) {
             $errors[] = "El email ya esta registrado.";
         }
 
-        // Si hay errores, volver al formulario
+        // Si hay errores, vuelvo al formulario
         if (!empty($errors)) {
             $csrfToken = Csrf::token();
             require VIEW . '/admin/users/create.php';
             return;
         }
 
-        // 3. Guardado
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        try {
+            // 3. Subo la Imagen
+            $foto_perfil = null;
+            if (isset($_FILES['foto_perfil'])) {
+                $foto_perfil = $this->handleFileUpload($_FILES['foto_perfil']);
+            }
 
-        $data = [
-            'nombre'        => $nombre,
-            'email'         => $email,
-            'password_hash' => $passwordHash,
-            'rol'           => $rol,
-            'activo'        => 1
-        ];
+            // 4. Guardo en Base de Datos
+            $data = [
+                'nombre'        => $nombre,
+                'email'         => $email,
+                'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                'rol'           => $rol,
+                'foto_perfil'   => $foto_perfil,
+                'activo'        => 1
+            ];
 
-        if ($userModel->create($data)) {
-            header('Location: /admin/usuarios?msg=created');
-            exit;
-        } else {
-            $errors[] = "Error al guardar en la base de datos.";
+            if ($userModel->create($data)) {
+                header('Location: /admin/usuarios');
+                exit;
+            } else {
+                $errors[] = "Error al guardar en la base de datos.";
+                $csrfToken = Csrf::token();
+                require VIEW . '/admin/users/create.php';
+            }
+
+        } catch (Exception $e) {
+            // Capturo error de subida o cualquier otro
+            $errors[] = $e->getMessage(); // Use $errors array for consistency
             $csrfToken = Csrf::token();
+            // Mantengo datos del formulario (opcional, aquí simplificado)
             require VIEW . '/admin/users/create.php';
+            return;
         }
     }
 
     /**
-     * Muestra el formulario de edicion.
+     * Muestro el formulario de edicion.
      * GET /admin/usuarios/editar?id={id}
      */
     public function edit(): void
@@ -146,7 +161,7 @@ class UserController
             exit;
         }
 
-        // Preparamos variables para la vista
+        // Preparo variables para la vista
         $nombre = $user->nombre;
         $email = $user->email;
         $rol = $user->rol;
@@ -157,7 +172,7 @@ class UserController
     }
 
     /**
-     * Actualiza un usuario existente.
+     * Actualizo un usuario existente.
      * POST /admin/usuarios/actualizar
      */
     public function update(): void
@@ -181,7 +196,7 @@ class UserController
             return;
         }
 
-        // 1. Sanitizacion
+        // 1. Sanitizo
         $nombre = trim(strip_tags($_POST['nombre'] ?? ''));
         $email = trim(filter_var($_POST['email'] ?? '', FILTER_SANITIZE_EMAIL));
         $password = $_POST['password'] ?? '';
@@ -189,7 +204,7 @@ class UserController
 
         $errors = [];
 
-        // 2. Validacion
+        // 2. Valido
         if (empty($nombre)) {
             $errors[] = "El nombre es obligatorio.";
         }
@@ -208,45 +223,77 @@ class UserController
             $errors[] = "El rol seleccionado no es valido.";
         }
 
-        // Verificar unicidad del email (excluyendo al propio usuario)
+        // Verifico unicidad del email (excluyendo al propio usuario)
         $userModel = new User();
         $existingUser = $userModel->findByEmail($email);
         if ($existingUser && (int)$existingUser->id_usuario !== (int)$id) {
             $errors[] = "El email ya esta registrado por otro usuario.";
         }
 
-        // Si hay errores, volver al formulario
+        // Si hay errores, vuelvo al formulario
         if (!empty($errors)) {
-            $id_usuario = $id; 
-            $csrfToken = Csrf::token();
+            $user = (object)[
+                'id_usuario' => $id,
+                'nombre' => $nombre,
+                'email' => $email,
+                'rol' => $rol
+            ];
+            $csrfToken = Csrf::token(); // Ensure CSRF token is available for the form
             require VIEW . '/admin/users/edit.php';
             return;
         }
 
-        // 3. Preparar datos
-        $data = [
-            'nombre' => $nombre,
-            'email'  => $email,
-            'rol'    => $rol
-        ];
+        try {
+            // Preparo datos para actualizar
+            $data = [
+                'nombre' => $nombre,
+                'email'  => $email,
+                'rol'    => $rol
+            ];
 
-        if (!empty($password)) {
-            $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
-        }
+            // Si se escribió contraseña, la actualizo
+            if (!empty($password)) {
+                $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+            }
 
-        if ($userModel->update((int)$id, $data)) {
-            header('Location: /admin/usuarios?msg=updated');
+            // Manejo de Imagen
+            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
+                $newFoto = $this->handleFileUpload($_FILES['foto_perfil']);
+                
+                if ($newFoto) {
+                    $data['foto_perfil'] = $newFoto;
+
+                    // Borro foto antigua si existe
+                    $currentUser = $userModel->findById((int)$id);
+                    if ($currentUser && !empty($currentUser->foto_perfil)) {
+                        $oldFile = ROOT . '/public/uploads/profiles/' . $currentUser->foto_perfil;
+                        if (file_exists($oldFile)) {
+                            unlink($oldFile);
+                        }
+                    }
+                }
+            }
+
+            if ($userModel->update((int)$id, $data)) {
+                header('Location: /admin/usuarios?msg=updated');
+                exit;
+            } else {
+                $errors[] = "Error al actualizar en la base de datos.";
+                $user = $userModel->findById((int)$id); // Re-fetch user to populate form
+                $csrfToken = Csrf::token(); // Ensure CSRF token is available for the form
+                require VIEW . '/admin/users/edit.php';
+            }
+
+        } catch (Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            // Redirijo al edit para mostrar el error
+            header("Location: /admin/usuarios/editar?id=$id");
             exit;
-        } else {
-            $errors[] = "Error al actualizar en la base de datos.";
-            $id_usuario = $id;
-            $csrfToken = Csrf::token();
-            require VIEW . '/admin/users/edit.php';
         }
     }
 
     /**
-     * Da de baja a un usuario (Soft Delete).
+     * Doy de baja a un usuario (Soft Delete).
      * POST /admin/usuarios/baja
      */
     public function delete(): void
@@ -284,7 +331,7 @@ class UserController
     }
 
     /**
-     * Cambia el estado de bloqueo de un usuario.
+     * Cambio el estado de bloqueo de un usuario.
      * POST /admin/usuarios/cambiar-bloqueo
      */
     public function toggleBlock(): void
@@ -322,5 +369,62 @@ class UserController
             header('Location: /admin/usuarios?error=db');
             exit;
         }
+    }
+    /**
+     * Manejo la subida de archivos de forma segura.
+     * 
+     * @param array $file Archivo desde $_FILES
+     * @return string|null Nombre del archivo guardado o null si no se subió nada
+     * @throws \Exception Si hay error de validación o subida
+     */
+    private function handleFileUpload(array $file): ?string
+    {
+        // 1. Verifico si se subió un archivo
+        if ($file['error'] === UPLOAD_ERR_NO_FILE) {
+            return null;
+        }
+
+        // 2. Verifico errores de subida
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new \Exception("Error al subir el archivo. Código: " . $file['error']);
+        }
+
+        // 3. Valido tamaño (Max 2MB)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            throw new \Exception("La imagen es demasiado pesada. Máximo 2MB.");
+        }
+
+        // 4. Valido tipo MIME real
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        
+        $allowedMimes = [
+            'image/jpeg',
+            'image/png',
+            'image/webp'
+        ];
+
+        if (!in_array($mime, $allowedMimes)) {
+            throw new \Exception("Formato de imagen no permitido. Solo JPG, PNG o WEBP.");
+        }
+
+        // 5. Genero nombre único y seguro
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('profile_', true) . '.' . $ext;
+
+        // 6. Creo directorio si no existe
+        $uploadDir = ROOT . '/public/uploads/profiles/';
+        if (!is_dir($uploadDir)) {
+            if (!mkdir($uploadDir, 0755, true)) {
+                throw new \Exception("No se pudo crear el directorio de subidas.");
+            }
+        }
+
+        // 7. Muevo archivo
+        if (!move_uploaded_file($file['tmp_name'], $uploadDir . $filename)) {
+            throw new \Exception("Error al guardar la imagen en el servidor.");
+        }
+
+        return $filename;
     }
 }

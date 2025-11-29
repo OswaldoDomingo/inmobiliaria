@@ -332,3 +332,40 @@ Se han aplicado mejoras críticas de seguridad y estabilidad en el núcleo de la
 *   `app/Controllers/TasacionController.php`
 *   `database/schema.sql`
 
+
+## 🗓️ 2025-11-29 (Fotos de Perfil)
+
+**Tema:** Implementación de Fotos de Perfil de Usuario
+**Tipo de avance:** Frontend / Backend / UX
+
+### 🚀 Resumen
+Se ha añadido la capacidad de que los usuarios (Admin, Coordinadores, Comerciales) tengan una foto de perfil asociada a su cuenta.
+
+### 🔧 Cambios Realizados
+
+#### 1. Base de Datos
+*   **Nueva Columna:** Se añadió `foto_perfil` (VARCHAR 255) a la tabla `usuarios`.
+
+#### 2. Backend (UserController)
+*   **Subida Segura:** He implementado `handleFileUpload` con validación estricta:
+    *   **MIME Type:** Solo permito JPG, PNG, WEBP para asegurar que no se suban scripts ejecutables disfrazados.
+    *   **Renombrado:** Genero nombres únicos (`uniqid`) para evitar colisiones y ejecución de scripts maliciosos.
+    *   **Limpieza:** Borro automáticamente la imagen anterior al actualizar para no saturar el servidor.
+*   **Manejo de Errores:** He utilizado bloques `try-catch` para capturar fallos en la subida y notificar al usuario sin romper la ejecución, priorizando la experiencia de usuario y la estabilidad.
+
+#### 3. Frontend (Vistas)
+*   **Formularios:** He actualizado `create.php` y `edit.php` con `enctype="multipart/form-data"` y previsualización de imagen.
+*   **Listado:** He añadido una columna "Avatar" en `index.php` con miniaturas circulares.
+
+### 📝 Archivos clave creados/modificados
+*   `database/migrations/01_add_foto_perfil.sql`
+*   `app/Models/User.php`
+*   `app/Controllers/UserController.php`
+*   `app/views/admin/users/create.php`
+*   `app/views/admin/users/edit.php`
+*   `app/views/admin/users/index.php`
+
+### 💡 Justificación Técnica para el Tribunal
+He decidido implementar la subida de archivos de esta manera manual en lugar de usar librerías externas para demostrar el conocimiento sobre el manejo de streams de archivos, permisos y validación de tipos MIME en PHP nativo. El uso de `uniqid` es una decisión de seguridad deliberada para desacoplar el nombre del archivo original del nombre en el servidor.
+
+

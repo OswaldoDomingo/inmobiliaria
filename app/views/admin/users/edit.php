@@ -21,9 +21,20 @@
                         </div>
                     <?php endif; ?>
 
-                    <form action="/admin/usuarios/actualizar" method="POST">
-                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
+                    <form action="/admin/usuarios/actualizar" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
                         <input type="hidden" name="id" value="<?= $id_usuario ?>">
+
+                        <div class="mb-3">
+                            <label for="foto_perfil" class="form-label">Foto de Perfil</label>
+                            <?php if (!empty($user->foto_perfil)): ?>
+                                <div class="mb-2">
+                                    <img src="/uploads/profiles/<?= htmlspecialchars($user->foto_perfil) ?>" alt="Perfil" class="img-thumbnail" style="max-width: 100px;">
+                                </div>
+                            <?php endif; ?>
+                            <input type="file" class="form-control" id="foto_perfil" name="foto_perfil" accept="image/jpeg,image/png,image/webp">
+                            <div class="form-text">Deja en blanco para mantener la actual. Máx: 2MB.</div>
+                        </div>
 
                         <div class="mb-3">
                             <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>

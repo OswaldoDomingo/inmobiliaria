@@ -95,9 +95,16 @@ Se ha implementado un sistema de carga de variables de entorno (`.env`) para sep
 *   **Creación/Edición:** Formularios validados en servidor.
 *   **Baja Lógica:** Implementación de "Soft Delete" para desactivar usuarios sin perder sus datos históricos.
 *   **Protección Anti-Suicidio:** Lógica que impide que un administrador se desactive a sí mismo.
+*   **Fotos de Perfil:** Sistema de subida de imágenes seguro con validación de tipo MIME, renombrado aleatorio y limpieza automática de archivos antiguos.
 
 ## 3.4. Manejo de Errores
-Se ha implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.
+He implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.
+
+## 3.5. Justificación de Decisiones Técnicas
+*   **¿Por qué PDO?** He elegido PDO sobre MySQLi porque me permite trabajar con una capa de abstracción de base de datos, facilitando una futura migración a otro motor si fuera necesario, y por su soporte nativo para sentencias preparadas, cruciales para evitar inyecciones SQL.
+*   **¿Por qué `password_hash`?** Utilizo el algoritmo `PASSWORD_DEFAULT` (actualmente Bcrypt) porque es el estándar de la industria para el hashing seguro, incorporando "salt" automáticamente y haciendo computacionalmente costosos los ataques de fuerza bruta.
+*   **¿Por qué `uniqid` en archivos?** Para evitar colisiones de nombres y prevenir ataques donde un usuario malicioso intenta sobrescribir archivos del sistema subiendo ficheros con nombres conocidos (ej. `index.php`).
+*   **¿Por qué `try-catch` en subidas?** La manipulación de archivos es propensa a errores (permisos, disco lleno). He encapsulado esta lógica para garantizar que un fallo en el sistema de archivos no detenga la ejecución del script ni muestre errores fatales al usuario, mejorando la robustez.
 
 ---
 

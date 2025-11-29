@@ -48,3 +48,13 @@ estilosPrueba.css
 
 inmobiliaria.code-workspace
 
+# Ignorar subidas de usuarios (Imágenes reales)
+public/uploads/
+/public/uploads/*
+
+# Ignorar archivos de sistema y entorno
+.env
+.DS_Store
+Thumbs.db
+node_modules/
+vendor/

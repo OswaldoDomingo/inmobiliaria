@@ -22,6 +22,7 @@
                     <thead class="table-light">
                         <tr>
                             <th class="ps-4">ID</th>
+                            <th>Avatar</th>
                             <th>Nombre</th>
                             <th>Email</th>
                             <th>Rol</th>
@@ -32,12 +33,21 @@
                     <tbody>
                         <?php if (empty($users)): ?>
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">No hay usuarios registrados.</td>
+                                <td colspan="7" class="text-center py-4 text-muted">No hay usuarios registrados.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($users as $user): ?>
                                 <tr>
                                     <td class="ps-4">#<?= $user->id_usuario ?></td>
+                                    <td>
+                                        <?php if (!empty($user->foto_perfil)): ?>
+                                            <img src="/uploads/profiles/<?= htmlspecialchars($user->foto_perfil) ?>" alt="Avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                        <?php else: ?>
+                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <i class="bi bi-person"></i>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="fw-medium"><?= htmlspecialchars($user->nombre) ?></td>
                                     <td><?= htmlspecialchars($user->email) ?></td>
                                     <td>
