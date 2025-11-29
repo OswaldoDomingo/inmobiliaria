@@ -53,10 +53,27 @@ require VIEW . '/layouts/header.php';
                     
                     <div class="mt-4">
                         <h4>Tus Datos</h4>
+                        <div class="d-flex align-items-center mb-3">
+                            <?php 
+                            $foto = $_SESSION['user_foto'] ?? null;
+                            $imgSrc = $foto ? "/uploads/profiles/" . htmlspecialchars($foto) : "";
+                            ?>
+                            <?php if ($foto): ?>
+                                <img src="<?= $imgSrc ?>" alt="Perfil" class="rounded-circle me-3" style="width: 64px; height: 64px; object-fit: cover;">
+                            <?php else: ?>
+                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <div>
+                                <p class="mb-1"><strong>Nombre:</strong> <?= htmlspecialchars($nombre) ?></p>
+                                <p class="mb-1"><strong>Email:</strong> <?= htmlspecialchars($_SESSION['user_email'] ?? 'No disponible') ?></p>
+                                <p class="mb-0"><strong>Rol:</strong> <?= ucfirst($rol) ?></p>
+                            </div>
+                        </div>
                         <ul>
                             <li><strong>ID:</strong> <?= $_SESSION['user_id'] ?></li>
-                            <li><strong>Email:</strong> <?= htmlspecialchars($_SESSION['user_email'] ?? 'No disponible') // Nota: No guardamos email en sesión en el controller, pero podríamos. ?></li>
-                            <li><strong>Rol:</strong> <?= ucfirst($rol) ?></li>
                         </ul>
                     </div>
                 </div>

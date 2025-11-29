@@ -369,3 +369,25 @@ Se ha añadido la capacidad de que los usuarios (Admin, Coordinadores, Comercial
 He decidido implementar la subida de archivos de esta manera manual en lugar de usar librerías externas para demostrar el conocimiento sobre el manejo de streams de archivos, permisos y validación de tipos MIME en PHP nativo. El uso de `uniqid` es una decisión de seguridad deliberada para desacoplar el nombre del archivo original del nombre en el servidor.
 
 
+
+## 🗓️ 2025-11-29 (Mejoras UX Dashboard)
+
+**Tema:** Mejora de Experiencia de Usuario en Panel de Control
+**Tipo de avance:** Frontend / UX / Backend
+
+### 🚀 Resumen
+Se ha mejorado la interfaz del Dashboard y la cabecera para mostrar información contextual del usuario logueado, personalizando la experiencia.
+
+### 🔧 Cambios Realizados
+
+#### 1. Persistencia de Datos de Sesión
+*   **AuthController:** Modificado para almacenar `email` y `foto_perfil` en la variable superglobal `$_SESSION` al momento del login, evitando consultas redundantes a la base de datos en cada carga de página.
+
+#### 2. Interfaz de Usuario (UI)
+*   **Header:** Ahora muestra la foto de perfil (o un icono por defecto si no existe) y el email del usuario junto a su nombre.
+*   **Dashboard:** La sección "Tus Datos" ahora refleja la información real del usuario logueado, incluyendo su avatar.
+
+### 📝 Archivos clave creados/modificados
+*   `app/Controllers/AuthController.php`
+*   `app/views/layouts/header.php`
+*   `app/views/admin/dashboard.php`

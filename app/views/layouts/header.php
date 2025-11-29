@@ -34,7 +34,29 @@
                         <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
                         <li class="nav-item ms-2">
                             <?php if (isset($_SESSION['user_id'])): ?>
-                                <a class="btn btn-outline-primary btn-sm" href="/dashboard">Mi Panel</a>
+                                <div class="d-flex align-items-center">
+                                    <?php 
+                                    $foto = $_SESSION['user_foto'] ?? null;
+                                    $imgSrc = $foto ? "/uploads/profiles/" . htmlspecialchars($foto) : "/assets/img/default-user.png";
+                                    // Fallback si no existe la imagen por defecto, usar un placeholder o icono
+                                    // Pero el usuario pidió "assets/img/default-user.png" o icono bootstrap.
+                                    // Usaré un icono de bootstrap si no hay foto para asegurar que se vea algo.
+                                    ?>
+                                    <?php if ($foto): ?>
+                                        <img src="<?= $imgSrc ?>" alt="Perfil" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                    <?php else: ?>
+                                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-person-fill"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <div class="d-none d-lg-block me-3">
+                                        <small class="d-block lh-1 fw-bold"><?= htmlspecialchars($_SESSION['user_name'] ?? 'Usuario') ?></small>
+                                        <small class="d-block lh-1 text-muted" style="font-size: 0.75rem;"><?= htmlspecialchars($_SESSION['user_email'] ?? '') ?></small>
+                                    </div>
+
+                                    <a class="btn btn-outline-primary btn-sm" href="/dashboard">Mi Panel</a>
+                                </div>
                             <?php else: ?>
                                 <a class="nav-link text-secondary" href="/login"><small>Acceso Profesionales</small></a>
                             <?php endif; ?>

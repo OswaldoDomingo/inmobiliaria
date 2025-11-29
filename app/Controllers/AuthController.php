@@ -115,6 +115,8 @@ class AuthController
 
             $_SESSION['user_id'] = $user->id_usuario;
             $_SESSION['user_name'] = $user->nombre;
+            $_SESSION['user_email'] = $user->email;
+            $_SESSION['user_foto'] = $user->foto_perfil;
             $_SESSION['user_role'] = $user->rol;
 
             header('Location: /dashboard');
