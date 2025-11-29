@@ -297,3 +297,38 @@ Se ha reforzado la seguridad del sistema de autenticación implementando protecc
 *   `app/views/auth/login.php`
 *   `app/views/admin/users/index.php`
 *   `public/index.php` (Nuevas rutas)
+
+
+## 🗓️ 2025-11-29 (Seguridad y Estabilidad)
+
+**Tema:** Hardening de Seguridad y Manejo de Errores Global
+**Tipo de avance:** Backend / Seguridad / DevOps
+
+### 🚀 Resumen
+Se han aplicado mejoras críticas de seguridad y estabilidad en el núcleo de la aplicación, enfocándose en el manejo robusto de errores y la protección de datos sensibles.
+
+### 🔧 Cambios Realizados
+
+#### 1. Manejo de Errores y Excepciones
+*   **Database Core (`App\Core\Database`):** Eliminación de `die()` en fallos de conexión. Ahora lanza `PDOException` para ser capturada por el manejador global.
+*   **Global Exception Handler (`public/index.php`):** Implementación de `set_exception_handler` para capturar errores no controlados.
+    *   **Producción:** Muestra un mensaje genérico "Error de sistema" (HTTP 500) y registra el detalle en el log del servidor (`error_log`).
+    *   **Debug:** Muestra la traza completa si `app.debug` es true.
+
+#### 2. Configuración y Secretos
+*   **Configuración Centralizada (`config/config.php`):** Integración de configuración de emails (`emails.agency`, `emails.noreply`) leyendo desde variables de entorno (`.env`).
+*   **TasacionController:** Refactorización para usar las nuevas claves de configuración, eliminando direcciones de correo hardcodeadas.
+
+#### 3. Base de Datos (Schema)
+*   **Schema Update (`database/schema.sql`):** Actualización del esquema de referencia de la tabla `usuarios` con columnas de auditoría y seguridad:
+    *   `intentos_fallidos` (Protección fuerza bruta).
+    *   `cuenta_bloqueada` (Bloqueo temporal/permanente).
+    *   `archivado` y `fecha_baja` (Soft deletes y auditoría).
+
+### 📝 Archivos clave creados/modificados
+*   `app/Core/Database.php`
+*   `public/index.php`
+*   `config/config.php`
+*   `app/Controllers/TasacionController.php`
+*   `database/schema.sql`
+

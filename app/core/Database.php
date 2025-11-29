@@ -8,7 +8,7 @@ use PDOException;
 
 /**
  * Clase Database
- * Singleton + Devuelve una conexión PDO en cada llamada.
+ * Singleton + Devuelve una conexion PDO en cada llamada.
  * 
  * Rutas implicadas:
  *   ROOT   -> inmobiliaria/
@@ -24,7 +24,7 @@ final class Database
 
     /**
      * Constructor privado
-     * Carga los datos de config.php y abre la conexión
+     * Carga los datos de config.php y abre la conexion
      */
     private function __construct()
     {
@@ -53,12 +53,13 @@ final class Database
                 $opciones
             );
         } catch (PDOException $e) {
-            die("❌ Error de Conexión a la Base de Datos: " . $e->getMessage());
+            // No exponer detalles al usuario; propagar para manejo global.
+            throw new PDOException('Error de conexion a la base de datos', (int)$e->getCode(), $e);
         }
     }
 
     /**
-     * Devuelve una conexión PDO lista para usar
+     * Devuelve una conexion PDO lista para usar
      */
     public static function conectar(): PDO
     {

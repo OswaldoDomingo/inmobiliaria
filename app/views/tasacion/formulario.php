@@ -261,6 +261,7 @@
     <!-- 4. LÓGICA JAVASCRIPT -->
     <script>
         // Inicializar Iconos
+        const csrfToken = '<?= htmlspecialchars($csrfToken ?? '') ?>';
         lucide.createIcons();
 
         /* =========================================================================
@@ -592,7 +593,8 @@
                 const response = await fetch('tasacion/enviar', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
                     },
                     body: JSON.stringify(params)
                 });

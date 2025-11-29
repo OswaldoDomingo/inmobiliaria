@@ -1,50 +1,73 @@
 <?php
 declare(strict_types=1);
 
-use App\Core\Database;
+use App\Core\Config;
+use App\Core\Env;
 use App\Core\Router;
-
-// ===============================
-// DEBUG SOLO EN DESARROLLO
-// ===============================
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
+use PDOException;
 
 // ===============================
 // 0. Constantes de rutas
 // ===============================
-define('ROOT', dirname(__DIR__));        // C:\servidor\apache24\htdocs\inmobiliaria
-define('APP', ROOT . '/app');            // ...\inmobiliaria\app
-define('CONFIG', ROOT . '/config');      // ...\inmobiliaria\config
-define('VIEW', APP . '/views');          // ...\inmobiliaria\app\views
+define('ROOT', dirname(__DIR__));
+define('APP', ROOT . '/app');
+define('CONFIG', ROOT . '/config');
+define('VIEW', APP . '/views');
 
 // ===============================
-// 1. Cargar configuración
+// 1. Cargar entorno (.env) antes de la configuración
+// ===============================
+require_once APP . '/Autoloader.php';
+\App\Autoloader::register(ROOT);
+
+Env::load(ROOT . '/.env');
+
+// ===============================
+// 2. Cargar configuración centralizada
 // ===============================
 $config = require CONFIG . '/config.php';
+Config::init($config);
 
 // ===============================
-// 2. Cargar Autoloader
+// 3. Configuración de errores según entorno
 // ===============================
-$autoloadPath = APP . '/Autoloader.php';
+$debug = (bool)Config::get('app.debug', false);
+ini_set('display_errors', $debug ? '1' : '0');
+ini_set('display_startup_errors', $debug ? '1' : '0');
+error_reporting($debug ? E_ALL : E_ALL & ~E_NOTICE & ~E_STRICT);
 
-if (file_exists($autoloadPath)) {
-    require_once $autoloadPath;
-
-    if (class_exists(\App\Autoloader::class)) {
-        \App\Autoloader::register(ROOT);
+set_exception_handler(function (\Throwable $e) use ($debug) {
+    if ($e instanceof PDOException) {
+        http_response_code(500);
+        error_log('DB ERROR: ' . $e->getMessage());
+        echo '<h1>Error de sistema</h1><p>No se ha podido completar la operacion.</p>';
+        return;
     }
+    // Re-lanzar si estamos en debug para ver trazas
+    if ($debug) {
+        throw $e;
+    }
+    http_response_code(500);
+    error_log($e->getMessage());
+    echo '<h1>Error de sistema</h1><p>Intentalo de nuevo mas tarde.</p>';
+});
+
+// ===============================
+// 4. Seguridad de sesión (cookies endurecidas)
+// ===============================
+$secureCookies = Config::get('env') === 'production';
+session_set_cookie_params([
+    'httponly' => true,
+    'secure'   => $secureCookies,
+    'samesite' => 'Lax',
+    'path'     => '/',
+]);
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
 // ===============================
-// 3. Cargar Database
-// ===============================
-// El Autoloader se encargará de cargar App\Core\Database cuando sea necesario.
-// Eliminamos la carga manual para evitar conflictos de rutas/casing.
-
-// ===============================
-// 4. Inicializar Router y Definir Rutas
+// 5. Inicializar Router y Definir Rutas
 // ===============================
 
 $router = new Router();
@@ -97,6 +120,6 @@ $router->post('/admin/usuarios/baja', [UserController::class, 'delete']);
 $router->post('/admin/usuarios/cambiar-bloqueo', [UserController::class, 'toggleBlock']);
 
 // ===============================
-// 5. Despachar la petición
+// 6. Despachar la petición
 // ===============================
 $router->dispatch();

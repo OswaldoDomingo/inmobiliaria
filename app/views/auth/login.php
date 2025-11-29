@@ -19,18 +19,19 @@
                     <?php endif; ?>
 
                     <form action="/login" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
                         <div class="mb-3">
-                            <label for="email" class="form-label">Correo Electrónico</label>
+                            <label for="email" class="form-label">Correo Electronico</label>
                             <input type="email" class="form-control" id="email" name="email" required autofocus>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
+                            <label for="password" class="form-label">Contrasena</label>
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                            <button type="submit" class="btn btn-primary">Iniciar Sesion</button>
                         </div>
                     </form>
                 </div>

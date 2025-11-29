@@ -3,23 +3,25 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Config;
+use App\Core\Csrf;
 use App\Lib\SimpleSMTP;
 use Exception;
 use Throwable;
 
 /**
- * Controlador de Tasación
- * Gestiona la vista del formulario y el envío de correos.
+ * Controlador de Tasacion
+ * Gestiona la vista del formulario y el envio de correos.
  */
 class TasacionController
 {
     /**
-     * Muestra el formulario de tasación.
+     * Muestra el formulario de tasacion.
      * Ruta: GET /tasacion
      */
     public function index(): void
     {
-        // CSS específico para la tasación
+        // CSS especifico para la tasacion
         $extraCss = '
         <script src="https://cdn.tailwindcss.com"></script>
         <script>
@@ -30,17 +32,14 @@ class TasacionController
             }
         </script>
         <style>
-            /* FIX: Conflicto Bootstrap vs Tailwind */
-            /* Tailwind pone visibility: collapse en .collapse, lo que oculta el menú de Bootstrap */
             .navbar .collapse:not(.show) {
-                display: none; /* Comportamiento standard de Bootstrap */
-                visibility: visible; /* Sobrescribir Tailwind */
+                display: none;
+                visibility: visible;
             }
             .navbar .collapse.show {
                 display: block;
                 visibility: visible;
             }
-            /* Asegurar que en desktop se vea */
             @media (min-width: 992px) {
                 .navbar .collapse {
                     display: flex !important;
@@ -56,6 +55,7 @@ class TasacionController
 
         // Ocultamos el hero de la landing
         $showHero = false;
+        $csrfToken = Csrf::token();
 
         require VIEW . '/layouts/header.php';
         require VIEW . '/tasacion/formulario.php';
@@ -63,16 +63,12 @@ class TasacionController
     }
 
     /**
-     * Procesa el envío del formulario y manda los correos.
-     * Ruta: POST /tasacion/enviar
-     */
-    /**
-     * Procesa el envío del formulario y manda los correos.
+     * Procesa el envio del formulario y manda los correos.
      * Ruta: POST /tasacion/enviar
      */
     public function enviar(): void
     {
-        // Configuración de cabeceras para respuesta JSON
+        // Configuracion de cabeceras para respuesta JSON
         header('Content-Type: application/json');
 
         // Evitar que errores de PHP rompan el JSON
@@ -81,15 +77,23 @@ class TasacionController
         error_reporting(E_ALL);
 
         try {
+            // CSRF basado en header
+            $csrfHeader = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+            if (!Csrf::validate($csrfHeader)) {
+                http_response_code(419);
+                echo json_encode(['status' => 'error', 'message' => 'Sesion expirada. Refresca la pagina.']);
+                return;
+            }
+
             // Recibir datos JSON
             $input = file_get_contents('php://input');
             $data = json_decode($input, true);
 
             if (!$data) {
-                throw new Exception('No se recibieron datos o el JSON es inválido');
+                throw new Exception('No se recibieron datos o el JSON es invalido');
             }
 
-            // 1. SANITIZACIÓN ESTRICTA
+            // 1. Sanitizacion estricta
             $email_cliente = trim(filter_var($data['to_email'] ?? '', FILTER_SANITIZE_EMAIL));
             $telefono = trim(strip_tags($data['user_phone'] ?? ''));
             $cp = trim(strip_tags($data['cp'] ?? ''));
@@ -101,19 +105,19 @@ class TasacionController
             $caracteristicas = trim(strip_tags($data['caracteristicas'] ?? ''));
             $fecha = date('d/m/Y H:i');
 
-            // 2. VALIDACIÓN ESTRICTA
+            // 2. Validacion estricta
             $errors = [];
 
             if (empty($email_cliente) || !filter_var($email_cliente, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = "El email no es válido.";
+                $errors[] = "El email no es valido.";
             }
 
             if (empty($telefono)) {
-                $errors[] = "El teléfono es obligatorio.";
+                $errors[] = "El telefono es obligatorio.";
             }
 
             if (empty($cp) || strlen($cp) < 4) {
-                $errors[] = "El código postal no es válido.";
+                $errors[] = "El codigo postal no es valido.";
             }
 
             if (empty($barrio)) {
@@ -121,25 +125,26 @@ class TasacionController
             }
 
             if (empty($superficie) || !is_numeric($superficie)) {
-                $errors[] = "La superficie debe ser un número válido.";
+                $errors[] = "La superficie debe ser un numero valido.";
             }
 
-            // Si hay errores de validación, devolverlos
+            // Si hay errores de validacion, devolverlos
             if (!empty($errors)) {
                 echo json_encode(['status' => 'error', 'message' => implode(' ', $errors)]);
                 return;
             }
 
-            // Configuración (Idealmente esto iría en config/config.php o .env)
-            $to_agency = 'no-responder@oswaldo.dev'; // Email de la agencia
-            $subject_agency = 'Nuevo Lead de Tasación Online';
-            $subject_client = 'Tu valoración inmobiliaria - Confirmación';
+            // Configuracion
+            $to_agency = Config::get('emails.agency', 'no-responder@example.com');
+            $from_email = Config::get('emails.noreply', $to_agency);
+            $subject_agency = 'Nuevo Lead de Tasacion Online';
+            $subject_client = 'Tu valoracion inmobiliaria - Confirmacion';
 
             // --- EMAIL PARA LA AGENCIA ---
             $message_agency = "
             <html>
             <head>
-              <title>Nuevo Lead de Tasación</title>
+              <title>Nuevo Lead de Tasacion</title>
             </head>
             <body>
               <h2>Nuevo Lead Recibido</h2>
@@ -147,17 +152,17 @@ class TasacionController
               <h3>Datos del Cliente</h3>
               <ul>
                 <li><strong>Email:</strong> " . htmlspecialchars($email_cliente) . "</li>
-                <li><strong>Teléfono:</strong> " . htmlspecialchars($telefono) . "</li>
+                <li><strong>Telefono:</strong> " . htmlspecialchars($telefono) . "</li>
               </ul>
               <h3>Datos del Inmueble</h3>
               <ul>
                 <li><strong>CP:</strong> " . htmlspecialchars($cp) . "</li>
                 <li><strong>Barrio:</strong> " . htmlspecialchars($barrio) . "</li>
                 <li><strong>Zona:</strong> " . htmlspecialchars($zona) . "</li>
-                <li><strong>Superficie:</strong> " . htmlspecialchars($superficie) . " m²</li>
-                <li><strong>Características:</strong> " . htmlspecialchars($caracteristicas) . "</li>
+                <li><strong>Superficie:</strong> " . htmlspecialchars($superficie) . " m2</li>
+                <li><strong>Caracteristicas:</strong> " . htmlspecialchars($caracteristicas) . "</li>
               </ul>
-              <h3>Valoración Estimada</h3>
+              <h3>Valoracion Estimada</h3>
               <p><strong>Rango:</strong> " . htmlspecialchars($precio_min) . " - " . htmlspecialchars($precio_max) . "</p>
             </body>
             </html>
@@ -165,49 +170,49 @@ class TasacionController
 
             $headers_agency = "MIME-Version: 1.0" . "\r\n";
             $headers_agency .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-            $headers_agency .= "From: Tasador Online <no-responder@oswaldo.dev>" . "\r\n";
+            $headers_agency .= "From: Tasador Online <{$from_email}>" . "\r\n";
             $headers_agency .= "Reply-To: $email_cliente" . "\r\n";
 
             // --- EMAIL PARA EL CLIENTE ---
             $message_client = "
             <html>
             <head>
-              <title>Tu Valoración Inmobiliaria</title>
+              <title>Tu Valoracion Inmobiliaria</title>
             </head>
             <body>
               <h2>Hola,</h2>
-              <p>Gracias por utilizar nuestro tasador online. Aquí tienes el resumen de tu valoración.</p>
+              <p>Gracias por utilizar nuestro tasador online. Aqui tienes el resumen de tu valoracion.</p>
               
               <div style='background-color: #f3f4f6; padding: 20px; border-radius: 10px; margin: 20px 0;'>
-                <h3 style='color: #4f46e5; margin-top: 0;'>Valoración Estimada</h3>
+                <h3 style='color: #4f46e5; margin-top: 0;'>Valoracion Estimada</h3>
                 <p style='font-size: 24px; font-weight: bold;'>" . htmlspecialchars($precio_min) . " - " . htmlspecialchars($precio_max) . "</p>
               </div>
 
               <h3>Detalles de tu inmueble:</h3>
               <ul>
-                <li><strong>Ubicación:</strong> " . htmlspecialchars($barrio) . ", " . htmlspecialchars($zona) . " (" . htmlspecialchars($cp) . ")</li>
-                <li><strong>Superficie:</strong> " . htmlspecialchars($superficie) . " m²</li>
+                <li><strong>Ubicacion:</strong> " . htmlspecialchars($barrio) . ", " . htmlspecialchars($zona) . " (" . htmlspecialchars($cp) . ")</li>
+                <li><strong>Superficie:</strong> " . htmlspecialchars($superficie) . " m2</li>
                 <li><strong>Extras:</strong> " . htmlspecialchars($caracteristicas) . "</li>
               </ul>
 
-              <p>Un agente se pondrá en contacto contigo pronto para validar estos datos y ofrecerte una valoración más precisa.</p>
+              <p>Un agente se pondra en contacto contigo pronto para validar estos datos y ofrecerte una valoracion mas precisa.</p>
               
-              <p>Atentamente,<br>El equipo de Tasación</p>
+              <p>Atentamente,<br>El equipo de Tasacion</p>
             </body>
             </html>
             ";
 
             $headers_client = "MIME-Version: 1.0" . "\r\n";
             $headers_client .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-            $headers_client .= "From: Tasador Online <no-responder@oswaldo.dev>" . "\r\n";
+            $headers_client .= "From: Tasador Online <{$from_email}>" . "\r\n";
             $headers_client .= "Reply-To: $to_agency" . "\r\n";
 
-            // --- CONFIGURACIÓN SMTP ---
-            // TODO: Mover credenciales a .env
-            $smtp_host = 'mail.oswaldo.dev'; 
-            $smtp_port = 587; 
-            $smtp_user = 'no-responder@oswaldo.dev'; 
-            $smtp_pass = 'Oswaldo!1963ñ'; 
+            // --- CONFIGURACION SMTP ---
+            $smtpConfig = Config::get('smtp', []);
+            $smtp_host = $smtpConfig['host'] ?? '';
+            $smtp_port = (int)($smtpConfig['port'] ?? 587);
+            $smtp_user = $smtpConfig['user'] ?? '';
+            $smtp_pass = $smtpConfig['pass'] ?? '';
 
             $smtp = new SimpleSMTP($smtp_host, $smtp_port, $smtp_user, $smtp_pass);
 
@@ -242,7 +247,8 @@ class TasacionController
             }
 
         } catch (Throwable $e) {
-            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+            $safeMessage = Config::get('app.debug') ? $e->getMessage() : 'Error procesando la solicitud.';
+            echo json_encode(['status' => 'error', 'message' => $safeMessage]);
         }
     }
 }

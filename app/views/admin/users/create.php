@@ -22,6 +22,7 @@
                     <?php endif; ?>
 
                     <form action="/admin/usuarios/guardar" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
                         <div class="mb-3">
                             <label for="nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="nombre" name="nombre" 
@@ -29,16 +30,16 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                            <label for="email" class="form-label">Correo Electronico <span class="text-danger">*</span></label>
                             <input type="email" class="form-control" id="email" name="email" 
                                    value="<?= htmlspecialchars($email ?? '') ?>" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña <span class="text-danger">*</span></label>
+                            <label for="password" class="form-label">Contrasena <span class="text-danger">*</span></label>
                             <input type="password" class="form-control" id="password" name="password" 
                                    minlength="6" required>
-                            <div class="form-text">Mínimo 6 caracteres.</div>
+                            <div class="form-text">Minimo 6 caracteres.</div>
                         </div>
 
                         <div class="mb-3">

@@ -2,7 +2,7 @@
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestión de Usuarios</h1>
+        <h1>Gestion de Usuarios</h1>
         <a href="/admin/usuarios/nuevo" class="btn btn-primary">
             <i class="bi bi-plus-lg"></i> Nuevo Usuario
         </a>
@@ -60,9 +60,10 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <!-- Botón Bloquear/Desbloquear -->
+                                            <!-- Boton Bloquear/Desbloquear -->
                                             <?php if ($user->id_usuario != $_SESSION['user_id']): ?>
                                                 <form action="/admin/usuarios/cambiar-bloqueo" method="POST" style="display:inline;">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
                                                     <input type="hidden" name="id" value="<?= $user->id_usuario ?>">
                                                     <?php if ((int)$user->cuenta_bloqueada === 1): ?>
                                                         <input type="hidden" name="status" value="0">
@@ -71,7 +72,7 @@
                                                         </button>
                                                     <?php else: ?>
                                                         <input type="hidden" name="status" value="1">
-                                                        <button type="submit" class="btn btn-sm btn-warning" title="Bloquear Cuenta" onclick="return confirm('¿Estás seguro de bloquear a este usuario?');">
+                                                        <button type="submit" class="btn btn-sm btn-warning" title="Bloquear Cuenta" onclick="return confirm('Estas seguro de bloquear a este usuario?');">
                                                             <i class="bi bi-lock"></i> Bloquear
                                                         </button>
                                                     <?php endif; ?>
@@ -85,7 +86,8 @@
                                             <?php if ($user->id_usuario != 1 && $user->id_usuario != $_SESSION['user_id']): ?>
 
                                             <?php if ($user->activo): ?>
-                                                <form action="/admin/usuarios/baja" method="POST" onsubmit="return confirm('¿Estás seguro de desactivar este usuario?');" style="display:inline;">
+                                                <form action="/admin/usuarios/baja" method="POST" onsubmit="return confirm('Estas seguro de desactivar este usuario?');" style="display:inline;">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
                                                     <input type="hidden" name="id" value="<?= $user->id_usuario ?>">
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Dar de Baja">
                                                         <i class="bi bi-person-x"></i> Baja

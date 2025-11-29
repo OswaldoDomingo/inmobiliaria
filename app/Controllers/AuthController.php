@@ -3,11 +3,12 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Csrf;
 use App\Models\User;
 
 /**
- * Controlador de Autenticación
- * Gestiona Login, Logout y validación de credenciales.
+ * Controlador de Autenticacion
+ * Gestiona Login, Logout y validacion de credenciales.
  */
 class AuthController
 {
@@ -17,15 +18,17 @@ class AuthController
      */
     public function login(): void
     {
-        // Si ya está logueado, redirigir al dashboard
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         
+        // Si ya esta logueado, redirigir al dashboard
         if (isset($_SESSION['user_id'])) {
             header('Location: /dashboard');
             exit;
         }
+
+        $csrfToken = Csrf::token();
 
         require VIEW . '/auth/login.php';
     }
@@ -41,6 +44,15 @@ class AuthController
             exit;
         }
 
+        if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['error'] = "Sesion expirada. Vuelve a intentarlo.";
+            header('Location: /login');
+            exit;
+        }
+
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
@@ -48,7 +60,7 @@ class AuthController
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
-            $_SESSION['error'] = "Email y contraseña son obligatorios.";
+            $_SESSION['error'] = "Email y contrasena son obligatorios.";
             header('Location: /login');
             exit;
         }
@@ -56,7 +68,7 @@ class AuthController
         $userModel = new User();
         $user = $userModel->findByEmail($email);
 
-        // Si el usuario no existe, error genérico
+        // Si el usuario no existe, error generico
         if (!$user) {
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
@@ -78,7 +90,7 @@ class AuthController
 
         // Paso B: Verificar Credenciales
         if (password_verify($password, $user->password_hash)) {
-            // Verificar si el usuario está activo (lógica existente)
+            // Verificar si el usuario esta activo (logica existente)
             if ((int)$user->activo === 0 || (isset($user->archivado) && (int)$user->archivado === 1)) {
                 if (session_status() === PHP_SESSION_NONE) {
                     session_start();
@@ -93,12 +105,12 @@ class AuthController
             $stmt = $pdo->prepare("UPDATE usuarios SET intentos_fallidos = 0 WHERE id_usuario = :id");
             $stmt->execute([':id' => $user->id_usuario]);
 
-            // Inicia sesión normalmente
+            // Inicia sesion normalmente
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
 
-            // Regenerar ID de sesión por seguridad
+            // Regenerar ID de sesion por seguridad
             session_regenerate_id(true);
 
             $_SESSION['user_id'] = $user->id_usuario;
@@ -108,7 +120,7 @@ class AuthController
             header('Location: /dashboard');
             exit;
         } else {
-            // Contraseña INCORRECTA
+            // Contrasena INCORRECTA
             $pdo = \App\Core\Database::conectar();
             
             // Incrementa el contador intentos_fallidos en +1
@@ -124,7 +136,7 @@ class AuthController
                 session_start();
             }
 
-            // Comprobación de Límite
+            // Comprobacion de Limite
             if ($intentos >= 3) {
                 // Actualiza cuenta_bloqueada = 1
                 $stmt = $pdo->prepare("UPDATE usuarios SET cuenta_bloqueada = 1 WHERE id_usuario = :id");
@@ -141,7 +153,7 @@ class AuthController
     }
 
     /**
-     * Cierra la sesión del usuario.
+     * Cierra la sesion del usuario.
      * GET /logout
      */
     public function logout(): void
@@ -150,10 +162,10 @@ class AuthController
             session_start();
         }
 
-        // Destruir todas las variables de sesión
+        // Destruir todas las variables de sesion
         $_SESSION = [];
 
-        // Borrar la cookie de sesión si existe
+        // Borrar la cookie de sesion si existe
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(session_name(), '', time() - 42000,
@@ -162,7 +174,7 @@ class AuthController
             );
         }
 
-        // Destruir la sesión
+        // Destruir la sesion
         session_destroy();
 
         header('Location: /');

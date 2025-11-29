@@ -22,6 +22,7 @@
                     <?php endif; ?>
 
                     <form action="/admin/usuarios/actualizar" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
                         <input type="hidden" name="id" value="<?= $id_usuario ?>">
 
                         <div class="mb-3">
@@ -31,16 +32,16 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Correo Electrónico <span class="text-danger">*</span></label>
+                            <label for="email" class="form-label">Correo Electronico <span class="text-danger">*</span></label>
                             <input type="email" class="form-control" id="email" name="email" 
                                    value="<?= htmlspecialchars($email ?? '') ?>" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="password" class="form-label">Contraseña</label>
+                            <label for="password" class="form-label">Contrasena</label>
                             <input type="password" class="form-control" id="password" name="password" 
                                    minlength="6" placeholder="Dejar en blanco para mantener la actual">
-                            <div class="form-text">Solo rellena esto si quieres cambiar la contraseña.</div>
+                            <div class="form-text">Solo rellena esto si quieres cambiar la contrasena.</div>
                         </div>
 
                         <div class="mb-3">
