@@ -96,6 +96,7 @@ Se ha implementado un sistema de carga de variables de entorno (`.env`) para sep
 *   **Baja Lógica:** Implementación de "Soft Delete" para desactivar usuarios sin perder sus datos históricos.
 *   **Protección Anti-Suicidio:** Lógica que impide que un administrador se desactive a sí mismo.
 *   **Fotos de Perfil:** Sistema de subida de imágenes seguro con validación de tipo MIME, renombrado aleatorio y limpieza automática de archivos antiguos.
+*   **Mejora de UX en Dashboard:** Personalización de la interfaz (Header y Dashboard) para mostrar la foto y el email del usuario logueado, mejorando la orientación y el feedback visual.
 
 ## 3.4. Manejo de Errores
 He implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.
