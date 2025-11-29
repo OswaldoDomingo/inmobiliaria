@@ -117,7 +117,10 @@ class AuthController
             $_SESSION['user_name'] = $user->nombre;
             $_SESSION['user_email'] = $user->email;
             $_SESSION['user_foto'] = $user->foto_perfil;
+            $_SESSION['user_foto'] = $user->foto_perfil;
             $_SESSION['user_role'] = $user->rol;
+
+            $this->registrarLog('LOGIN_EXITOSO', $email);
 
             header('Location: /dashboard');
             exit;
@@ -144,8 +147,10 @@ class AuthController
                 $stmt = $pdo->prepare("UPDATE usuarios SET cuenta_bloqueada = 1 WHERE id_usuario = :id");
                 $stmt->execute([':id' => $user->id_usuario]);
 
+                $this->registrarLog('BLOQUEO_CUENTA', $email);
                 $_SESSION['error'] = "Cuenta bloqueada.";
             } else {
+                $this->registrarLog('LOGIN_FALLIDO', $email);
                 $_SESSION['error'] = "Credenciales incorrectas.";
             }
 
@@ -164,6 +169,10 @@ class AuthController
             session_start();
         }
 
+        // Registrar logout antes de destruir sesion
+        $email = $_SESSION['user_email'] ?? 'Desconocido';
+        $this->registrarLog('LOGOUT', $email);
+
         // Destruir todas las variables de sesion
         $_SESSION = [];
 
@@ -181,5 +190,28 @@ class AuthController
 
         header('Location: /');
         exit;
+    }
+
+    /**
+     * Registra un evento en el archivo de logs.
+     * 
+     * @param string $evento Tipo de evento (LOGIN_EXITOSO, LOGIN_FALLIDO, etc.)
+     * @param string $email Email del usuario asociado al evento
+     */
+    private function registrarLog(string $evento, string $email): void
+    {
+        $logDir = ROOT . '/logs';
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+
+        $file = $logDir . '/auth.log';
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
+        $date = date('Y-m-d H:i:s');
+        
+        // Formato: FECHA|IP|EVENTO|EMAIL
+        $logEntry = "$date|$ip|$evento|$email" . PHP_EOL;
+
+        file_put_contents($file, $logEntry, FILE_APPEND);
     }
 }

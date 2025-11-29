@@ -33,6 +33,7 @@ require VIEW . '/layouts/header.php';
                             echo "<p class='card-text'>Tienes acceso total al sistema. Puedes gestionar usuarios y propiedades.</p>";
                             echo '<div class="mt-3">';
                             echo '<a href="/admin/usuarios" class="btn btn-primary"><i class="bi bi-people"></i> Gestionar Usuarios</a>';
+                            echo ' <a href="/admin/logs" class="btn btn-secondary ms-2"><i class="bi bi-shield-lock"></i> Auditoría</a>';
                             echo '</div>';
                             break;
                         case 'coordinador':

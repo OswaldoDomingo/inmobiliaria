@@ -119,6 +119,10 @@ $router->post('/admin/usuarios/actualizar', [UserController::class, 'update']);
 $router->post('/admin/usuarios/baja', [UserController::class, 'delete']);
 $router->post('/admin/usuarios/cambiar-bloqueo', [UserController::class, 'toggleBlock']);
 
+// Rutas de Admin (Logs)
+use App\Controllers\LogController;
+$router->get('/admin/logs', [LogController::class, 'index']);
+
 // ===============================
 // 6. Despachar la petición
 // ===============================
