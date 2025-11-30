@@ -22,7 +22,7 @@ class ClienteController
     public function index(): void
     {
         $rol = $_SESSION['user_role'] ?? 'comercial';
-        $uid = $_SESSION['user_id'] ?? null;
+        $uid = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
         $clientes = $this->clienteModel->getAll($uid, $rol);
         $csrfToken = Csrf::token();
 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 use App\Core\Config;
 use App\Core\Env;
 use App\Core\Router;
-use PDOException;
 
 // ===============================
 // 0. Constantes de rutas
@@ -34,10 +33,10 @@ Config::init($config);
 $debug = (bool)Config::get('app.debug', false);
 ini_set('display_errors', $debug ? '1' : '0');
 ini_set('display_startup_errors', $debug ? '1' : '0');
-error_reporting($debug ? E_ALL : E_ALL & ~E_NOTICE & ~E_STRICT);
+error_reporting($debug ? E_ALL : E_ALL & ~E_NOTICE);
 
 set_exception_handler(function (\Throwable $e) use ($debug) {
-    if ($e instanceof PDOException) {
+    if ($e instanceof \PDOException) {
         http_response_code(500);
         error_log('DB ERROR: ' . $e->getMessage());
         echo '<h1>Error de sistema</h1><p>No se ha podido completar la operacion.</p>';
