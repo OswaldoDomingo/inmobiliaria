@@ -29,6 +29,9 @@
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" href="#">Propiedades</a></li>
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                        <li class="nav-item"><a class="nav-link" href="/admin/clientes">Clientes</a></li>
+                        <?php endif; ?>
                         <li class="nav-item"><a class="nav-link" href="#">Vende</a></li>
                         <li class="nav-item"><a class="nav-link fw-bold text-primary" href="/tasacion">Tasador Online</a></li>
                         <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>

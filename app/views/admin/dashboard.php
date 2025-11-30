@@ -34,15 +34,25 @@ require VIEW . '/layouts/header.php';
                             echo '<div class="mt-3">';
                             echo '<a href="/admin/usuarios" class="btn btn-primary"><i class="bi bi-people"></i> Gestionar Usuarios</a>';
                             echo ' <a href="/admin/logs" class="btn btn-secondary ms-2"><i class="bi bi-shield-lock"></i> Auditoría</a>';
+                            echo ' <a href="/admin/clientes" class="btn btn-outline-primary ms-2"><i class="bi bi-person-lines-fill"></i> Gestionar Clientes</a>';
+                            echo ' <a href="/admin/clientes/nuevo" class="btn btn-outline-success ms-2"><i class="bi bi-plus-lg"></i> Nuevo Cliente</a>';
                             echo '</div>';
                             break;
                         case 'coordinador':
                             echo "<h3 class='card-title text-success'>Hola Coordinador $nombre</h3>";
                             echo "<p class='card-text'>Puedes ver todos los registros y supervisar la actividad.</p>";
+                            echo '<div class="mt-3">';
+                            echo '<a href="/admin/clientes" class="btn btn-primary"><i class="bi bi-person-lines-fill"></i> Gestionar Clientes</a>';
+                            echo ' <a href="/admin/clientes/nuevo" class="btn btn-outline-success ms-2"><i class="bi bi-plus-lg"></i> Nuevo Cliente</a>';
+                            echo '</div>';
                             break;
                         case 'comercial':
                             echo "<h3 class='card-title text-info'>Hola Comercial $nombre</h3>";
                             echo "<p class='card-text'>Aquí puedes gestionar tus propiedades y clientes asignados.</p>";
+                            echo '<div class="mt-3">';
+                            echo '<a href="/admin/clientes" class="btn btn-primary"><i class="bi bi-person-lines-fill"></i> Ver Clientes</a>';
+                            echo ' <a href="/admin/clientes/nuevo" class="btn btn-outline-success ms-2"><i class="bi bi-plus-lg"></i> Nuevo Cliente</a>';
+                            echo '</div>';
                             break;
                         default:
                             echo "<h3 class='card-title'>Bienvenido $nombre</h3>";

@@ -391,3 +391,33 @@ Se ha mejorado la interfaz del Dashboard y la cabecera para mostrar información
 *   `app/Controllers/AuthController.php`
 *   `app/views/layouts/header.php`
 *   `app/views/admin/dashboard.php`
+
+## ✅ 2025-11-30 (Clientes: Schema + CRUD + Menús)
+
+**Tema:** Alta de Clientes e Integración en Dashboard  
+**Tipo de avance:** Backend / DB / UX  
+
+### ✅ Resumen
+- Se creó la migración `database/migrations/03_create_crm_tables.sql` con las tablas `clientes` e `inmuebles` (FK a `usuarios` y `clientes`, índices de filtrado y flags de operación).
+- Nuevo módulo CRUD de clientes con control por rol (admin/coordinador ven todo; comercial solo los suyos).
+- Enlace directo a clientes desde el header y botones en el dashboard según rol.
+- Manejador global de errores muestra mensaje genérico; detalle queda en el log.
+- Incidencia resuelta: error “Unknown column usuario_id/telefono” al crear clientes; se corrigió el esquema y se reintentó el alta.
+
+### ✅ Archivos clave creados/modificados
+- `database/migrations/03_create_crm_tables.sql`
+- `app/Models/Cliente.php`
+- `app/Controllers/ClienteController.php`
+- `app/Views/admin/clientes/{index.php,create.php,edit.php}`
+- `public/index.php` (rutas de clientes)
+- `app/Views/layouts/header.php` (menú Clientes)
+- `app/Views/admin/dashboard.php` (accesos rápidos por rol)
+
+### ✅ Notas de implementación
+- CSRF en todos los formularios de clientes; asignación automática de `usuario_id` al comercial logueado.
+- Validación de DNI duplicado antes de insertar/actualizar.
+- Borrado protegido: si hay inmuebles, el delete falla y muestra mensaje.
+
+### ✅ Errores y soluciones
+- **1054 Unknown column usuario_id/telefono**: la tabla `clientes` no tenía las columnas del nuevo esquema; se corrigió con ALTER y se añadió la migración completa.
+- **Error de sistema** al volver/guardar: se resolvió al alinear el esquema y dejar que el manejador global devuelva mensaje genérico y loguee detalle.

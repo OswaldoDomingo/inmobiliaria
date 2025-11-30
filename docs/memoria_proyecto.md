@@ -99,6 +99,17 @@ Se ha implementado un sistema de carga de variables de entorno (`.env`) para sep
 *   **Sistema de Auditoría:** Implementación de logs de seguridad en archivo de texto (Flat-File) para registrar accesos, fallos y bloqueos, con visor integrado en el panel de administración.
 *   **Mejora de UX en Dashboard:** Personalización de la interfaz (Header y Dashboard) para mostrar la foto y el email del usuario logueado, mejorando la orientación y el feedback visual.
 
+### 3.3.4. Gestión de Clientes
+*   **Migración y esquema:** Se creó `database/migrations/03_create_crm_tables.sql` con las tablas `clientes` e `inmuebles`, FKs a `usuarios` y `clientes`, flags de operación e índices de filtrado.
+*   **CRUD con control de rol:** Admin y coordinador ven todos los clientes; el comercial sólo los asignados (`usuario_id` se asigna automáticamente al crear).
+*   **Seguridad y validación:** CSRF en formularios, sanitización básica y control de DNI duplicado antes de insertar/actualizar.
+*   **Borrado protegido:** Si existen inmuebles ligados, el delete devuelve error controlado y no elimina.
+*   **UI:** Nuevas vistas (`index`, `create`, `edit`) y accesos desde el header y el dashboard según rol.
+
+### 3.3.5. Manejo de errores y logs
+*   **Excepciones de BD:** `App\Core\Database` lanza `PDOException` y el front controller captura y muestra mensaje genérico “Error de sistema”, registrando detalle en el log del servidor.
+*   **Errores detectados y resueltos:** Ajuste de la tabla `clientes` (faltaban `usuario_id`, `telefono`) que provocaba `Unknown column` al crear clientes; se corrigió el esquema y se añadió la migración completa.
+
 ## 3.4. Manejo de Errores
 He implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.
 

@@ -110,6 +110,7 @@ $router->get('/dashboard', function() {
 // RUTAS DE GESTIÓN DE USUARIOS (CRUD)
 // ===============================
 use App\Controllers\UserController;
+use App\Controllers\ClienteController;
 
 $router->get('/admin/usuarios', [UserController::class, 'index']);
 $router->get('/admin/usuarios/nuevo', [UserController::class, 'create']);
@@ -118,6 +119,16 @@ $router->get('/admin/usuarios/editar', [UserController::class, 'edit']);
 $router->post('/admin/usuarios/actualizar', [UserController::class, 'update']);
 $router->post('/admin/usuarios/baja', [UserController::class, 'delete']);
 $router->post('/admin/usuarios/cambiar-bloqueo', [UserController::class, 'toggleBlock']);
+
+// ===============================
+// RUTAS DE CLIENTES
+// ===============================
+$router->get('/admin/clientes', [ClienteController::class, 'index']);
+$router->get('/admin/clientes/nuevo', [ClienteController::class, 'create']);
+$router->post('/admin/clientes/guardar', [ClienteController::class, 'store']);
+$router->get('/admin/clientes/editar', [ClienteController::class, 'edit']);
+$router->post('/admin/clientes/actualizar', [ClienteController::class, 'update']);
+$router->post('/admin/clientes/borrar', [ClienteController::class, 'delete']);
 
 // Rutas de Admin (Logs)
 use App\Controllers\LogController;
