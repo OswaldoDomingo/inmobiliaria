@@ -5,10 +5,12 @@ namespace App\Controllers;
 
 use App\Core\Csrf;
 use App\Models\Cliente;
+use App\Models\User;
 
 class ClienteController
 {
     private Cliente $clienteModel;
+    private User $userModel;
 
     public function __construct()
     {
@@ -17,11 +19,12 @@ class ClienteController
         }
 
         $this->clienteModel = new Cliente();
+        $this->userModel = new User();
     }
 
     public function index(): void
     {
-        $rol = $_SESSION['user_role'] ?? 'comercial';
+        $rol = $this->getRol();
         $uid = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
         $clientes = $this->clienteModel->getAll($uid, $rol);
         $csrfToken = Csrf::token();
@@ -31,6 +34,8 @@ class ClienteController
 
     public function create(): void
     {
+        $rol = $this->getRol();
+        $comerciales = $this->isAdminOrCoordinador($rol) ? $this->userModel->getComercialesActivos() : [];
         $csrfToken = Csrf::token();
         require VIEW . '/admin/clientes/create.php';
     }
@@ -39,8 +44,10 @@ class ClienteController
     {
         $this->ensurePost();
 
+        $rol = $this->getRol();
         $data = $this->sanitize($_POST);
-        $data['usuario_id'] = $_SESSION['user_id'] ?? null;
+        $data['usuario_id'] = $this->resolverAsignacionUsuario($rol, $_POST);
+        $comerciales = $this->isAdminOrCoordinador($rol) ? $this->userModel->getComercialesActivos() : [];
 
         if ($this->clienteModel->findByDni($data['dni'])) {
             $errors = ["El DNI ya existe."];
@@ -69,6 +76,8 @@ class ClienteController
             exit;
         }
 
+        $rol = $this->getRol();
+        $comerciales = $this->isAdminOrCoordinador($rol) ? $this->userModel->getComercialesActivos() : [];
         $csrfToken = Csrf::token();
         require VIEW . '/admin/clientes/edit.php';
     }
@@ -78,12 +87,21 @@ class ClienteController
         $this->ensurePost();
 
         $id = (int)($_POST['id'] ?? 0);
+        $cliente = $this->clienteModel->findById($id);
+
+        if (!$cliente) {
+            header('Location: /admin/clientes?error=notfound');
+            exit;
+        }
+
+        $rol = $this->getRol();
+        $comerciales = $this->isAdminOrCoordinador($rol) ? $this->userModel->getComercialesActivos() : [];
         $data = $this->sanitize($_POST);
+        $data['usuario_id'] = $this->resolverAsignacionUsuario($rol, $_POST, (int)($cliente->usuario_id ?? 0));
 
         $existing = $this->clienteModel->findByDni($data['dni']);
         if ($existing && (int)$existing->id_cliente !== $id) {
             $errors = ["El DNI ya existe."];
-            $cliente = $this->clienteModel->findById($id);
             $csrfToken = Csrf::token();
             require VIEW . '/admin/clientes/edit.php';
             return;
@@ -95,7 +113,6 @@ class ClienteController
         }
 
         $errors = ["No se pudo actualizar el cliente."];
-        $cliente = $this->clienteModel->findById($id);
         $csrfToken = Csrf::token();
         require VIEW . '/admin/clientes/edit.php';
     }
@@ -139,5 +156,28 @@ class ClienteController
         $clean['notas']     = trim($input['notas'] ?? '') ?: null;
         $clean['activo']    = isset($input['activo']) ? (int)$input['activo'] : 1;
         return $clean;
+    }
+
+    private function getRol(): string
+    {
+        return $_SESSION['user_role'] ?? ($_SESSION['rol'] ?? 'comercial');
+    }
+
+    private function isAdminOrCoordinador(string $rol): bool
+    {
+        return in_array($rol, ['admin', 'coordinador'], true);
+    }
+
+    private function resolverAsignacionUsuario(string $rol, array $input, ?int $usuarioActual = null): ?int
+    {
+        if ($this->isAdminOrCoordinador($rol)) {
+            return isset($input['usuario_id']) ? (int)$input['usuario_id'] : $usuarioActual;
+        }
+
+        if ($usuarioActual !== null) {
+            return $usuarioActual;
+        }
+
+        return isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : null;
     }
 }

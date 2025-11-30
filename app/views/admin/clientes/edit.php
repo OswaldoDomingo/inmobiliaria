@@ -44,6 +44,21 @@
                                 <label class="form-label">Email</label>
                                 <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($cliente->email ?? '') ?>">
                             </div>
+                            <?php $rolSesion = $_SESSION['user_role'] ?? ($_SESSION['rol'] ?? 'comercial'); ?>
+                            <?php if (in_array($rolSesion, ['admin', 'coordinador'], true)): ?>
+                                <div class="col-md-6">
+                                    <label class="form-label">Comercial Asignado</label>
+                                    <select name="usuario_id" class="form-select">
+                                        <option value="">Selecciona un comercial</option>
+                                        <?php foreach ($comerciales ?? [] as $comercial): ?>
+                                            <?php $seleccionado = (int)($cliente->usuario_id ?? 0) === (int)$comercial->id_usuario; ?>
+                                            <option value="<?= (int)$comercial->id_usuario ?>" <?= $seleccionado ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($comercial->nombre) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            <?php endif; ?>
                             <div class="col-12">
                                 <label class="form-label">Dirección</label>
                                 <input type="text" name="direccion" class="form-control" value="<?= htmlspecialchars($cliente->direccion ?? '') ?>">

@@ -165,4 +165,22 @@ class User
         
         return $stmt->execute();
     }
+
+    /**
+     * Obtiene comerciales/coordinadores activos para asignaci�n de clientes.
+     *
+     * @return array
+     */
+    public function getComercialesActivos(): array
+    {
+        $pdo = Database::conectar();
+        $sql = "SELECT id_usuario, nombre
+                FROM usuarios
+                WHERE rol IN ('comercial', 'coordinador')
+                  AND activo = 1
+                  AND (archivado IS NULL OR archivado = 0)
+                ORDER BY nombre ASC";
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll() ?: [];
+    }
 }

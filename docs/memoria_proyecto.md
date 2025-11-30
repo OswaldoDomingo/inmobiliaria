@@ -102,6 +102,10 @@ Se ha implementado un sistema de carga de variables de entorno (`.env`) para sep
 ### 3.3.4. Gestión de Clientes
 *   **Migración y esquema:** Se creó `database/migrations/03_create_crm_tables.sql` con las tablas `clientes` e `inmuebles`, FKs a `usuarios` y `clientes`, flags de operación e índices de filtrado.
 *   **CRUD con control de rol:** Admin y coordinador ven todos los clientes; el comercial sólo los asignados (`usuario_id` se asigna automáticamente al crear).
+*   **Asignacion y reasignacion por rol:** Admin/coordinador pueden elegir o cambiar el comercial desde el formulario; el controlador fuerza el `usuario_id` correcto para impedir manipulacion por comerciales.
+*   **Seguridad y validacion:** CSRF en formularios, sanitizacion basica y control de DNI duplicado antes de insertar/actualizar.
+*   **Borrado protegido:** Si existen inmuebles ligados, el delete devuelve error controlado y no elimina.
+*   **UI:** Nuevas vistas (`index`, `create`, `edit`) y accesos desde el header y el dashboard segun rol.
 *   **Seguridad y validación:** CSRF en formularios, sanitización básica y control de DNI duplicado antes de insertar/actualizar.
 *   **Borrado protegido:** Si existen inmuebles ligados, el delete devuelve error controlado y no elimina.
 *   **UI:** Nuevas vistas (`index`, `create`, `edit`) y accesos desde el header y el dashboard según rol.
@@ -141,3 +145,5 @@ El desarrollo de este proyecto ha permitido consolidar conocimientos avanzados d
 *   **PSR Standards (PHP-FIG):** https://www.php-fig.org/psr/
 *   **OWASP Top 10:** https://owasp.org/www-project-top-ten/
 *   **Bootstrap 5 Docs:** https://getbootstrap.com/docs/5.0/getting-started/introduction/
+
+

@@ -423,3 +423,27 @@ Se ha mejorado la interfaz del Dashboard y la cabecera para mostrar información
 - **Error de sistema** al volver/guardar: se resolvió al alinear el esquema y dejar que el manejador global devuelva mensaje genérico y loguee detalle.
 - **PHP 8 (tipado estricto):** Se casteó `$_SESSION['user_id']` a int en `ClienteController::index()` para evitar la excepción de tipo en producción.
 - **Warnings deprecados:** Se ajustó `error_reporting` eliminando `E_STRICT` y se usó `\PDOException` en el handler global para limpiar avisos de `use` sin efecto.
+---
+
+## ✅ 2025-11-30 (Roles y reasignación de clientes)
+
+**Tema:** Permisos para asignar/reasignar clientes a comerciales  
+**Tipo de avance:** Backend / CRM / Seguridad de roles
+
+### ?? Resumen
+Se habilitó que **administradores y coordinadores** puedan asignar o reasignar clientes a cualquier comercial, manteniendo a los comerciales limitados a su propia cartera.
+
+### ?? Cambios realizados
+- **Modelo `User`:** Nuevo `getComercialesActivos()` devuelve id/nombre de comerciales y coordinadores activos (no archivados) ordenados.
+- **`ClienteController`:** Carga la lista de comerciales en `create/edit` solo para roles con permiso; en `store/update` fuerza el `usuario_id` según rol (admin/coordinador toma el select, comercial se autoasigna o mantiene el asignado).
+- **Vistas `clientes/create` y `clientes/edit`:** Select condicional "Comercial Asignado" visible solo para admin/coordinador; en edición se marca el comercial actual.
+
+### ?? Archivos clave tocados
+- `app/Models/User.php`
+- `app/Controllers/ClienteController.php`
+- `app/Views/admin/clientes/create.php`
+- `app/Views/admin/clientes/edit.php`
+
+### ?? Notas
+- El controlador impide que un comercial manipule el formulario para reasignar clientes ajenos.
+- Recomendado: test manual en producción tras limpiar caché de sesiones.
