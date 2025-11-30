@@ -109,6 +109,7 @@ Se ha implementado un sistema de carga de variables de entorno (`.env`) para sep
 ### 3.3.5. Manejo de errores y logs
 *   **Excepciones de BD:** `App\Core\Database` lanza `PDOException` y el front controller captura y muestra mensaje genérico “Error de sistema”, registrando detalle en el log del servidor.
 *   **Errores detectados y resueltos:** Ajuste de la tabla `clientes` (faltaban `usuario_id`, `telefono`) que provocaba `Unknown column` al crear clientes; se corrigió el esquema y se añadió la migración completa.
+*   **Compatibilidad PHP 8:** Se normalizó el tipo de `user_id` (casteo a int en `ClienteController::index()`) para evitar excepciones de tipado en producción y se eliminó `E_STRICT` de `error_reporting`, usando `\PDOException` en el handler global para limpiar warnings.
 
 ## 3.4. Manejo de Errores
 He implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.

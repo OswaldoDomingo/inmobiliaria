@@ -421,3 +421,5 @@ Se ha mejorado la interfaz del Dashboard y la cabecera para mostrar información
 ### ✅ Errores y soluciones
 - **1054 Unknown column usuario_id/telefono**: la tabla `clientes` no tenía las columnas del nuevo esquema; se corrigió con ALTER y se añadió la migración completa.
 - **Error de sistema** al volver/guardar: se resolvió al alinear el esquema y dejar que el manejador global devuelva mensaje genérico y loguee detalle.
+- **PHP 8 (tipado estricto):** Se casteó `$_SESSION['user_id']` a int en `ClienteController::index()` para evitar la excepción de tipo en producción.
+- **Warnings deprecados:** Se ajustó `error_reporting` eliminando `E_STRICT` y se usó `\PDOException` en el handler global para limpiar avisos de `use` sin efecto.
