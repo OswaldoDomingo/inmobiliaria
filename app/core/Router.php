@@ -65,12 +65,12 @@ class Router
         // 2. Decodificar caracteres URL (ej: %20 -> espacio) por seguridad y consistencia
         $uriPath = rawurldecode($uriPath);
         
-        // 3. (Opcional) Si tu proyecto está en una subcarpeta (ej: /inmobiliaria/public), 
-        // podrías necesitar limpiar el prefijo. 
+        // 3. (Opcional) Si el proyecto está en una subcarpeta (ej: /inmobiliaria/public), 
+        // podría necesitar limpiar el prefijo. 
         // Asumiremos que el VirtualHost apunta a public/ o que gestionamos rutas relativas.
-        // Si estás accediendo como localhost/inmobiliaria/public/index.php, la URI será /inmobiliaria/public/
+        // Si está accediendo como localhost/inmobiliaria/public/index.php, la URI será /inmobiliaria/public/
         // Para este MVP, asumiremos que las rutas se definen completas o que ajustamos la base.
-        // NOTA: Si usas XAMPP en subcarpeta, la URI vendrá con '/inmobiliaria/public'.
+        // NOTA: Si se usa XAMPP en subcarpeta, la URI vendrá con '/inmobiliaria/public'.
         // Vamos a intentar detectar el script name para hacerlo dinámico o pedir configuración.
         
         // SOLUCIÓN ROBUSTA PARA SUBCARPETAS:

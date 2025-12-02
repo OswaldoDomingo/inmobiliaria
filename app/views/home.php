@@ -1,3 +1,6 @@
+<?php if (isset($mostrar_tarjeta) && $mostrar_tarjeta === true): ?>
+    <?php include __DIR__ . '/temporada/plantilla.php'; ?>
+<?php endif; ?>
 <!-- 2. Propiedades destacadas -->
 <section id="propiedades" class="py-5">
     <div class="container">
@@ -10,7 +13,7 @@
                 <div class="col-12 col-md-6 col-lg-3">
                     <article class="card propiedad-card h-100">
                         <img src="/assets/img/placeholedr.jpg"
-                             class="card-img-top" alt="Propiedad ejemplo">
+                            class="card-img-top" alt="Propiedad ejemplo">
                         <div class="card-body">
                             <h3 class="h6 card-title mb-1">Chalet en Valencia</h3>
                             <p class="card-text small mb-2">Zona Montcada · 120 m² · 3 hab</p>
