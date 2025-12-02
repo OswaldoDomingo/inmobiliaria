@@ -73,6 +73,7 @@ $router = new Router();
 
 // Ruta Raíz (Landing Page)
 use App\Controllers\HomeController;
+use App\Controllers\LegalController;
 
 $router->get('/', [HomeController::class, 'index']);
 
@@ -80,6 +81,13 @@ $router->get('/', [HomeController::class, 'index']);
 $router->get('/prueba', function () {
     echo "<h1>¡El Router funciona!</h1>";
 });
+
+// ===============================
+// RUTAS LEGALES
+// ===============================
+$router->get('/legal/aviso-legal', [LegalController::class, 'avisoLegal']);
+$router->get('/legal/privacidad', [LegalController::class, 'privacidad']);
+$router->get('/legal/cookies', [LegalController::class, 'cookies']);
 
 // ===============================
 // RUTAS DE TASACIÓN

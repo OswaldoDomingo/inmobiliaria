@@ -447,3 +447,23 @@ Se habilitó que **administradores y coordinadores** puedan asignar o reasignar 
 ### ?? Notas
 - El controlador impide que un comercial manipule el formulario para reasignar clientes ajenos.
 - Recomendado: test manual en producción tras limpiar caché de sesiones.
+
+## ✅ 2025-12-02
+
+**Tema:** Cumplimiento legal base (aviso legal, privacidad, cookies y banner RGPD)
+**Tipo de avance:** Legal / Frontend / UX
+
+### Resumen
+- Se ha creado el modulo legal en MVC con `LegalController` y vistas provisionales (`app/Views/legal/*`) accesibles desde `/legal/aviso-legal`, `/legal/privacidad` y `/legal/cookies`.
+- El footer se reorganizo para mostrar enlaces legales visibles y las redes oficiales debajo en formato horizontal.
+- Se anadio un banner de cookies fijo inferior con gestion de consentimiento en `localStorage` (aceptar/rechazar) y botones con colores corporativos.
+
+### Archivos clave creados/modificados
+- `app/Controllers/LegalController.php`
+- `app/Views/legal/{aviso_legal.php,privacidad.php,cookies.php}`
+- `public/index.php`
+- `app/views/layouts/footer.php`
+- `docs/avances.md`, `docs/memoria_proyecto.md`
+
+### Notas
+- Los textos legales son provisionales y se sustituiran por los definitivos tras la revision juridica.

@@ -115,6 +115,13 @@ Se ha implementado un sistema de carga de variables de entorno (`.env`) para sep
 *   **Errores detectados y resueltos:** Ajuste de la tabla `clientes` (faltaban `usuario_id`, `telefono`) que provocaba `Unknown column` al crear clientes; se corrigió el esquema y se añadió la migración completa.
 *   **Compatibilidad PHP 8:** Se normalizó el tipo de `user_id` (casteo a int en `ClienteController::index()`) para evitar excepciones de tipado en producción y se eliminó `E_STRICT` de `error_reporting`, usando `\PDOException` en el handler global para limpiar warnings.
 
+
+
+### 3.3.6. Cumplimiento normativo (RGPD y cookies)
+*   Paginas legales provisionales (aviso legal, privacidad, cookies) publicadas bajo `/legal/*` con controlador dedicado y vistas en `app/Views/legal/`, marcando que el contenido es temporal hasta validacion juridica.
+*   Footer reorganizado con enlaces legales visibles y las redes sociales oficiales en formato horizontal, debajo del bloque legal.
+*   Banner de cookies fijo en la parte inferior con botones de aceptar/rechazar; la preferencia se guarda en `localStorage` (`cookie_consent`) y se oculta el aviso tras la decision del usuario.
+
 ## 3.4. Manejo de Errores
 He implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.
 
