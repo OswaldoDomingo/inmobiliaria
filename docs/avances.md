@@ -433,18 +433,18 @@ Se ha mejorado la interfaz del Dashboard y la cabecera para mostrar información
 ### ?? Resumen
 Se habilitó que **administradores y coordinadores** puedan asignar o reasignar clientes a cualquier comercial, manteniendo a los comerciales limitados a su propia cartera.
 
-### ?? Cambios realizados
+### ✅ Cambios realizados
 - **Modelo `User`:** Nuevo `getComercialesActivos()` devuelve id/nombre de comerciales y coordinadores activos (no archivados) ordenados.
 - **`ClienteController`:** Carga la lista de comerciales en `create/edit` solo para roles con permiso; en `store/update` fuerza el `usuario_id` según rol (admin/coordinador toma el select, comercial se autoasigna o mantiene el asignado).
 - **Vistas `clientes/create` y `clientes/edit`:** Select condicional "Comercial Asignado" visible solo para admin/coordinador; en edición se marca el comercial actual.
 
-### ?? Archivos clave tocados
+### ✅ Archivos clave tocados
 - `app/Models/User.php`
 - `app/Controllers/ClienteController.php`
 - `app/Views/admin/clientes/create.php`
 - `app/Views/admin/clientes/edit.php`
 
-### ?? Notas
+### ✅ Notas
 - El controlador impide que un comercial manipule el formulario para reasignar clientes ajenos.
 - Recomendado: test manual en producción tras limpiar caché de sesiones.
 
@@ -467,3 +467,16 @@ Se habilitó que **administradores y coordinadores** puedan asignar o reasignar 
 
 ### Notas
 - Los textos legales son provisionales y se sustituiran por los definitivos tras la revision juridica.
+
+---
+
+## ✅ 2025-12-04
+
+**Tema:** Banner principal dinamico y popup estacional controlado por sesion  
+**Tipo de avance:** Frontend / UX / MVC
+
+### ✅ Resumen
+- Refactor del `HomeController` para centralizar variables de interfaz (hero y popup) respetando la separacion de responsabilidades.
+- Creacion de la carpeta `app/Views/partials/` para alojar vistas reutilizables y despliegue del hero.
+- Integracion de `Hero Section` con imagen aleatoria de Lorem Picsum y textos configurables desde el controlador.
+- Logica de sesion con `$_SESSION['tarjeta_vista']` para evitar que el popup navideno rebote en recargas sucesivas.

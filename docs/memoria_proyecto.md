@@ -122,6 +122,9 @@ Se ha implementado un sistema de carga de variables de entorno (`.env`) para sep
 *   Footer reorganizado con enlaces legales visibles y las redes sociales oficiales en formato horizontal, debajo del bloque legal.
 *   Banner de cookies fijo en la parte inferior con botones de aceptar/rechazar; la preferencia se guarda en `localStorage` (`cookie_consent`) y se oculta el aviso tras la decision del usuario.
 
+### 3.3.7. Gestion de Interfaz y UX
+Se ha optado por una arquitectura modular basada en vistas parciales ubicadas en `app/Views/partials/` para encapsular componentes reutilizables (por ejemplo, el banner principal). La visibilidad de cada elemento de interfaz se controla de forma estricta desde `HomeController` mediante banderas (`$showHero`, `$mostrar_tarjeta` y las variables asociadas al hero), manteniendo la separacion de responsabilidades propia del MVC: el controlador decide y la vista se limita a representar el contenido recibido.
+
 ## 3.4. Manejo de Errores
 He implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.
 
