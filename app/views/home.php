@@ -1,3 +1,7 @@
+<?php if (isset($showHero) && $showHero === true): ?>
+    <?php include __DIR__ . '/partials/hero.php'; ?>
+<?php endif; ?>
+
 <?php if (isset($mostrar_tarjeta) && $mostrar_tarjeta === true): ?>
     <?php include __DIR__ . '/temporada/plantilla.php'; ?>
 <?php endif; ?>
