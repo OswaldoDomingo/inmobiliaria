@@ -5,7 +5,7 @@ namespace App\Controllers;
 
 /**
  * Controlador Principal
- * Gestiona la página de inicio.
+ * Gestiona la pÃ¡gina de inicio.
  */
 class HomeController
 {
@@ -15,13 +15,18 @@ class HomeController
      */
     public function index(): void
     {
-        $showHero = true; // Variable para mostrar el hero en el header
-        // --- LÓGICA DE LA TARJETA ---
+        // Variables del banner principal
+        $showHero = true;
+        $heroTitle = "Encuentra tu hogar ideal";
+        $heroSubTitle = "Miles de propiedades te esperan en Valencia";
+        $heroImage = "https://picsum.photos/1920/600";
+        // --- LÃ LOGICA DE LA TARJETA ---
 
         // Preguntamos: ¿Existe la variable 'tarjeta_vista' en la sesión?
-        // El símbolo '!' significa NO.
+        // El sÃ­mbolo '!' significa NO.
         // Traducción: "Si NO está definida la variable 'tarjeta_vista'..."
-        $mostrar_tarjeta = true; // Variable para mostrar la tarjeta de temporada
+
+        $mostrar_tarjeta = false; // Variable para mostrar la tarjeta de temporada o no
         if (!isset($_SESSION['tarjeta_vista'])) {
         // 2. IMPORTANTE: Ponemos el "sello" inmediatamente para la próxima vez
             $_SESSION['tarjeta_vista'] = true;
