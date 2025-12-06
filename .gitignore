@@ -5,7 +5,6 @@ Thumbs.db
 
 # Configuración local
 .env
-config/*.php
 
 # Archivos temporales y de caché
 *.log
@@ -61,3 +60,5 @@ vendor/
 
 # Logs de Auditoría
 logs/*.log
+.clinerules
+.cursorrules

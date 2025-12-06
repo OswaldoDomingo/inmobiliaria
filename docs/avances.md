@@ -475,6 +475,22 @@ Se habilitó que **administradores y coordinadores** puedan asignar o reasignar 
 **Tema:** Banner principal dinamico y popup estacional controlado por sesion  
 **Tipo de avance:** Frontend / UX / MVC
 
+## [2025-12-06] - Seguridad: Protección de Credenciales de Base de Datos
+
+### ¿Qué se ha hecho?
+Se ha blindado la configuración de conexión a la base de datos eliminando los valores por defecto inseguros ("root" y contraseña vacía).
+
+### ¿Cómo se ha implementado?
+1.  **Modificación de `config/config.php`:** Se ha refactorizado el array de configuración.
+2.  **Eliminación de fallbacks:** Se han retirado los operadores ternarios que asignaban credenciales predeterminadas si fallaba la lectura del entorno.
+3.  **Dependencia estricta:** Ahora el sistema obliga a la lectura del archivo `.env`.
+
+### Justificación (Para la memoria/defensa)
+Cumplimiento de normativas de seguridad básicas (OWASP). Se evita que, ante un error de despliegue o fallo en la carga de variables de entorno, la aplicación intente conectar con credenciales administrativas estándar, lo que reduciría la superficie de ataque.
+
+### Archivos afectados
+- `config/config.php`
+
 ### ✅ Resumen
 - Refactor del `HomeController` para centralizar variables de interfaz (hero y popup) respetando la separacion de responsabilidades.
 - Creacion de la carpeta `app/Views/partials/` para alojar vistas reutilizables y despliegue del hero.
