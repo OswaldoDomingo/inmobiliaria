@@ -19,7 +19,7 @@ define('VIEW', APP . '/views');
 require_once APP . '/Autoloader.php';
 \App\Autoloader::register(ROOT);
 
-Env::load(ROOT . '/.env');
+Env::load(CONFIG . '/.env');
 
 // ===============================
 // 2. Cargar configuración centralizada
