@@ -481,45 +481,31 @@ Se habilitó que **administradores y coordinadores** puedan asignar o reasignar 
 - Integracion de `Hero Section` con imagen aleatoria de Lorem Picsum y textos configurables desde el controlador.
 - Logica de sesion con `$_SESSION['tarjeta_vista']` para evitar que el popup navideno rebote en recargas sucesivas.
 
-## [2025-12-06] - Seguridad: Protección de Credenciales de Base de Datos
+## 🗓️ 2025-12-06 (Seguridad y Arquitectura)
 
-### ¿Qué se ha hecho?
-Se ha blindado la configuración de conexión a la base de datos eliminando los valores por defecto inseguros ("root" y contraseña vacía).
-
-### ¿Cómo se ha implementado?
-1.  **Modificación de `config/config.php`:** Se ha refactorizado el array de configuración.
-2.  **Eliminación de fallbacks:** Se han retirado los operadores ternarios que asignaban credenciales predeterminadas si fallaba la lectura del entorno.
-3.  **Dependencia estricta:** Ahora el sistema obliga a la lectura del archivo `.env`.
-
-### Justificación (Para la memoria/defensa)
-Cumplimiento de normativas de seguridad básicas (OWASP). Se evita que, ante un error de despliegue o fallo en la carga de variables de entorno, la aplicación intente conectar con credenciales administrativas estándar, lo que reduciría la superficie de ataque.
-
-### Archivos afectados
-- `config/config.php`
-
-## 🗓️ 2025-12-06 (Refactorización y Seguridad Avanzada)
-
-**Tema:** Refactorización de Arquitectura y Hardening del Servidor
+**Tema:** Hardening del servidor, Refactorización de Configuración y Limpieza.
 **Tipo de avance:** Backend / DevOps / Seguridad
 
 ### 🚀 Resumen
-Se ha realizado una refactorización profunda del sistema de configuración para eliminar cualquier dependencia de credenciales en el código y asegurar el entorno de producción.
+Se ha realizado una refactorización integral de la capa de configuración y seguridad del proyecto. El objetivo ha sido eliminar credenciales del código fuente, proteger los archivos sensibles y limpiar la estructura de directorios, centralizando la configuración en la carpeta `config/`.
 
 ### 🔧 Cambios Realizados
 
-#### 1. Sistema de Configuración (App/Core/Env.php)
-*   **Implementación Nativa:** Se ha desarrollado la clase `App\Core\Env` para cargar variables de entorno desde archivos `.env` sin depender de librerías externas (Composer), utilizando funciones nativas de PHP (`fopen`, `putenv`).
-*   **Configuración Agnóstica:** El archivo `config/config.php` ha sido reescrito para no contener ninguna credencial ni lógica por dominio. Ahora carga dinámicamente todo desde `$_ENV` o `getenv()`.
+#### 1. Sistema de Configuración y Entorno
+* **Implementación Nativa (`App\Core\Env`):** Se ha desarrollado un cargador de variables de entorno propio (sin dependencias externas) que utiliza funciones nativas de PHP.
+* **Centralización:** Se ha movido el archivo `.env` desde la raíz a la carpeta `config/` para mantener el directorio raíz limpio.
+* **Refactorización de `config.php`:** Se han eliminado los valores por defecto inseguros (fallbacks como "root"). Ahora el sistema obliga a la lectura del archivo `.env`, cumpliendo con normativas de seguridad OWASP.
+* **Bootstrap (`index.php`):** Actualización de la ruta de carga en el punto de entrada para apuntar a `CONFIG . '/.env'`.
 
-#### 2. Seguridad del Servidor (.htaccess)
-*   **Bloqueo de Archivos Ocultos:** Se ha configurado Apache para denegar estrictamente el acceso web a cualquier archivo o directorio que comience por punto (ej. `.env`, `.git`), protegiendo la información sensible.
-*   **Excepción SSL:** Se ha mantenido acceso a `.well-known` para permitir la renovación de certificados Let's Encrypt.
+#### 2. Seguridad del Servidor (Hardening)
+* **Protección Global (`.htaccess` en raíz):** Configuración para bloquear estrictamente el acceso web a archivos ocultos (que empiezan por punto, como `.git` o `.env`), manteniendo la excepción para certificados SSL (`.well-known`).
+* **Protección Específica (`.htaccess` en `config/`):** Se ha creado un archivo con la directiva `Deny from all` dentro de la carpeta `config/` para blindar totalmente el acceso a los archivos de configuración.
 
-#### 3. Limpieza de Código
-*   Eliminación de cualquier contraseña o usuario "fallback" en el código fuente.
-*   Confirmación de exclusión de `.env` en `.gitignore`.
+#### 3. Correcciones Adicionales
+* **Enrutamiento:** Ajuste en la expresión regular del Router para permitir URLs con barras y parámetros complejos.
+* **Git:** Verificación de que el archivo `.env` está correctamente ignorado en `.gitignore`.
 
 ### 📝 Archivos clave modificados
-*   `app/Core/Env.php`
-*   `config/config.php`
-*   `.htaccess`
+* `app/Core/Env.php` (Nuevo)
+* `config/config.php`
+* `public/index.php`
