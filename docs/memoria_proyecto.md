@@ -72,7 +72,11 @@ El esquema relacional se ha diseñado para garantizar la integridad de los datos
 # 3. Desarrollo del proyecto
 
 ## 3.1. Configuración del Entorno
-Se ha implementado un sistema de carga de variables de entorno (`.env`) para separar la configuración sensible (credenciales de BD, SMTP) del código fuente. La clase `App\Core\Config` centraliza el acceso a estas variables.
+Se ha implementado un sistema de carga de variables de entorno (`.env`) para separar la configuración sensible (credenciales de BD, SMTP) del código fuente.
+
+Dado que no se utilizan frameworks ni gestores de dependencias como Composer, he desarrollado una solución propia y nativa:
+*   **Clase `App\Core\Env`:** Un parser ligero que lee el archivo `.env` línea por línea, procesa las claves y valores, y los inyecta tanto en `$_ENV` como en el entorno del sistema mediante `putenv()`.
+*   **Agnosticismo:** El archivo `config.php` no contiene credenciales "hardcoded", sino que depende exclusivamente de la existencia de estas variables, garantizando que el código sea seguro y portable entre entornos (local/producción).
 
 ## 3.2. Núcleo (Core)
 *   **Router:** Se desarrolló un enrutador personalizado que despacha las peticiones a los controladores correspondientes basándose en la URI.
@@ -84,6 +88,7 @@ Se ha implementado un sistema de carga de variables de entorno (`.env`) para sep
 *   **Login Seguro:** Verificación de hash de contraseñas (`password_verify`).
 *   **Gestión de Sesiones:** Regeneración de ID de sesión tras login para prevenir fijación de sesión. Cookies con flags `HttpOnly` y `Secure`.
 *   **Control de Acceso (RBAC):** Middleware en los constructores de los controladores para restringir el acceso según el rol del usuario.
+*   **Seguridad del Servidor (.htaccess):** Implementación de reglas de reescritura en Apache para bloquear estrictamente el acceso público a archivos de configuración y control de versiones (como `.env`, `.git`, `.htaccess`), devolviendo un error 403 Forbidden ante cualquier intento de lectura externa.
 
 ### 3.3.2. Herramienta de Tasación
 *   Formulario interactivo para la valoración de inmuebles.
@@ -155,5 +160,3 @@ El desarrollo de este proyecto ha permitido consolidar conocimientos avanzados d
 *   **PSR Standards (PHP-FIG):** https://www.php-fig.org/psr/
 *   **OWASP Top 10:** https://owasp.org/www-project-top-ten/
 *   **Bootstrap 5 Docs:** https://getbootstrap.com/docs/5.0/getting-started/introduction/
-
-

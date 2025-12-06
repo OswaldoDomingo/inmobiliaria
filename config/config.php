@@ -10,22 +10,22 @@
  *  SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
  */
 
-$env = getenv('APP_ENV') ?: 'local';
+$env = $_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: 'local';
 
-$dbHost = getenv('DB_HOST') ?: 'localhost';
-$dbName = getenv('DB_NAME') ?: 'inmobiliaria_db';
-$dbUser = getenv('DB_USER') ?: '';
-$dbPass = getenv('DB_PASS') ?: '';
+$dbHost = $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost';
+$dbName = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?: 'inmobiliaria_db';
+$dbUser = $_ENV['DB_USER'] ?? getenv('DB_USER') ?: '';
+$dbPass = $_ENV['DB_PASS'] ?? getenv('DB_PASS') ?: '';
 
-$baseUrl = getenv('APP_BASE_URL') ?: 'http://localhost';
+$baseUrl = $_ENV['APP_BASE_URL'] ?? getenv('APP_BASE_URL') ?: 'http://localhost';
 
-$smtpHost = getenv('SMTP_HOST') ?: '';
-$smtpPort = (int)(getenv('SMTP_PORT') ?: 587);
-$smtpUser = getenv('SMTP_USER') ?: '';
-$smtpPass = getenv('SMTP_PASS') ?: '';
+$smtpHost = $_ENV['SMTP_HOST'] ?? getenv('SMTP_HOST') ?: '';
+$smtpPort = (int)($_ENV['SMTP_PORT'] ?? getenv('SMTP_PORT') ?: 587);
+$smtpUser = $_ENV['SMTP_USER'] ?? getenv('SMTP_USER') ?: '';
+$smtpPass = $_ENV['SMTP_PASS'] ?? getenv('SMTP_PASS') ?: '';
 
-$agencyEmail = getenv('LEAD_AGENCY_EMAIL') ?: '';
-$noReplyEmail = getenv('NOREPLY_EMAIL') ?: $agencyEmail;
+$agencyEmail = $_ENV['LEAD_AGENCY_EMAIL'] ?? getenv('LEAD_AGENCY_EMAIL') ?: '';
+$noReplyEmail = $_ENV['NOREPLY_EMAIL'] ?? getenv('NOREPLY_EMAIL') ?: $agencyEmail;
 
 return [
     'env' => $env,

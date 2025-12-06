@@ -475,6 +475,12 @@ Se habilitó que **administradores y coordinadores** puedan asignar o reasignar 
 **Tema:** Banner principal dinamico y popup estacional controlado por sesion  
 **Tipo de avance:** Frontend / UX / MVC
 
+### ✅ Resumen
+- Refactor del `HomeController` para centralizar variables de interfaz (hero y popup) respetando la separacion de responsabilidades.
+- Creacion de la carpeta `app/Views/partials/` para alojar vistas reutilizables y despliegue del hero.
+- Integracion de `Hero Section` con imagen aleatoria de Lorem Picsum y textos configurables desde el controlador.
+- Logica de sesion con `$_SESSION['tarjeta_vista']` para evitar que el popup navideno rebote en recargas sucesivas.
+
 ## [2025-12-06] - Seguridad: Protección de Credenciales de Base de Datos
 
 ### ¿Qué se ha hecho?
@@ -491,8 +497,29 @@ Cumplimiento de normativas de seguridad básicas (OWASP). Se evita que, ante un 
 ### Archivos afectados
 - `config/config.php`
 
-### ✅ Resumen
-- Refactor del `HomeController` para centralizar variables de interfaz (hero y popup) respetando la separacion de responsabilidades.
-- Creacion de la carpeta `app/Views/partials/` para alojar vistas reutilizables y despliegue del hero.
-- Integracion de `Hero Section` con imagen aleatoria de Lorem Picsum y textos configurables desde el controlador.
-- Logica de sesion con `$_SESSION['tarjeta_vista']` para evitar que el popup navideno rebote en recargas sucesivas.
+## 🗓️ 2025-12-06 (Refactorización y Seguridad Avanzada)
+
+**Tema:** Refactorización de Arquitectura y Hardening del Servidor
+**Tipo de avance:** Backend / DevOps / Seguridad
+
+### 🚀 Resumen
+Se ha realizado una refactorización profunda del sistema de configuración para eliminar cualquier dependencia de credenciales en el código y asegurar el entorno de producción.
+
+### 🔧 Cambios Realizados
+
+#### 1. Sistema de Configuración (App/Core/Env.php)
+*   **Implementación Nativa:** Se ha desarrollado la clase `App\Core\Env` para cargar variables de entorno desde archivos `.env` sin depender de librerías externas (Composer), utilizando funciones nativas de PHP (`fopen`, `putenv`).
+*   **Configuración Agnóstica:** El archivo `config/config.php` ha sido reescrito para no contener ninguna credencial ni lógica por dominio. Ahora carga dinámicamente todo desde `$_ENV` o `getenv()`.
+
+#### 2. Seguridad del Servidor (.htaccess)
+*   **Bloqueo de Archivos Ocultos:** Se ha configurado Apache para denegar estrictamente el acceso web a cualquier archivo o directorio que comience por punto (ej. `.env`, `.git`), protegiendo la información sensible.
+*   **Excepción SSL:** Se ha mantenido acceso a `.well-known` para permitir la renovación de certificados Let's Encrypt.
+
+#### 3. Limpieza de Código
+*   Eliminación de cualquier contraseña o usuario "fallback" en el código fuente.
+*   Confirmación de exclusión de `.env` en `.gitignore`.
+
+### 📝 Archivos clave modificados
+*   `app/Core/Env.php`
+*   `config/config.php`
+*   `.htaccess`

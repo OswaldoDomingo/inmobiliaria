@@ -1,14 +1,24 @@
+# 1. SEGURIDAD: Bloquear acceso a archivos ocultos (inicia con punto)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# 2. EXCEPCIÓN: Permitir validación de SSL
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^\.well-known/ - [L,NC]
+</IfModule>
+
+# 3. ENRUTAMIENTO
 <IfModule mod_rewrite.c>
     Options -Multiviews
     RewriteEngine On
     RewriteBase /
 
-    # Si la carpeta o archivo solicitado existe, sírvelo directamente (imágenes, css, js)
+    # Si el archivo/carpeta existe físicamente (css, js, imagenes), sírvelo
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
 
-    # Si no existe, redirige todo a index.php
-    # RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
-    RewriteRule ^([a-zA-Z0-9-]+)$ index.php?url=$1 [QSA,L]
-    
+    # Si no existe, manda TODO a index.php (Permitiendo barras /)
+    RewriteRule ^(.+)$ index.php?url=$1 [QSA,L]
 </IfModule>
