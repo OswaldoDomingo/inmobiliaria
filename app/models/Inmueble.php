@@ -138,13 +138,13 @@ class Inmueble
         $sql = "INSERT INTO inmuebles (
                     ref, direccion, localidad, provincia, cp,
                     tipo, operacion, precio,
-                    superficie, habitaciones, banos, descripcion,
+                    superficie, habitaciones, banos, descripcion, imagen,
                     estado, activo, archivado,
                     propietario_id, comercial_id
                 ) VALUES (
                     :ref, :direccion, :localidad, :provincia, :cp,
                     :tipo, :operacion, :precio,
-                    :superficie, :habitaciones, :banos, :descripcion,
+                    :superficie, :habitaciones, :banos, :descripcion, :imagen,
                     :estado, :activo, :archivado,
                     :propietario_id, :comercial_id
                 )";
@@ -164,6 +164,7 @@ class Inmueble
             ':habitaciones'   => $data['habitaciones'] ?? null,
             ':banos'          => $data['banos'] ?? null,
             ':descripcion'    => $data['descripcion'] ?? null,
+            ':imagen'         => $data['imagen'] ?? null,
             ':estado'         => $data['estado'],
             ':activo'         => (int)($data['activo'] ?? 1),
             ':archivado'      => (int)($data['archivado'] ?? 0),
@@ -188,6 +189,7 @@ class Inmueble
                     habitaciones = :habitaciones,
                     banos = :banos,
                     descripcion = :descripcion,
+                    imagen = :imagen,
                     estado = :estado,
                     activo = :activo,
                     archivado = :archivado,
@@ -211,6 +213,7 @@ class Inmueble
             ':habitaciones'   => $data['habitaciones'] ?? null,
             ':banos'          => $data['banos'] ?? null,
             ':descripcion'    => $data['descripcion'] ?? null,
+            ':imagen'         => $data['imagen'] ?? null,
             ':estado'         => $data['estado'],
             ':activo'         => (int)($data['activo'] ?? 1),
             ':archivado'      => (int)($data['archivado'] ?? 0),
