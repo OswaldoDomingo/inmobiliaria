@@ -596,6 +596,15 @@ Además, se ha ejecutado un conjunto de pruebas formales recogidas en `docs/veri
 - La protección frente a intentos de open redirect utilizando `?return_to=http://google.com`, confirmando que el sistema realiza fallback seguro al listado `/admin/inmuebles` (Prueba 8).
 
 Todas las pruebas han sido superadas y el entorno ha quedado limpio tras eliminar el script temporal de ayuda (`setup_tests.php`).
+#### Navegación contextual en el alta de inmuebles (`return_to`)
+
+- Implementado patrón de navegación contextual en el **alta de inmuebles**:
+  - Si el alta se inicia desde la **ficha de un cliente** (`/admin/clientes/editar?id=X`), tras crear el inmueble la aplicación regresa automáticamente a esa ficha añadiendo `msg=created` a la URL.
+  - Si el alta se inicia desde el **listado global de inmuebles** (`/admin/inmuebles`), se mantiene el flujo clásico: tras guardar se vuelve al listado con `msg=created`.
+  - Se reutilizan los helpers existentes `validateReturnTo()` y `addQueryParam()` para:
+    - Validar que `return_to` es siempre una ruta interna segura (evitando redirecciones abiertas).
+    - Construir la query string sin romper parámetros previos, manteniendo URLs limpias y consistentes.
+
 #### 5. Imagen principal de inmuebles (subida segura de archivos)
 
 * **Nueva columna `imagen` en `inmuebles`:**  
