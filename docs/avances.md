@@ -589,10 +589,60 @@ Hasta ahora, al editar un inmueble desde la ficha de un cliente, el botón **«V
   - No se pierde ni el estado del formulario ni el `return_to`.
 - Intentos de manipular manualmente el `return_to` con URLs externas:
   - El sistema ignora esas rutas y hace fallback a `/admin/inmuebles`.
-  
+
 Además, se ha ejecutado un conjunto de pruebas formales recogidas en `docs/verificacion_return_path.md`, donde se han validado:
 - El comportamiento de los botones «Volver» y «Guardar» desde la ficha de cliente (Pruebas 1 y 2).
 - La recarga del formulario con errores sin perder el `return_to` ni el contexto (Prueba 3).
 - La protección frente a intentos de open redirect utilizando `?return_to=http://google.com`, confirmando que el sistema realiza fallback seguro al listado `/admin/inmuebles` (Prueba 8).
 
 Todas las pruebas han sido superadas y el entorno ha quedado limpio tras eliminar el script temporal de ayuda (`setup_tests.php`).
+#### 5. Imagen principal de inmuebles (subida segura de archivos)
+
+* **Nueva columna `imagen` en `inmuebles`:**  
+  Se crea la migración `04_add_imagen_to_inmuebles.sql` para añadir la columna opcional `imagen VARCHAR(255) NULL` que almacena el nombre del archivo de la foto principal del inmueble.
+
+* **Lógica de subida y validación en `InmuebleController`:**  
+  * Se implementa el método privado `handleImageUpload()` para gestionar la subida de la imagen de forma segura.
+  * Validaciones aplicadas:
+    * Tamaño máximo: **2 MB**.
+    * Tipo MIME real comprobado con `finfo_file()` (no se confía en `$_FILES['type']`).
+    * Solo se aceptan: `image/jpeg`, `image/png`, `image/webp`, `image/gif`.
+    * Verificación adicional con `getimagesize()` para asegurarse de que el archivo es una imagen válida.
+    * Límite de dimensiones: **1920x1920 px** (se rechazan imágenes enormes tipo 4K).
+  * Se genera un nombre de archivo único con el patrón: `inmueble_<uniqid>.ext`.
+  * Se guarda el fichero en `/public/uploads/inmuebles`, creando el directorio si no existe y añadiendo un `.htaccess` que:
+    * Desactiva la ejecución de PHP.
+    * Deshabilita el listado de directorio.
+
+* **Integración en alta, edición y borrado:**
+  * En `store()`:
+    * Si se sube una imagen válida, se procesa con `handleImageUpload()` y se guarda el nombre en `$data['imagen']`.
+    * Si no se sube imagen, el campo queda en `NULL` (inmueble sin foto principal).
+  * En `update()`:
+    * Si se sube una nueva imagen válida, se guarda el nuevo archivo y se **borra del disco** la imagen anterior asociada al inmueble.
+    * Si no se sube nueva imagen, se mantiene el valor actual de `imagen`.
+  * En `delete()`:
+    * Antes de eliminar el registro se comprueba si existe `imagen` y, en caso afirmativo, se elimina el archivo correspondiente del directorio `/public/uploads/inmuebles`.
+
+* **Cambios en vistas del backoffice:**
+  * `app/Views/admin/inmuebles/form.php`:
+    * Se añade `enctype="multipart/form-data"` al `<form>`.
+    * Se incorpora un campo `input type="file" name="imagen"` con texto de ayuda sobre formatos, tamaño y dimensiones.
+    * En modo edición, se muestra una **miniatura de la imagen actual** y se informa de que subir una nueva la reemplazará.
+    * Se integran los mensajes de error del campo `imagen` en el sistema de validación ya existente.
+  * `app/Views/admin/inmuebles/index.php`:
+    * Se añade una columna **“Imagen”** al listado.
+    * Si el inmueble tiene imagen, se muestra una miniatura de **60x60px** con `object-fit: cover`.
+    * Si no tiene imagen, se muestra un placeholder (`/assets/img/no-image.png`) con opacidad reducida.
+
+* **Pruebas manuales realizadas:**
+  * Alta de inmueble **con imagen válida** → miniatura visible en listado, archivo guardado en `/public/uploads/inmuebles` y nombre registrado en BD.
+  * Alta de inmueble **sin imagen** → alta correcta, miniatura sustituida por placeholder y columna `imagen` en `NULL`.
+  * Edición sin cambiar imagen → solo se actualizan los campos editados, se mantiene el mismo archivo.
+  * Edición cambiando imagen → la nueva imagen se guarda y la anterior se borra del disco.
+  * Borrado de inmueble con imagen → se elimina el registro y también el archivo físico.
+  * Casos de error (tipo no permitido, tamaño > 2 MB o dimensiones excesivas) → el formulario muestra un mensaje de “Error al procesar la imagen” y no se crea/actualiza el inmueble.
+
+* **Incidencia menor (PHP 8.5):**
+  * Durante las pruebas apareció un aviso `Deprecated: Function finfo_close() is deprecated since 8.5`.  
+    Se ajustó el código eliminando la llamada explícita a `finfo_close()`, ya que los objetos `finfo` se liberan automáticamente en versiones recientes de PHP.

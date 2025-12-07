@@ -212,6 +212,78 @@ Esta mejora se ha probado con los tres perfiles definidos en la aplicación (adm
 - Manipulaciones manuales del parámetro `return_to` con URLs externas o rutas no válidas son neutralizadas por `validateReturnTo()`, que fuerza el uso del *fallback* seguro.
 
 Con este cambio se mejora de forma significativa la experiencia de usuario, se respeta el flujo de trabajo real de una agencia inmobiliaria (operar siempre “dentro” de la ficha de cliente) y se mantiene al mismo tiempo un nivel adecuado de seguridad frente a redirecciones abiertas y manipulación de URLs. 
+### 3.3.5.4. Soporte de imagen principal de inmuebles (subida segura)
+
+Una vez resuelto el bloqueo de routing y estabilizado el CRUD del módulo **Inmuebles**, se decidió incorporar una mejora funcional y visual clave: permitir que cada inmueble tenga una **imagen principal** opcional, gestionada desde el backoffice y visible en el listado y en la ficha.
+
+#### Diseño de la solución
+
+El objetivo era cumplir dos requisitos:
+
+1. **No romper inmuebles existentes** (compatibilidad hacia atrás).
+2. **Aplicar buenas prácticas de seguridad en subida de ficheros**, alineadas con el resto de la arquitectura del proyecto.
+
+Las decisiones principales fueron:
+
+* Añadir una columna opcional `imagen` a la tabla `inmuebles` mediante la migración `04_add_imagen_to_inmuebles.sql`, almacenando únicamente el **nombre del archivo** (no la ruta completa).  
+* Considerar la imagen como un campo **no obligatorio**: si un inmueble no tiene imagen, la interfaz utiliza un **placeholder** (`no-image.png`) y la base de datos mantiene `imagen = NULL`.  
+* Reutilizar el patrón ya empleado en las fotos de usuario (`foto_perfil`), pero adaptado a un directorio específico para inmuebles: `/public/uploads/inmuebles`.
+
+#### Lógica de subida y validación
+
+Para evitar vulnerabilidades típicas en sistemas de subida de archivos (ejecución de scripts, abuso de tamaño, imágenes malformadas, etc.), se implementó un método privado `handleImageUpload()` en el controlador de inmuebles. Este método:
+
+* **Valida el origen del archivo** con `move_uploaded_file()`, asegurando que proviene de una petición `POST` multipart/form-data.
+* **Comprueba el tamaño máximo** (2 MB) para evitar consumos excesivos de disco y de memoria.
+* **Detecta el tipo MIME real** con `finfo_file()` y no con los datos proporcionados por el navegador (cabeceras manipulables). Solo se admiten `image/jpeg`, `image/png`, `image/webp` y `image/gif`.
+* **Verifica que el archivo es una imagen** usando `getimagesize()`, que además proporciona las dimensiones.
+* **Impone un límite de dimensiones** (máximo 1920x1920 píxeles) como compromiso entre calidad visual y rendimiento.
+* **Genera un nombre único y seguro** (`inmueble_<uniqid>.ext`) para evitar colisiones y ataques de path traversal.
+* **Crea el directorio de subida si no existe** (`/public/uploads/inmuebles`) y añade un archivo `.htaccess` que:
+  * desactiva la ejecución del motor PHP dentro de ese directorio,
+  * deshabilita el listado de directorios.
+
+En caso de fallo en cualquiera de estas validaciones, el método devuelve `null` y el controlador muestra un mensaje genérico de error en la imagen, manteniendo el resto de datos del formulario para no penalizar la experiencia del usuario.
+
+#### Integración en el ciclo de vida del inmueble
+
+La columna `imagen` se integra en las operaciones principales del módulo:
+
+* **Alta (`store`)**  
+  Si el usuario adjunta una imagen válida, se procesa y se guarda el nombre del archivo en `$data['imagen']` antes de invocar al modelo. Si no se adjunta nada, el campo se deja en `NULL` y el inmueble se considera “sin foto principal”.
+
+* **Edición (`update`)**  
+  * Si se sube una nueva imagen válida, se guarda el nuevo archivo, se actualiza la columna `imagen` y se elimina del disco la imagen anterior asociada al inmueble, evitando archivos huérfanos.
+  * Si no se adjunta nueva imagen, se mantiene el valor existente de `imagen`, de forma transparente para el usuario.
+
+* **Borrado (`delete`)**  
+  Antes de eliminar el registro de la tabla `inmuebles`, el controlador recupera el nombre de la imagen asociada (si existe) y borra el archivo físico del directorio de uploads. De este modo, la base de datos y el sistema de ficheros se mantienen coherentes.
+
+#### Cambios en las vistas y experiencia de usuario
+
+En el formulario de inmuebles del área de administración se han aplicado los siguientes cambios:
+
+* Se ha añadido `enctype="multipart/form-data"` al formulario para permitir el envío de archivos.
+* Se incorpora un campo de tipo `file` para seleccionar la imagen, junto con ayuda textual sobre formatos permitidos, tamaño máximo y dimensiones recomendadas.
+* En modo edición, se muestra una **miniatura de la imagen actual** y un mensaje informativo indicando que subir una nueva imagen reemplazará a la existente.
+
+En el listado de inmuebles se añade una columna **Imagen** que muestra:
+
+* Una miniatura de 60x60 píxeles (con `object-fit: cover`) cuando el inmueble tiene imagen principal.
+* Un icono genérico (`no-image.png`) con menor opacidad cuando no hay imagen asociada, para mantener la coherencia visual sin obligar al usuario a subir fotos en todas las altas.
+
+Esta mejora acerca el módulo a un caso de uso real de una inmobiliaria, donde la imagen de la propiedad es un elemento clave tanto para el trabajo del equipo comercial como para la web pública.
+
+#### Pruebas y lecciones aprendidas
+
+Se han realizado pruebas manuales con diferentes escenarios:
+
+* Alta y edición de inmuebles con y sin imagen.
+* Sustitución de imagen y verificación del borrado del archivo anterior.
+* Intento de subida de ficheros no válidos (formatos incorrectos, tamaño excesivo, imágenes demasiado grandes).
+* Borrado de inmuebles con imagen para comprobar la limpieza del sistema de ficheros.
+
+Durante estas pruebas apareció una advertencia deprecada en PHP 8.5 relacionada con `finfo_close()`, que se solucionó eliminando la llamada explícita, ya que los objetos `finfo` se liberan automáticamente en versiones recientes del intérprete. Esta incidencia ha servido para ajustar el código a las nuevas versiones de PHP y mantener la compatibilidad futura.
 
 ### 3.3.6. Cumplimiento normativo (RGPD y cookies)
 *   Paginas legales provisionales (aviso legal, privacidad, cookies) publicadas bajo `/legal/*` con controlador dedicado y vistas en `app/Views/legal/`, marcando que el contenido es temporal hasta validacion juridica.
