@@ -64,3 +64,5 @@ logs/*.log
 .cursorrules
 
 tests/
+
+presentacion_tribunal.md
