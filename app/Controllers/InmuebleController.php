@@ -73,6 +73,14 @@ final class InmuebleController
     public function store(): void
     {
         $this->ensurePost();
+
+        // 🔍 DETECCIÓN DE POST_MAX_SIZE EXCEDIDO
+        // Si es POST, tiene contenido (Content-Length > 0) pero $_POST está vacío,
+        // significa que PHP descartó los datos por exceder post_max_size.
+        if (empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+            $this->redirect('/admin/inmuebles?error=post_max_size');
+        }
+
         if (!$this->csrfValidate($_POST['csrf_token'] ?? '')) {
             $this->redirect('/admin/inmuebles?error=csrf');
         }
@@ -186,6 +194,12 @@ final class InmuebleController
     public function update(): void
     {
         $this->ensurePost();
+
+        // 🔍 DETECCIÓN DE POST_MAX_SIZE EXCEDIDO
+        if (empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+            $this->redirect('/admin/inmuebles?error=post_max_size');
+        }
+
         if (!$this->csrfValidate($_POST['csrf_token'] ?? '')) {
             $this->redirect('/admin/inmuebles?error=csrf');
         }
