@@ -38,6 +38,10 @@ if ($mode === 'create' && !empty($propietarioPre)) {
     $title = "Nuevo inmueble para " . e($nombreProp);
 }
 
+// Preparar return_to
+$returnTo = $returnTo ?? null;
+$returnUrl = $returnTo ?: '/admin/inmuebles';
+
 require VIEW . '/layouts/header.php';
 ?>
 
@@ -47,7 +51,7 @@ require VIEW . '/layouts/header.php';
             
             <!-- Encabezado -->
             <div class="d-flex align-items-center mb-4">
-                <a href="/admin/inmuebles" class="btn btn-outline-secondary me-3">
+                <a href="<?= e($returnUrl) ?>" class="btn btn-outline-secondary me-3">
                     <i class="bi bi-arrow-left"></i> Volver
                 </a>
                 <h1 class="h3 mb-0"><?= e($title) ?></h1>
@@ -71,6 +75,9 @@ require VIEW . '/layouts/header.php';
                         <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
                         <?php if ($mode === 'edit'): ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
+                        <?php endif; ?>
+                        <?php if ($returnTo): ?>
+                            <input type="hidden" name="return_to" value="<?= e($returnTo) ?>">
                         <?php endif; ?>
 
                         <!-- Sección: Propietario y Comercial -->
@@ -241,7 +248,7 @@ require VIEW . '/layouts/header.php';
                         </div>
 
                         <div class="col-12 mt-4 d-grid gap-2 d-md-flex justify-content-md-end">
-                             <a href="/admin/inmuebles" class="btn btn-outline-secondary me-md-2">Cancelar</a>
+                             <a href="<?= e($returnUrl) ?>" class="btn btn-outline-secondary me-md-2">Cancelar</a>
                              <button type="submit" class="btn btn-primary px-4">Guardar Inmueble</button>
                         </div>
 

@@ -132,7 +132,11 @@
                                                 </span>
                                             </td>
                                             <td class="text-end">
-                                                <a href="/admin/inmuebles/editar?id=<?= $inm['id_inmueble'] ?>" class="btn btn-sm btn-outline-primary">
+                                                <?php 
+                                                    $returnPath = '/admin/clientes/editar?id=' . (int)$cliente->id_cliente;
+                                                    $editLink = '/admin/inmuebles/editar?id=' . $inm['id_inmueble'] . '&return_to=' . urlencode($returnPath);
+                                                ?>
+                                                <a href="<?= htmlspecialchars($editLink) ?>" class="btn btn-sm btn-outline-primary">
                                                     Editar
                                                 </a>
                                             </td>

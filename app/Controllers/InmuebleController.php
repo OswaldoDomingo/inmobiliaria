@@ -128,6 +128,9 @@ final class InmuebleController
             $this->redirect('/admin/inmuebles?error=notfound');
         }
 
+        // Leer y validar return_to
+        $returnTo = $this->validateReturnTo($_GET['return_to'] ?? null);
+
         $propietarios = $this->clientes->listForSelect();
         $comerciales  = $this->getComerciales();
         $csrfToken = $this->csrfToken();
@@ -154,6 +157,9 @@ final class InmuebleController
             $this->redirect('/admin/inmuebles?error=notfound');
         }
 
+        // Leer y validar return_to
+        $returnTo = $this->validateReturnTo($_POST['return_to'] ?? null);
+
         [$data, $errors] = $this->validateInput($_POST);
 
         // propietario existe
@@ -176,6 +182,7 @@ final class InmuebleController
         }
 
         if ($errors) {
+            // Re-renderizar con errores, manteniendo return_to
             $propietarios = $this->clientes->listForSelect();
             $comerciales  = $this->getComerciales();
             $csrfToken = $this->csrfToken();
@@ -185,8 +192,14 @@ final class InmuebleController
             return;
         }
 
+        // Actualizar en BD
         $ok = $this->inmuebles->update($id, $data);
-        $this->redirect($ok ? '/admin/inmuebles?msg=updated' : '/admin/inmuebles?error=db');
+        
+        // Redirigir a return_to (si válido) o fallback al listado
+        $destination = $returnTo ?: '/admin/inmuebles';
+        $destination = $this->addQueryParam($destination, 'msg', 'updated');
+        
+        $this->redirect($ok ? $destination : '/admin/inmuebles?error=db');
     }
 
     public function delete(): void
@@ -380,5 +393,39 @@ final class InmuebleController
         } catch (\Throwable $e) {
             return [];
         }
+    }
+
+    /**
+     * Valida una URL de retorno para asegurar que solo sea una ruta interna segura.
+     * Solo acepta rutas que empiecen con /admin/
+     * @param string|null $url URL a validar
+     * @return string|null Retorna la URL validada o null si no es segura
+     */
+    private function validateReturnTo(?string $url): ?string
+    {
+        if (!$url || trim($url) === '') return null;
+        
+        $url = trim($url);
+        
+        // Solo rutas internas que empiecen con /admin/
+        if (!str_starts_with($url, '/admin/')) return null;
+        
+        // Sin protocolos externos (evitar open redirect)
+        if (preg_match('#^(https?:)?//#i', $url)) return null;
+        
+        return $url;
+    }
+
+    /**
+     * Añade un parámetro a una URL sin romper querystrings existentes
+     * @param string $url URL base
+     * @param string $key Clave del parámetro
+     * @param string $value Valor del parámetro
+     * @return string URL con el parámetro añadido
+     */
+    private function addQueryParam(string $url, string $key, string $value): string
+    {
+        $separator = str_contains($url, '?') ? '&' : '?';
+        return $url . $separator . urlencode($key) . '=' . urlencode($value);
     }
 }
