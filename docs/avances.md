@@ -509,3 +509,44 @@ Se ha realizado una refactorización integral de la capa de configuración y seg
 * `app/Core/Env.php` (Nuevo)
 * `config/config.php`
 * `public/index.php`
+
+## ✅ 07/12/2025 (Módulo Inmuebles: Implementación, Bloqueo y Resolución)
+
+**Tema:** Implementación Completa del Módulo Inmuebles y Core Routing Fix
+**Tipo de avance:** Backend / Core / UI / DB
+
+### 🚀 Resumen del día
+Se ha desarrollado e integrado con éxito el módulo de **Inmuebles**, cubriendo tanto el panel de administración (CRUD) como la estructura para la parte pública. Aunque inicialmente se detectó un bloqueo técnico severo relacionado con el enrutamiento (Error 404), este fue diagnosticado y resuelto en la misma jornada, permitiendo cerrar el módulo como **funcional**.
+
+### 1. Desarrollo del Módulo (Fase Inicial)
+*   **Modelo de Datos (`Inmueble.php`):** Mapeo completo de la tabla `inmuebles` (`ref`, `propietario_id`, `comercial_id`, etc.) con métodos de paginación y filtrado.
+*   **Controladores:**
+    *   `InmuebleController`: Lógica de administración, validaciones y gestión de permisos.
+    *   `InmueblePublicController`: Estructura para el catálogo público.
+*   **Vistas Admin:** Listado (`index.php`) y Formulario (`form.php`) maquetado con Bootstrap 5.
+*   **Rutas:** Registro de endpoints en `public/index.php`.
+
+### 2. Bloqueo Técnico Detectado (Routing)
+Durante las pruebas, se identificó que las rutas de subdirectorios (ej. `/admin/inmuebles/nuevo`) devolvían **404 Not Found** en el entorno de desarrollo Windows, impidiendo el acceso al formulario de creación.
+*   **Causa:** La normalización de rutas en `Router.php` fallaba al procesar `SCRIPT_NAME` con separadores de directorio inversos (`\`), típicos de Windows.
+
+### 3. Resolución y Cierre (Fix & Polish)
+*   **Corrección del Core:** Se aplicó una normalización de separadores (`str_replace('\\', '/', ...)`) en `Router::dispatch`, solucionando el error 404.
+*   **Ajuste de Sesiones:** Unificación de claves de sesión (`user_id` vs `id_usuario`) en controladores para evitar redirecciones erróneas ("bucle de login").
+*   **Consulta de Comerciales:** Corrección en `InmuebleController::getComerciales()` para listar correctamente usuarios activos sin depender de columnas obsoletas.
+
+### 4. Lógica de Negocio y Mejoras UI
+*   **Roles y Permisos:**
+    *   **Comercial:** Acceso habilitado. Al crear inmuebles, se **auto-asigan** como responsables (campo read-only).
+    *   **Admin/Coordinador:** Control total para asignar inmuebles a cualquier usuario.
+*   **Integración CRM:** Sección "Inmuebles de este cliente" añadida en la ficha de cliente (`admin/clientes/edit.php`) con botón de creación directa.
+
+### 📝 Archivos clave modificados
+*   `app/Core/Router.php` (Fix Routing)
+*   `app/Models/Inmueble.php`
+*   `app/Controllers/InmuebleController.php`
+*   `app/Views/admin/inmuebles/form.php`
+*   `app/Views/admin/clientes/edit.php`
+
+### ✅ Estado Final
+El módulo Inmuebles está **DESBLOQUEADO y 100% OPERATIVO**, cumpliendo los requisitos de seguridad y gestión de roles.
