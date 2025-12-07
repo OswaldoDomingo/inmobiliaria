@@ -53,6 +53,9 @@ final class InmuebleController
             $propietarioPre = $this->clientes->findById($propietarioId);
         }
 
+        // Leer y validar return_to desde GET
+        $returnTo = $this->validateReturnTo($_GET['return_to'] ?? null);
+
         $propietarios = $this->clientes->listForSelect();
         $comerciales  = $this->getComerciales(); // Helper
         $csrfToken = $this->csrfToken();
@@ -73,6 +76,9 @@ final class InmuebleController
         if (!$this->csrfValidate($_POST['csrf_token'] ?? '')) {
             $this->redirect('/admin/inmuebles?error=csrf');
         }
+
+        // Leer y validar return_to desde POST
+        $returnTo = $this->validateReturnTo($_POST['return_to'] ?? null);
 
         [$data, $errors] = $this->validateInput($_POST);
 
@@ -141,7 +147,15 @@ final class InmuebleController
         }
 
         $ok = $this->inmuebles->create($data);
-        $this->redirect($ok ? '/admin/inmuebles?msg=created' : '/admin/inmuebles?error=db');
+        
+        // Redirigir a return_to (si válido) o fallback al listado
+        if ($ok) {
+            $destination = $returnTo ?: '/admin/inmuebles';
+            $destination = $this->addQueryParam($destination, 'msg', 'created');
+            $this->redirect($destination);
+        } else {
+            $this->redirect('/admin/inmuebles?error=db');
+        }
     }
 
 

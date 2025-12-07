@@ -9,7 +9,11 @@
             </div>
 
             <div class="mb-4">
-                <a href="/admin/inmuebles/nuevo?propietario_id=<?= (int)$cliente->id_cliente ?>" class="btn btn-outline-primary me-2">
+                <?php 
+                    $returnPath = '/admin/clientes/editar?id=' . (int)$cliente->id_cliente;
+                    $nuevoInmuebleLink = '/admin/inmuebles/nuevo?propietario_id=' . (int)$cliente->id_cliente . '&return_to=' . urlencode($returnPath);
+                ?>
+                <a href="<?= htmlspecialchars($nuevoInmuebleLink) ?>" class="btn btn-outline-primary me-2">
                     <i class="bi bi-house-add"></i> ➕ Añadir inmueble
                 </a>
                 <a href="/admin/demandas/nuevo?cliente_id=<?= (int)$cliente->id_cliente ?>" class="btn btn-outline-secondary">
