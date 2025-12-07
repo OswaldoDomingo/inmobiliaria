@@ -74,19 +74,34 @@ final class InmuebleController
     {
         $this->ensurePost();
 
+        // Leer return_to ANTES de validar (puede venir de GET si POST está vacío)
+        $returnTo = $this->validateReturnTo($_POST['return_to'] ?? $_GET['return_to'] ?? null);
+
         // 🔍 DETECCIÓN DE POST_MAX_SIZE EXCEDIDO
         // Si es POST, tiene contenido (Content-Length > 0) pero $_POST está vacío,
         // significa que PHP descartó los datos por exceder post_max_size.
         if (empty($_POST) && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
-            $this->redirect('/admin/inmuebles?error=post_max_size');
+            // NO redirigir - mostrar formulario con error manteniendo contexto
+            $propietarioId = (int)($_GET['propietario_id'] ?? 0);
+            $propietarioPre = null;
+            if ($propietarioId > 0) {
+                $propietarioPre = $this->clientes->findById($propietarioId);
+            }
+
+            $propietarios = $this->clientes->listForSelect();
+            $comerciales  = $this->getComerciales();
+            $csrfToken = $this->csrfToken();
+            $errors = ['imagen' => 'El archivo es demasiado grande. Tamaño máximo: 10MB.'];
+            $old = ['propietario_id' => $propietarioId];
+            
+            require VIEW . '/admin/inmuebles/form.php';
+            return;
         }
 
         if (!$this->csrfValidate($_POST['csrf_token'] ?? '')) {
             $this->redirect('/admin/inmuebles?error=csrf');
         }
 
-        // Leer y validar return_to desde POST
-        $returnTo = $this->validateReturnTo($_POST['return_to'] ?? null);
 
         [$data, $errors] = $this->validateInput($_POST);
 
