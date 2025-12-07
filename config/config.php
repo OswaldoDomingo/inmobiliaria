@@ -17,7 +17,14 @@ $dbName = $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?: 'inmobiliaria_db';
 $dbUser = $_ENV['DB_USER'] ?? getenv('DB_USER') ?: '';
 $dbPass = $_ENV['DB_PASS'] ?? getenv('DB_PASS') ?: '';
 
-$baseUrl = $_ENV['APP_BASE_URL'] ?? getenv('APP_BASE_URL') ?: 'http://localhost';
+// Detección automática de URL base si no está en ENV
+if (!empty($_ENV['APP_BASE_URL']) || getenv('APP_BASE_URL')) {
+    $baseUrl = $_ENV['APP_BASE_URL'] ?? getenv('APP_BASE_URL');
+} else {
+    $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+    $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $baseUrl = $scheme . '://' . $host;
+}
 
 $smtpHost = $_ENV['SMTP_HOST'] ?? getenv('SMTP_HOST') ?: '';
 $smtpPort = (int)($_ENV['SMTP_PORT'] ?? getenv('SMTP_PORT') ?: 587);

@@ -11,6 +11,7 @@ class ClienteController
 {
     private Cliente $clienteModel;
     private User $userModel;
+    private \App\Models\Inmueble $inmuebleModel;
 
     public function __construct()
     {
@@ -20,6 +21,7 @@ class ClienteController
 
         $this->clienteModel = new Cliente();
         $this->userModel = new User();
+        $this->inmuebleModel = new \App\Models\Inmueble();
     }
 
     public function index(): void
@@ -78,6 +80,10 @@ class ClienteController
 
         $rol = $this->getRol();
         $comerciales = $this->isAdminOrCoordinador($rol) ? $this->userModel->getComercialesActivos() : [];
+        
+        // Obtener inmuebles del cliente
+        $inmueblesCliente = $this->inmuebleModel->getByPropietario($id);
+
         $csrfToken = Csrf::token();
         require VIEW . '/admin/clientes/edit.php';
     }

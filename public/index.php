@@ -42,7 +42,6 @@ set_exception_handler(function (\Throwable $e) use ($debug) {
         echo '<h1>Error de sistema</h1><p>No se ha podido completar la operacion.</p>';
         return;
     }
-    // Re-lanzar si estamos en debug para ver trazas
     if ($debug) {
         throw $e;
     }
@@ -52,7 +51,7 @@ set_exception_handler(function (\Throwable $e) use ($debug) {
 });
 
 // ===============================
-// 4. Seguridad de sesión (cookies endurecidas)
+// 4. Seguridad de sesión
 // ===============================
 $secureCookies = Config::get('env') === 'production';
 session_set_cookie_params([
@@ -71,54 +70,53 @@ if (session_status() === PHP_SESSION_NONE) {
 
 $router = new Router();
 
-// Ruta Raíz (Landing Page)
+// --------------------------------------------------------------------------
+// Rutas Públicas
+// --------------------------------------------------------------------------
 use App\Controllers\HomeController;
 use App\Controllers\LegalController;
+use App\Controllers\TasacionController;
+use App\Controllers\AuthController;
+use App\Controllers\InmueblePublicController;
 
+// Landing
 $router->get('/', [HomeController::class, 'index']);
 
-// Ruta de prueba para verificar 404 u otras páginas
-$router->get('/prueba', function () {
-    echo "<h1>¡El Router funciona!</h1>";
-});
-
-// ===============================
-// RUTAS LEGALES
-// ===============================
+// Legal
 $router->get('/legal/aviso-legal', [LegalController::class, 'avisoLegal']);
 $router->get('/legal/privacidad', [LegalController::class, 'privacidad']);
 $router->get('/legal/cookies', [LegalController::class, 'cookies']);
 
-// ===============================
-// RUTAS DE TASACIÓN
-// ===============================
-use App\Controllers\TasacionController;
-
+// Tasación
 $router->get('/tasacion', [TasacionController::class, 'index']);
 $router->post('/tasacion/enviar', [TasacionController::class, 'enviar']);
 
-// ===============================
-// RUTAS DE AUTENTICACIÓN
-// ===============================
-use App\Controllers\AuthController;
-
+// Auth
 $router->get('/login', [AuthController::class, 'login']);
 $router->post('/login', [AuthController::class, 'authenticate']);
 $router->get('/logout', [AuthController::class, 'logout']);
 
-// ===============================
-// RUTAS DE ADMINISTRACIÓN
-// ===============================
+// Inmuebles Público
+$router->get('/inmuebles', [InmueblePublicController::class, 'index']);
+$router->get('/inmuebles/ver', [InmueblePublicController::class, 'show']);
+
+// --------------------------------------------------------------------------
+// Rutas de Administración
+// --------------------------------------------------------------------------
+use App\Controllers\UserController;
+use App\Controllers\ClienteController;
+use App\Controllers\InmuebleController;
+use App\Controllers\DemandaController;
+use App\Controllers\LogController;
+
 $router->get('/dashboard', function() {
     require VIEW . '/admin/dashboard.php';
 });
 
-// ===============================
-// RUTAS DE GESTIÓN DE USUARIOS (CRUD)
-// ===============================
-use App\Controllers\UserController;
-use App\Controllers\ClienteController;
+// Logs
+$router->get('/admin/logs', [LogController::class, 'index']);
 
+// Usuarios
 $router->get('/admin/usuarios', [UserController::class, 'index']);
 $router->get('/admin/usuarios/nuevo', [UserController::class, 'create']);
 $router->post('/admin/usuarios/guardar', [UserController::class, 'store']);
@@ -127,9 +125,7 @@ $router->post('/admin/usuarios/actualizar', [UserController::class, 'update']);
 $router->post('/admin/usuarios/baja', [UserController::class, 'delete']);
 $router->post('/admin/usuarios/cambiar-bloqueo', [UserController::class, 'toggleBlock']);
 
-// ===============================
-// RUTAS DE CLIENTES
-// ===============================
+// Clientes
 $router->get('/admin/clientes', [ClienteController::class, 'index']);
 $router->get('/admin/clientes/nuevo', [ClienteController::class, 'create']);
 $router->post('/admin/clientes/guardar', [ClienteController::class, 'store']);
@@ -137,11 +133,19 @@ $router->get('/admin/clientes/editar', [ClienteController::class, 'edit']);
 $router->post('/admin/clientes/actualizar', [ClienteController::class, 'update']);
 $router->post('/admin/clientes/borrar', [ClienteController::class, 'delete']);
 
-// Rutas de Admin (Logs)
-use App\Controllers\LogController;
-$router->get('/admin/logs', [LogController::class, 'index']);
+// Inmuebles (Admin)
+$router->get('/admin/inmuebles', [InmuebleController::class, 'index']);
+$router->get('/admin/inmuebles/nuevo', [InmuebleController::class, 'create']);
+$router->post('/admin/inmuebles/guardar', [InmuebleController::class, 'store']);
+$router->get('/admin/inmuebles/editar', [InmuebleController::class, 'edit']);
+$router->post('/admin/inmuebles/actualizar', [InmuebleController::class, 'update']);
+$router->post('/admin/inmuebles/borrar', [InmuebleController::class, 'delete']);
+
+// Demandas
+$router->get('/admin/demandas/nuevo', [DemandaController::class, 'create']);
+// $router->post('/admin/demandas/guardar', [DemandaController::class, 'store']);
 
 // ===============================
-// 6. Despachar la petición
+// 6. Despachar
 // ===============================
 $router->dispatch();
