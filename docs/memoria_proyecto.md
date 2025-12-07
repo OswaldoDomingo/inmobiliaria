@@ -189,6 +189,29 @@ Tras el análisis detallado del error 404 en las rutas de administración, se pr
 *   **Ajuste de Sesiones:** Se unificó el uso de las claves de sesión (`user_id` vs `id_usuario`) en los controladores `InmuebleController` y `DemandaController` para alinearlos con el `AuthController`, evitando redirecciones erróneas al login.
 *   **Gestión de Roles extendida:** Se habilitó el acceso al módulo para el rol `comercial` (además de admin y coordinador), implementando una lógica de negocio específica: los comerciales pueden crear inmuebles pero se auto-asignan como responsables, sin posibilidad de asignar a otros compañeros (campo de solo lectura).
 *   **Integración UI:** Se completó la interfaz añadiendo accesos directos desde la ficha del cliente ("Añadir inmueble"), facilitando el flujo de trabajo natural del operador.
+### 3.3.5.4. Mejora de navegación en la edición de inmuebles (Return Path)
+
+Durante las pruebas de uso del módulo de inmuebles se detectó un problema de usabilidad importante:  
+cuando un usuario accedía a la edición de un inmueble desde la ficha de un cliente, al pulsar el botón **«Volver»** o al guardar correctamente el formulario, el sistema redirigía siempre al listado general `/admin/inmuebles`. Esto obligaba al usuario a localizar de nuevo al cliente y rompía el flujo natural de trabajo orientado a “ficha de cliente → inmuebles de ese cliente”.
+
+Para resolverlo, se ha implementado un mecanismo de **return path** basado en un parámetro seguro `return_to`:
+
+- La vista de edición de clientes genera el enlace de **Editar inmueble** incluyendo un `return_to` con la URL completa de la ficha de cliente.
+- El método `edit()` de `InmuebleController` lee este parámetro y lo valida mediante un método privado `validateReturnTo()`, que solo acepta rutas internas que comienzan por `/admin/` y descarta cualquier intento de URL externa o potencial open redirect.
+- La vista del formulario de inmuebles (`form.php`) recibe el return path y lo mantiene en un campo oculto `<input type="hidden" name="return_to">`.
+- Los botones **«Volver»** y **«Cancelar»** utilizan este `return_to` cuando está presente, y realizan un *fallback* controlado al listado `/admin/inmuebles` cuando no existe (por ejemplo, si el usuario llega desde el propio listado de inmuebles).
+- El método `update()` incorpora la misma lógica: tras una actualización correcta, redirige al `return_to` validado y añade el parámetro `msg=updated` utilizando un helper `addQueryParam()`, que construye la query string sin romper posibles parámetros previos.
+
+En caso de errores de validación en el formulario, el flujo se mantiene deliberadamente en la vista de edición:  
+no se realiza ninguna redirección, se muestran los mensajes de error y se conserva tanto el contenido del formulario como el `return_to`, permitiendo corregir los datos sin perder el contexto de origen.
+
+Esta mejora se ha probado con los tres perfiles definidos en la aplicación (administrador, coordinador y comercial):
+
+- Desde la ficha de un cliente, al editar un inmueble y pulsar **«Volver»** o guardar correctamente, se regresa siempre a la ficha de ese cliente.
+- Desde el listado general de inmuebles, el comportamiento clásico se mantiene: la navegación vuelve al listado.
+- Manipulaciones manuales del parámetro `return_to` con URLs externas o rutas no válidas son neutralizadas por `validateReturnTo()`, que fuerza el uso del *fallback* seguro.
+
+Con este cambio se mejora de forma significativa la experiencia de usuario, se respeta el flujo de trabajo real de una agencia inmobiliaria (operar siempre “dentro” de la ficha de cliente) y se mantiene al mismo tiempo un nivel adecuado de seguridad frente a redirecciones abiertas y manipulación de URLs. 
 
 ### 3.3.6. Cumplimiento normativo (RGPD y cookies)
 *   Paginas legales provisionales (aviso legal, privacidad, cookies) publicadas bajo `/legal/*` con controlador dedicado y vistas en `app/Views/legal/`, marcando que el contenido es temporal hasta validacion juridica.

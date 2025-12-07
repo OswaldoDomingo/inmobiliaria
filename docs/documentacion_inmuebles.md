@@ -119,3 +119,83 @@ Se ha resuelto el problema de routing que impedía el acceso a `/admin/inmuebles
 ### Estado final
 El módulo de inmuebles está **DESBLOQUEADO y FUNCIONAL**. Se permite el flujo completo de alta, edición y listado, integrando la lógica de negocio para la asignación de comerciales y la visualización desde la ficha de cliente.
 
+## Mejora de navegación: Return Path en edición de inmuebles
+
+### Problema detectado
+
+En la primera versión del módulo, al acceder a la edición de un inmueble desde la ficha de un cliente, los botones **«Volver»** y la redirección tras **«Guardar inmueble»** apuntaban siempre al listado general `/admin/inmuebles`.  
+Esto obligaba al usuario a salir del contexto del cliente, localizarlo de nuevo en el CRM y suponía un flujo poco natural para el trabajo diario de la agencia.
+
+### Objetivo funcional
+
+Conseguir que, cuando la edición de un inmueble se inicia desde la ficha de un cliente, todas las acciones de salida (volver, cancelar, guardar con éxito) lleven de vuelta a esa misma ficha, manteniendo:
+
+- Seguridad frente a redirecciones manipuladas.
+- Compatibilidad con el flujo clásico cuando la edición se inicia desde el listado de inmuebles.
+
+### Implementación técnica
+
+1. **Parámetro `return_to` en enlaces de edición**
+   - En `admin/clientes/edit.php` se genera el enlace a la edición del inmueble con un parámetro `return_to` que contiene la URL actual de la ficha de cliente (`/admin/clientes/editar?id=...`), codificada con `urlencode()`.
+
+2. **Validación de `return_to` en el controlador**
+   - En `InmuebleController` se añade un método privado `validateReturnTo(?string $url): ?string` que:
+     - Acepta únicamente rutas internas que comienzan por `/admin/`.
+     - Rechaza cualquier URL que contenga un esquema externo o doble barra inicial (`http://`, `https://`, `//`).
+     - Devuelve `null` si la ruta no es válida.
+   - Los métodos `edit()` y `update()` utilizan este helper para obtener un `$returnTo` seguro.
+
+3. **Persistencia en el formulario**
+   - La vista `app/Views/admin/inmuebles/form.php` incluye, cuando procede, un campo oculto:
+     ```php
+     <input type="hidden" name="return_to" value="<?= e($returnTo) ?>">
+     ```
+   - De esta forma, el valor se mantiene entre peticiones POST incluso si hay errores de validación.
+
+4. **Botones de navegación y redirección tras el guardado**
+   - Se calcula una URL de retorno:
+     ```php
+     $returnUrl = $returnTo ?: '/admin/inmuebles';
+     ```
+   - Los botones **«Volver»** y **«Cancelar»** usan siempre `$returnUrl`.
+   - En caso de éxito al actualizar (`update()`), se construye la URL de redirección final con un helper `addQueryParam(string $url, string $key, string $value)`, que añade `msg=updated` respetando la query string existente.
+
+5. **Gestión de errores de validación**
+   - Si hay errores, no se redirige:
+     - Se vuelve a cargar la vista del formulario con los mensajes de error.
+     - Se vuelve a pasar `$returnTo` a la vista para no perder el origen.
+   - Esto evita corrupciones de datos y permite al usuario corregir el formulario sin perder el contexto.
+
+### Problemas y cómo se han resuelto
+
+- **Riesgo de open redirect:**  
+  Aceptar un `return_to` arbitrario abría la puerta a redirecciones externas.  
+  → Se ha mitigado limitando las rutas a `/admin/*` y bloqueando explícitamente cualquier URL con esquema o doble barra inicial.
+
+- **Compatibilidad con flujos existentes:**  
+  La edición desde `/admin/inmuebles` no debe depender de `return_to`.  
+  → Se ha establecido un *fallback* claro: si no hay `return_to` válido, se usa siempre `/admin/inmuebles`.
+
+- **Conservación de contexto con errores:**  
+  Si el formulario daba error y redirigía, se perdían tanto los datos como el origen.  
+  → Ahora se re-renderiza el formulario con los errores, manteniendo campos y `return_to`.
+
+### Pruebas realizadas
+
+Se ha verificado el comportamiento con los tres roles de la aplicación:
+
+- **Administrador y Coordinador**
+  - Edición de inmuebles desde ficha de cliente → tras guardar o pulsar «Volver» se regresa a la ficha del cliente con el mensaje `msg=updated`.
+  - Edición desde el listado general → comportamiento idéntico al original (vuelta al listado).
+
+- **Comercial**
+  - Puede editar los inmuebles que le corresponden.
+  - Navegación de retorno funciona igual que para admin/coordinador, respetando el contexto de cliente.
+
+- **Pruebas de seguridad**
+  - Manipulación manual del parámetro `return_to` con URLs externas o rutas no válidas → el sistema ignora el valor y redirige al listado `/admin/inmuebles`.
+
+Con esta mejora, el módulo de inmuebles ofrece una navegación mucho más coherente con el flujo real de trabajo de la agencia, reduciendo clics innecesarios y manteniendo un nivel adecuado de seguridad en el manejo de URLs de retorno.
+
+Adicionalmente, se ha creado el documento `docs/verificacion_return_path.md` donde se describe de forma detallada el plan de pruebas, los casos ejecutados (incluyendo pruebas específicas de persistencia del `return_to` tras errores de validación) y los resultados obtenidos.  
+Durante estas pruebas se confirmó también el comportamiento de seguridad frente a intentos de redirección externa, verificando que el sistema realiza siempre un fallback seguro cuando el `return_to` no supera la validación.

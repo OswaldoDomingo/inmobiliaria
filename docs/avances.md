@@ -550,3 +550,49 @@ Durante las pruebas, se identificó que las rutas de subdirectorios (ej. `/admin
 
 ### ✅ Estado Final
 El módulo Inmuebles está **DESBLOQUEADO y 100% OPERATIVO**, cumpliendo los requisitos de seguridad y gestión de roles.
+
+## 2025-12-07 – Mejora de navegación en Edición de Inmuebles (Return Path)
+
+**Contexto**  
+Hasta ahora, al editar un inmueble desde la ficha de un cliente, el botón **«Volver»** y la redirección tras **«Guardar Inmueble»** llevaban siempre al listado general `/admin/inmuebles`. Esto hacía perder el contexto de trabajo (ficha del cliente) y obligaba a varios clics extra para volver a la vista original.
+
+**Qué se ha implementado**  
+- Se ha añadido un sistema de **return path** mediante un parámetro `return_to`:
+  - La ficha de cliente (`admin/clientes/edit`) genera el enlace de **Editar inmueble** incluyendo `return_to` con la URL actual de la ficha.
+  - El `InmuebleController` lee y valida ese `return_to` y lo pasa a la vista.
+  - El formulario de inmuebles incluye un `<input type="hidden" name="return_to">`.
+  - Los botones **«Volver»** y **«Cancelar»** usan `return_to` si existe; si no, hacen fallback al listado `/admin/inmuebles`.
+  - Tras guardar correctamente, el método `update()` redirige al `return_to` válido y añade `msg=updated`.
+
+**Cómo se ha hecho (detalle técnico)**  
+- Se ha creado un método privado `validateReturnTo()` en el controlador de inmuebles para:
+  - Aceptar solo rutas internas que comiencen por `/admin/`.
+  - Bloquear URIs externas (`http://`, `https://`, `//`) y posibles intentos de open redirect.
+- Se ha creado un helper `addQueryParam()` para añadir `msg=updated` sin romper la query string existente.
+- En caso de errores de validación del formulario:
+  - No se redirige.
+  - Se vuelve a pintar la vista `form.php` con los errores.
+  - Se conserva el valor de `return_to` para que, una vez corregido, se pueda volver al origen correcto.
+
+**Problemas detectados y solución**  
+- **Riesgo de open redirect** al aceptar un `return_to` sin filtrar → se soluciona con `validateReturnTo()`, que solo admite rutas internas seguras.
+- **Compatibilidad hacia atrás**: había que mantener el comportamiento antiguo cuando se edita desde `/admin/inmuebles` → si no hay `return_to`, los botones siguen yendo al listado como antes.
+- **Gestión de query string**: al añadir `msg=updated` se podía romper la URL → se ha centralizado en `addQueryParam()` para construir la URL correctamente.
+
+**Pruebas realizadas**  
+- Edición de inmueble desde ficha de cliente:
+  - **Admin**, **Coordinador** y **Comercial**: tras **«Volver»** o guardar con éxito, se vuelve a la ficha del cliente.
+- Edición desde listado de inmuebles:
+  - Todos los roles autorizados vuelven al listado, igual que antes.
+- Validación con errores:
+  - Se muestran los mensajes en el formulario.
+  - No se pierde ni el estado del formulario ni el `return_to`.
+- Intentos de manipular manualmente el `return_to` con URLs externas:
+  - El sistema ignora esas rutas y hace fallback a `/admin/inmuebles`.
+  
+Además, se ha ejecutado un conjunto de pruebas formales recogidas en `docs/verificacion_return_path.md`, donde se han validado:
+- El comportamiento de los botones «Volver» y «Guardar» desde la ficha de cliente (Pruebas 1 y 2).
+- La recarga del formulario con errores sin perder el `return_to` ni el contexto (Prueba 3).
+- La protección frente a intentos de open redirect utilizando `?return_to=http://google.com`, confirmando que el sistema realiza fallback seguro al listado `/admin/inmuebles` (Prueba 8).
+
+Todas las pruebas han sido superadas y el entorno ha quedado limpio tras eliminar el script temporal de ayuda (`setup_tests.php`).
