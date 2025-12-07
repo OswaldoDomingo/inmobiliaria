@@ -107,6 +107,34 @@ final class InmuebleController
             return;
         }
 
+        // Procesar imagen si se subió
+        $imagenFilename = null;
+        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+            $imagenFilename = $this->handleImageUpload($_FILES['imagen']);
+            if (!$imagenFilename) {
+                $errors['imagen'] = 'Error al procesar la imagen. Verifica formato, tamaño y dimensiones.';
+            }
+        }
+
+        // Si hubo error en la imagen, re-renderizar formulario
+        if ($errors) {
+            $propietarioId = (int)($data['propietario_id'] ?? 0);
+            $propietarioPre = null;
+            if ($propietarioId > 0) {
+                $propietarioPre = $this->clientes->findById($propietarioId);
+            }
+
+            $propietarios = $this->clientes->listForSelect();
+            $comerciales  = $this->getComerciales();
+            $csrfToken = $this->csrfToken();
+            $old = $data;
+            require VIEW . '/admin/inmuebles/form.php';
+            return;
+        }
+
+        // Añadir imagen al array de datos
+        $data['imagen'] = $imagenFilename;
+
         // comercial_id: si no viene, por defecto el logado
         if (!isset($data['comercial_id']) || $data['comercial_id'] === null) {
             $data['comercial_id'] = $this->currentUserId();
@@ -115,6 +143,7 @@ final class InmuebleController
         $ok = $this->inmuebles->create($data);
         $this->redirect($ok ? '/admin/inmuebles?msg=created' : '/admin/inmuebles?error=db');
     }
+
 
     public function edit(): void
     {
@@ -192,6 +221,38 @@ final class InmuebleController
             return;
         }
 
+        // Procesar imagen si se subió una nueva
+        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+            $newImagen = $this->handleImageUpload($_FILES['imagen']);
+            if ($newImagen) {
+                $data['imagen'] = $newImagen;
+                
+                // Borrar imagen anterior si existe
+                $oldImagen = $this->getField($current, 'imagen');
+                if ($oldImagen) {
+                    $oldPath = ROOT . '/public/uploads/inmuebles/' . $oldImagen;
+                    if (file_exists($oldPath)) {
+                        @unlink($oldPath);
+                    }
+                }
+            } else {
+                // Error al procesar nueva imagen
+                $errors['imagen'] = 'Error al procesar la nueva imagen. Verifica formato, tamaño y dimensiones.';
+                $propietarios = $this->clientes->listForSelect();
+                $comerciales  = $this->getComerciales();
+                $csrfToken = $this->csrfToken();
+                $inmueble = $current;
+                $old = $data;
+                require VIEW . '/admin/inmuebles/form.php';
+                return;
+            }
+        }
+
+        // Si no se subió nueva imagen, mantener la actual
+        if (!isset($data['imagen'])) {
+            $data['imagen'] = $this->getField($current, 'imagen');
+        }
+
         // Actualizar en BD
         $ok = $this->inmuebles->update($id, $data);
         
@@ -200,6 +261,7 @@ final class InmuebleController
         $destination = $this->addQueryParam($destination, 'msg', 'updated');
         
         $this->redirect($ok ? $destination : '/admin/inmuebles?error=db');
+
     }
 
     public function delete(): void
@@ -214,8 +276,18 @@ final class InmuebleController
             $this->redirect('/admin/inmuebles?error=badid');
         }
 
+        // Obtener inmueble y borrar imagen física si existe
+        $inmueble = $this->inmuebles->findById($id);
+        if ($inmueble && !empty($inmueble->imagen)) {
+            $imagePath = ROOT . '/public/uploads/inmuebles/' . $inmueble->imagen;
+            if (file_exists($imagePath)) {
+                @unlink($imagePath);
+            }
+        }
+
         $ok = $this->inmuebles->delete($id);
         $this->redirect($ok ? '/admin/inmuebles?msg=deleted' : '/admin/inmuebles?error=db');
+
     }
 
     // -----------------------------
@@ -428,4 +500,75 @@ final class InmuebleController
         $separator = str_contains($url, '?') ? '&' : '?';
         return $url . $separator . urlencode($key) . '=' . urlencode($value);
     }
+
+    /**
+     * Maneja la subida y validación de imagen de inmueble
+     * @param array $file Array de $_FILES['imagen']
+     * @return string|null Nombre del archivo guardado o null si falla
+     */
+    private function handleImageUpload(array $file): ?string
+    {
+        // 1. Validar errores de subida
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        // 2. Validar tamaño (máx 2MB)
+        $maxSize = 2 * 1024 * 1024; // 2MB
+        if ($file['size'] > $maxSize) {
+            return null;
+        }
+
+        // 3. Validar MIME real con finfo
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+$mimeType = $finfo->file($file['tmp_name']);
+
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (!in_array($mimeType, $allowedMimes, true)) {
+            return null;
+        }
+
+        // 4. Validar dimensiones (máx 1920px ancho)
+        $imageInfo = @getimagesize($file['tmp_name']);
+        if ($imageInfo === false) {
+            return null; // No es imagen válida
+        }
+
+        [$width, $height] = $imageInfo;
+        if ($width > 1920 || $height > 1920) {
+            return null; // Dimensiones excesivas
+        }
+
+        // 5. Generar nombre único y seguro
+        $extension = match($mimeType) {
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            default => 'jpg'
+        };
+
+        $uniqueName = 'inmueble_' . uniqid('', true) . '.' . $extension;
+
+        // 6. Crear directorio si no existe
+        $uploadDir = ROOT . '/public/uploads/inmuebles';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+            
+            // Crear .htaccess para seguridad
+            $htaccess = $uploadDir . '/.htaccess';
+            if (!file_exists($htaccess)) {
+                file_put_contents($htaccess, "php_flag engine off\nOptions -Indexes");
+            }
+        }
+
+        // 7. Mover archivo
+        $destination = $uploadDir . '/' . $uniqueName;
+        if (!move_uploaded_file($file['tmp_name'], $destination)) {
+            return null;
+        }
+
+        return $uniqueName;
+    }
 }
+

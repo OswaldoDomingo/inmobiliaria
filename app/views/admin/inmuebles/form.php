@@ -71,7 +71,7 @@ require VIEW . '/layouts/header.php';
             <!-- Tarjeta del Formulario -->
             <div class="card shadow-sm">
                 <div class="card-body p-4">
-                    <form method="post" action="<?= e($action) ?>" class="row g-3">
+                    <form method="post" action="<?= e($action) ?>" class="row g-3" enctype="multipart/form-data">
                         <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
                         <?php if ($mode === 'edit'): ?>
                             <input type="hidden" name="id" value="<?= $id ?>">
@@ -234,6 +234,53 @@ require VIEW . '/layouts/header.php';
                          <div class="col-12">
                             <label class="form-label">Descripción</label>
                             <textarea name="descripcion" class="form-control" rows="4"><?= e($val('descripcion')) ?></textarea>
+                        </div>
+
+                        <div class="col-12"><hr class="my-2"></div>
+
+                        <!-- Sección: Imagen Principal -->
+                        <div class="col-12">
+                            <h5 class="mb-3">Imagen Principal</h5>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="imagen" class="form-label">Imagen del Inmueble</label>
+                            
+                            <?php if ($mode === 'edit' && !empty($val('imagen'))): ?>
+                                <div class="mb-2">
+                                    <p class="text-muted small mb-1">Imagen actual:</p>
+                                    <img src="/uploads/inmuebles/<?= e($val('imagen')) ?>" 
+                                         alt="Imagen actual" 
+                                         class="img-thumbnail" 
+                                         style="max-width: 200px; max-height: 150px; object-fit: cover;">
+                                </div>
+                                <p class="text-muted small">Sube una nueva imagen para reemplazar la actual</p>
+                            <?php endif; ?>
+                            
+                            <input type="file" 
+                                   class="form-control <?= $isInvalid('imagen') ?>" 
+                                   id="imagen" 
+                                   name="imagen" 
+                                   accept="image/jpeg,image/jpg,image/png,image/webp,image/gif">
+                            
+                            <div class="form-text">
+                                Formatos: JPG, PNG, WebP, GIF | Máx. 2MB | Máx. 1920x1920px
+                            </div>
+                            
+                            <?php if ($err('imagen')): ?>
+                                <div class="invalid-feedback d-block"><?= e($err('imagen')) ?></div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <strong>Recomendaciones:</strong>
+                                <ul class="mb-0 small">
+                                    <li>Usa imágenes de alta calidad</li>
+                                    <li>Relación de aspecto recomendada: 4:3 o 16:9</li>
+                                    <li>La imagen aparecerá en el listado de inmuebles</li>
+                                </ul>
+                            </div>
                         </div>
 
                         <div class="col-12 mt-4">

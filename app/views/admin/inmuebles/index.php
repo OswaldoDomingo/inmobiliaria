@@ -20,7 +20,7 @@ $perPage = (int)($result['perPage'] ?? 15);
 <table border="1" cellpadding="6" cellspacing="0">
   <thead>
     <tr>
-      <th>Ref</th><th>Tipo</th><th>Operación</th><th>Precio</th><th>Localidad</th><th>Estado</th><th>Prop. / Com.</th><th>Acciones</th>
+      <th>Imagen</th><th>Ref</th><th>Tipo</th><th>Operación</th><th>Precio</th><th>Localidad</th><th>Estado</th><th>Prop. / Com.</th><th>Acciones</th>
     </tr>
   </thead>
   <tbody>
@@ -33,11 +33,25 @@ $perPage = (int)($result['perPage'] ?? 15);
       $precio = $isArr ? $row['precio'] : $row->precio;
       $localidad = $isArr ? $row['localidad'] : $row->localidad;
       $estado = $isArr ? $row['estado'] : $row->estado;
+      $imagen = $isArr ? ($row['imagen'] ?? null) : ($row->imagen ?? null);
       
       $prop = trim(($isArr ? ($row['propietario_nombre'] ?? '') : ($row->propietario_nombre ?? '')) . ' ' . ($isArr ? ($row['propietario_apellidos'] ?? '') : ($row->propietario_apellidos ?? '')));
       $com = $isArr ? ($row['comercial_nombre'] ?? '-') : ($row->comercial_nombre ?? '-');
   ?>
     <tr>
+      <td>
+        <?php if ($imagen): ?>
+          <img src="/uploads/inmuebles/<?= e($imagen) ?>" 
+               alt="Inmueble" 
+               class="img-thumbnail" 
+               style="width: 60px; height: 60px; object-fit: cover;">
+        <?php else: ?>
+          <img src="/assets/img/no-image.png" 
+               alt="Sin imagen" 
+               class="img-thumbnail" 
+               style="width: 60px; height: 60px; object-fit: cover; opacity: 0.5;">
+        <?php endif; ?>
+      </td>
       <td><?= e($ref) ?></td>
       <td><?= e($tipo) ?></td>
       <td><?= e($operacion) ?></td>
