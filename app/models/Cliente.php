@@ -125,4 +125,18 @@ class Cliente
         $row = $stmt->fetch();
         return $row ?: null;
     }
+
+    /**
+     * Lista básica de clientes para selects de propietario.
+     * Devuelve id_cliente, nombre y apellidos ordenados alfabéticamente.
+     */
+    public function listForSelect(): array
+    {
+        $pdo = Database::conectar();
+        $sql = "SELECT id_cliente, nombre, apellidos
+                FROM clientes
+                ORDER BY nombre ASC, apellidos ASC";
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll() ?: [];
+    }
 }
