@@ -1010,3 +1010,26 @@ Comercial: Ahora pueden borrar demandas de sus clientes asignados, pero no de cl
 📝 Archivos modificados
 app/Views/admin/demandas/index.php
 app/Controllers/DemandaController.php
+
+**Tema:** Unificación visual y mejoras de navegación
+**Tipo de avance:** Frontend / UX
+
+### 🐛 Problemas detectados
+- La vista principal de inmuebles (`/admin/inmuebles`) carecía de estilos CSS del proyecto, mostrándose como una tabla HTML básica sin estructura.
+- Faltaban opciones de navegación claras para retornar al Panel de Control (Dashboard).
+
+### 🔧 Solución aplicada
+- **Rediseño completo de `admin/inmuebles/index.php`**:
+  - Implementación de estructura Bootstrap (Container, Cards, Badges).
+  - Integración con el layout principal (`header.php` / `footer.php`).
+  - Estilización de filtros y tabla de datos.
+- **Navegación mejorada**:
+  - Añadido botón "Mi Panel" en la cabecera del listado.
+  - Mejorada la disposición de los botones de acción (Nuevo, Filtrar, Limpiar).
+
+### ✅ Resultado
+- El módulo de inmuebles ahora mantiene la coherencia visual con el resto de la aplicación (Clientes, Demandas, etc.).
+- Navegación más fluida entre el listado y el dashboard.
+
+### 📝 Archivos modificados
+- `app/Views/admin/inmuebles/index.php`
