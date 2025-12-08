@@ -294,6 +294,166 @@ Durante estas pruebas apareció una advertencia deprecada en PHP 8.5 relacionada
 
 ### 3.3.7. Gestion de Interfaz y UX
 Se ha optado por una arquitectura modular basada en vistas parciales ubicadas en `app/Views/partials/` para encapsular componentes reutilizables (por ejemplo, el banner principal). La visibilidad de cada elemento de interfaz se controla de forma estricta desde `HomeController` mediante banderas (`$showHero`, `$mostrar_tarjeta` y las variables asociadas al hero), manteniendo la separacion de responsabilidades propia del MVC: el controlador decide y la vista se limita a representar el contenido recibido.
+### 3.3.8. Módulo de Demandas (gestión de necesidades de compra/alquiler)
+
+El módulo de **Demandas** completa el ciclo CRM del backoffice, permitiendo registrar y gestionar las necesidades de búsqueda de inmuebles de cada cliente: tipo de operación (compra, alquiler, vacacional), rango de precios, superficie mínima, número de habitaciones y baños, zonas de interés y características adicionales (garaje, piscina, ascensor, terraza, etc.).
+
+A nivel de modelo, se implementa la clase `Demanda` alineada con la tabla `demandas` definida en la base de datos real. Esta tabla incluye, entre otros, los siguientes campos:
+
+- `cliente_id`: referencia al cliente que solicita la demanda.  
+- `comercial_id`: usuario responsable de gestionar la demanda.  
+- `tipo_operacion`: compra | alquiler | vacacional.  
+- `rango_precio_min` / `rango_precio_max`: banda de precio objetivo.  
+- `superficie_min`, `habitaciones_min`, `banos_min`: criterios mínimos.  
+- `zonas`: texto libre con barrios o zonas preferidas.  
+- `caracteristicas` (JSON): lista de etiquetas (`["garaje","piscina","ascensor", ...]`).  
+- `estado`: `activa`, `en_gestion`, `pausada`, `archivada`.  
+- Flags `activo`/`archivado` y campos de fecha (`fecha_alta`, `fecha_archivado`) para el ciclo de vida.
+
+El modelo se conecta a la base de datos mediante la clase `Database` del core y expone métodos para:
+
+- **Paginación por rol** (`paginateAdmin`):  
+  - Admin / Coordinador: ven todas las demandas.  
+  - Comercial: solo ve demandas de los clientes que tiene asignados.
+- **CRUD completo** (`create`, `findById`, `update`, `delete`) con conversión automática del campo JSON `caracteristicas` a arrays PHP (y viceversa).
+- **Integración con Clientes** (`getByCliente`): listado de demandas asociadas a un cliente concreto para mostrarlas en su ficha.
+
+Desde el punto de vista de negocio, se mantiene la coherencia con el módulo de Clientes:
+
+- Cada cliente puede tener **0..N demandas**.  
+- El `comercial_id` de la demanda **se hereda automáticamente** del cliente (`usuario_id`), evitando que un comercial pueda “colarse” asignándose clientes que no le corresponden.
+- Admin y coordinador pueden trabajar con el conjunto completo de datos, mientras que el comercial solo opera sobre su cartera.
+
+La interfaz se integra en dos niveles:
+
+1. **Listado global de Demandas** (`/admin/demandas`):  
+   - Tabla con filtros por tipo de operación, estado, comercial y rango de precio.  
+   - Paginación reutilizando el patrón existente en otros módulos.
+
+2. **Ficha de cliente** (`/admin/clientes/editar`):  
+   - Nueva sección “Demandas de este cliente” que muestra un resumen de sus demandas (tipo, rango de precios, superficie mínima, estado, fecha, etc.).  
+   - Botón “Añadir demanda” que abre el formulario pre-rellenando el cliente y, tras guardar, retorna de nuevo a la ficha mediante el parámetro `return_to`.
+
+En términos de seguridad y robustez:
+
+- Todos los formularios de alta/edición usan **tokens CSRF** y validación básica del lado servidor.  
+- Se validan reglas como:
+  - El cliente seleccionado debe existir y ser accesible para el usuario logueado.  
+  - El precio mínimo no puede ser mayor que el máximo.  
+  - Los campos numéricos (superficie, habitaciones, baños) no admiten valores negativos.
+- El campo `caracteristicas` se serializa como JSON con `json_encode` y se deserializa con `json_decode`, normalizando siempre a un array vacío cuando no hay datos para evitar errores en PHP.
+
+Este módulo prepara el terreno para un futuro sistema de **matching automático** entre `demandas` e `inmuebles` (por precio, zona y características), que permitiría sugerir inmuebles a los comerciales en función de las necesidades registradas.
+
+### 3.3.9. Módulo de Demandas (peticiones de compra/alquiler)
+
+En una inmobiliaria real no basta con saber qué inmuebles hay disponibles; es igual de importante registrar **qué está buscando cada cliente**.  
+Para cubrir esta necesidad se ha desarrollado el módulo de **Demandas**, que permite asociar a cada cliente una o varias “peticiones” de compra o alquiler con sus criterios de búsqueda.
+
+#### Modelo de datos y relaciones
+
+El módulo se apoya en la tabla `demandas`, que está relacionada de forma directa con clientes y usuarios (comerciales):
+
+- `cliente_id` → `clientes.id_cliente` (**ON DELETE CASCADE**):  
+  Si se elimina un cliente, todas sus demandas se borran automáticamente.
+- `comercial_id` → `usuarios.id_usuario` (**ON DELETE SET NULL**):  
+  Si se elimina un usuario/comercial, las demandas siguen existiendo pero quedan sin comercial asignado.
+
+Además de las claves externas, la tabla almacena:
+
+- Información comercial:
+  - `tipo_operacion` (`compra`, `alquiler`, `vacacional`).
+  - `rango_precio_min` y `rango_precio_max` (DECIMAL).
+  - `superficie_min`, `habitaciones_min`, `banos_min`.
+  - `zonas` (texto libre para barrios o zonas concretas).
+- Estado y ciclo de vida:
+  - `estado` (`activa`, `en_gestion`, `pausada`, `archivada`).
+  - Flags `activo` y `archivado`.
+  - `fecha_alta`, `fecha_archivado`.
+
+Para las características se ha optado por un campo **JSON**:
+
+- `caracteristicas` (JSON): array de cadenas con etiquetas como `"garaje"`, `"ascensor"`, `"terraza"`, etc.
+- A nivel de código, el modelo `Demanda` se encarga de:
+  - Codificar el array a JSON al guardar (`json_encode`).
+  - Decodificarlo siempre a **array** al leer (`json_decode(..., true) ?? []`), evitando valores `NULL`.
+
+Esta decisión facilita la **evolución futura**: se pueden añadir nuevas características sin alterar el esquema de la base de datos.
+
+#### Implementación en MVC
+
+Se ha creado el modelo `App\Models\Demanda`, que reutiliza la clase `Database` existente (`Database::conectar()`) y proporciona los métodos habituales de acceso:
+
+- `paginateAdmin($userId, $rol, $filtros, $page, $perPage)`: listado paginado con filtros y control por rol.
+- `findById($id)`: obtención de una demanda concreta.
+- `create(array $data)`, `update(int $id, array $data)`, `delete(int $id)`.
+- `getByCliente(int $clienteId)`: helper para obtener todas las demandas asociadas a un cliente.
+
+En el controlador `DemandaController` se ha implementado el CRUD completo:
+
+- `index()`: listado con filtros (tipo de operación, estado, comercial, rango de precio).
+- `create()` / `store()`: alta de nuevas demandas.
+- `edit()` / `update()`: edición de demandas existentes.
+- `delete()`: borrado (solo disponible para admin y coordinador).
+
+El controlador reutiliza los mismos **helpers de autenticación y seguridad** que el módulo de inmuebles:
+
+- `requireAuth()`, `requireRole()`, `currentUserId()`, `currentUserRole()`.
+- `csrfToken()`, `csrfValidate()` para protección frente a CSRF.
+- `validateReturnTo()` y `addQueryParam()` para gestionar el patrón de navegación contextual (`return_to`).
+
+#### Reglas de negocio por rol
+
+El módulo está alineado con la organización real de la inmobiliaria:
+
+- **Administrador / Coordinador**:
+  - Pueden ver y filtrar **todas las demandas**.
+  - Pueden crear, editar y borrar demandas de cualquier cliente.
+  - En los formularios de alta/edición pueden seleccionar cualquier cliente.
+
+- **Comercial**:
+  - Solo ve demandas de **sus clientes** (se filtra por `clientes.usuario_id = user_id`).
+  - Solo puede crear demandas para clientes que le están asignados.
+  - Si intenta manipular el `cliente_id` para apuntar a otro comercial, el controlador bloquea la operación y muestra un error de permisos.
+
+Para mantener la coherencia, el `comercial_id` de la demanda se hereda siempre del cliente:
+
+- En perfiles admin/coordinador: se toma `cliente->usuario_id`.
+- En perfiles comercial: se fuerza al `user_id` de la sesión, aunque se manipule el formulario.
+
+#### Flujo de trabajo e integración con Clientes
+
+La integración con la ficha de cliente es clave para que el módulo tenga sentido en el día a día de la oficina:
+
+- En `ClienteController` se inyecta el modelo `Demanda` y, en el método `edit()`, se obtienen las demandas del cliente mediante `getByCliente($id)`.
+- En la vista `app/Views/admin/clientes/edit.php` se ha añadido una sección específica “Demandas de este cliente”:
+  - Muestra una tabla con tipo de operación, rango de precio, superficie mínima, estado y fecha.
+  - Cada fila incluye un botón **Editar** que respeta el patrón `return_to` (tras guardar vuelve a la ficha del cliente).
+- Sobre la propia ficha del cliente se ha añadido el botón “➕ Añadir demanda”:
+  - Abre el formulario de alta de demandas con el `cliente_id` ya fijado.
+  - El campo de cliente se muestra en modo **solo lectura** para evitar inconsistencias.
+
+Paralelamente, existe un listado global en `/admin/demandas` accesible desde el dashboard, que permite filtrar y revisar todas las demandas existentes.
+
+#### Validación de datos y coherencia funcional
+
+En el servidor se aplican una serie de validaciones para garantizar la calidad del dato:
+
+- `cliente_id` debe existir y ser accesible según el rol del usuario.
+- `tipo_operacion` debe estar dentro de los valores permitidos.
+- `rango_precio_min` y `rango_precio_max`:
+  - Se convierten a enteros (truncando posibles decimales).
+  - Se valida que el mínimo no sea mayor que el máximo.
+- `superficie_min`, `habitaciones_min`, `banos_min` deben ser valores numéricos positivos o cero.
+
+En caso de error, el controlador no redirige: vuelve a renderizar el formulario conservando los datos introducidos y mostrando mensajes de validación campo a campo.
+
+Gracias a las claves externas definidas en la base de datos, se garantiza además que:
+
+- Al borrar un cliente, se eliminan automáticamente sus demandas asociadas (`ON DELETE CASCADE`).
+- Si se elimina un comercial, las demandas siguen existiendo pero `comercial_id` pasa a `NULL`, lo que facilita reasignarlas posteriormente.
+
+En conjunto, el módulo de Demandas convierte la aplicación en una herramienta más cercana a un CRM real, permitiendo cruzar de forma estructurada **lo que el cliente busca** con **lo que la agencia tiene en cartera** (funcionalidad de cruces prevista para desarrollos posteriores).
 
 ## 3.4. Manejo de Errores
 He implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.

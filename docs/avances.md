@@ -655,3 +655,284 @@ Todas las pruebas han sido superadas y el entorno ha quedado limpio tras elimina
 * **Incidencia menor (PHP 8.5):**
   * Durante las pruebas apareció un aviso `Deprecated: Function finfo_close() is deprecated since 8.5`.  
     Se ajustó el código eliminando la llamada explícita a `finfo_close()`, ya que los objetos `finfo` se liberan automáticamente en versiones recientes de PHP.
+## ✅ 2025-12-08 (Módulo Demandas: implementación completa y control por rol)
+
+**Tema:** Módulo de Demandas (búsquedas de compra/alquiler por cliente)  
+**Tipo de avance:** Backend / UI / Reglas de negocio
+
+### 🚀 Resumen del día
+
+He implementado el módulo completo de **Demandas**, que permite registrar qué busca cada cliente (tipo de operación, presupuesto, superficie, zonas y características deseadas).  
+El módulo está completamente integrado con **Clientes**, respeta los **roles** (admin, coordinador, comercial) y funciona tanto en local (`inmobiliaria.loc`) como en producción (`inmobiliaria.oswaldo.dev`) usando rutas relativas.
+
+---
+
+### 1. Modelo de datos (`app/Models/Demanda.php`)
+
+- Nuevo modelo `Demanda` mapeado a la tabla `demandas`:
+  - `id_demanda`, `cliente_id`, `comercial_id`
+  - `tipo_operacion` (compra, alquiler, vacacional)
+  - `rango_precio_min`, `rango_precio_max`
+  - `superficie_min`, `habitaciones_min`, `banos_min`
+  - `zonas` (texto libre)
+  - `caracteristicas` (JSON)
+  - `estado` (activa, en_gestion, pausada, archivada)
+  - `activo`, `archivado`, `fecha_alta`, `fecha_archivado`
+
+- Conexión a BD reutilizando `Database::conectar()` para mantener consistencia con el resto de modelos.
+- Métodos principales:
+  - `paginateAdmin($userId, $rol, $filtros, $page, $perPage)`
+  - `findById($id)`
+  - `create($data)`
+  - `update($id, $data)`
+  - `delete($id)`
+  - `getByCliente($clienteId)`
+
+- Campo `caracteristicas`:
+  - Al guardar: `json_encode($data['caracteristicas'] ?? [])`.
+  - Al leer: siempre se decodifica a **array**, nunca `null`, para simplificar la lógica de las vistas.
+
+---
+
+### 2. Controlador (`app/Controllers/DemandaController.php`)
+
+- Reescritura completa del controlador para implementar el CRUD:
+  - `index()`: listado de demandas con filtros por tipo, estado, comercial y precio.
+  - `create()`: muestra el formulario de alta (desde listado o desde ficha de cliente).
+  - `store()`: valida y guarda una nueva demanda.
+  - `edit()`: carga una demanda existente para edición.
+  - `update()`: valida cambios y actualiza.
+  - `delete()`: borrado de demandas (solo admin/coordinador).
+
+- Reutilización de helpers ya existentes (copiados del controlador de Inmuebles):
+  - `requireAuth()`, `requireRole()`
+  - `currentUserId()`, `currentUserRole()`, `isAdminOrCoordinador()`
+  - `csrfToken()`, `csrfValidate()`
+  - `validateReturnTo()`, `addQueryParam()`
+  - `ensurePost()` (para asegurar que ciertas acciones vayan siempre por POST).
+
+- **Reglas de negocio por rol:**
+  - Admin/Coordinador:
+    - Ven **todas** las demandas.
+    - Pueden filtrar por comercial.
+    - Pueden crear/editar/borrar demandas de cualquier cliente.
+  - Comercial:
+    - Solo ve demandas de **sus clientes** (tabla `clientes.usuario_id`).
+    - Solo puede crear/editar demandas asociadas a sus clientes.
+    - No puede crear demandas para clientes de otros comerciales (se valida en servidor).
+
+- Asignación de `comercial_id`:
+  - Admin/Coordinador: se hereda del cliente (`cliente->usuario_id`).
+  - Comercial: se fuerza siempre al `user_id` actual de sesión.
+
+---
+
+### 3. Vistas del módulo Demandas
+
+#### `app/Views/admin/demandas/index.php`
+
+- Listado paginado con columnas:
+  - Cliente, Comercial, Tipo de operación
+  - Rango de precio (mín–máx)
+  - Superficie mínima, habitaciones, baños
+  - Estado, fecha de alta
+- Filtros en la parte superior:
+  - Tipo de operación (compra / alquiler / vacacional)
+  - Estado
+  - Comercial (solo visible para admin/coordinador)
+  - Rango de precio mínimo/máximo
+- Botones de acción:
+  - **Editar** demanda.
+  - **Eliminar** demanda (solo admin/coordinador, vía POST + CSRF).
+
+#### `app/Views/admin/demandas/form.php`
+
+- Formulario reutilizable para crear y editar demandas:
+  - Cliente:
+    - Si se entra desde la ficha de cliente → campo de texto **readonly** + `cliente_id` oculto.
+    - Si se entra desde el listado → `<select>` con clientes (filtrado según rol).
+  - Tipo de operación (`select`).
+  - Rango de precio (`rango_precio_min`, `rango_precio_max`):
+    - `input type="number" step="1" min="0"`.
+    - Cualquier decimal queda truncado a entero en servidor.
+  - Superficie mínima, habitaciones mínimas, baños mínimos.
+  - Zonas: textarea libre.
+  - Características: checkboxes que se guardan en el JSON (`garaje`, `piscina`, `ascensor`, `terraza`, etc.).
+  - Estado de la demanda (activa / en_gestion / pausada / archivada).
+  - Campos ocultos: `csrf_token` y `return_to`.
+
+- Manejo de errores:
+  - Los errores de validación se muestran junto a cada campo (array `$errors`).
+  - El formulario repinta los valores anteriores con `$old` para no perder el trabajo del usuario.
+
+---
+
+### 4. Integración con Clientes
+
+#### `app/Controllers/ClienteController.php`
+
+- Nueva propiedad `$demandaModel` inyectando `App\Models\Demanda`.
+- En el método `edit()`:
+  - Además de los inmuebles del cliente, se cargan sus demandas:  
+    ` $demandasCliente = $this->demandaModel->getByCliente($id);`
+  - Se pasan a la vista para mostrarlas en una tabla.
+
+#### `app/Views/admin/clientes/edit.php`
+
+- Botón "➕ Añadir demanda" corregido para incluir `return_to` y `cliente_id`.
+- Nueva sección “Demandas de este cliente” con tabla:
+  - Tipo, precio min–máx, superficie, estado, fecha, acciones.
+  - Botón **Editar** que respeta el patrón `return_to` (se vuelve a la ficha de cliente tras guardar).
+
+---
+
+### 5. Rutas y navegación
+
+- Rutas registradas en `public/index.php`:
+
+  - `GET  /admin/demandas` → `DemandaController@index`
+  - `GET  /admin/demandas/nueva` → `DemandaController@create`
+  - `POST /admin/demandas/guardar` → `DemandaController@store`
+  - `GET  /admin/demandas/editar` → `DemandaController@edit`
+  - `POST /admin/demandas/actualizar` → `DemandaController@update`
+  - `POST /admin/demandas/borrar` → `DemandaController@delete`
+
+- En el `dashboard` se ha añadido un acceso directo al módulo de Demandas.
+
+---
+
+### 6. Estado final del módulo Demandas
+
+- ✅ CRUD completo (alta, edición, listado, borrado).
+- ✅ Control de acceso por rol (admin, coordinador, comercial).
+- ✅ Integración con la ficha de cliente (tabla de demandas + botón “Añadir demanda”).
+- ✅ Validación de seguridad (CSRF, permisos por cliente, limpieza de datos).
+- ✅ Campo JSON `caracteristicas` gestionado de forma transparente.
+- ✅ Funciona tanto en local (`inmobiliaria.loc`) como en producción (`inmobiliaria.oswaldo.dev`).
+
+## ✅ 08/12/2025 (Módulo Demandas: CRM de necesidades de clientes)
+
+**Tema:** Implementación completa del módulo de Demandas (peticiones de compra/alquiler) con control de roles e integración en la ficha de cliente.  
+**Tipo de avance:** Backend / CRM / UX
+
+### 🚀 Resumen del día
+
+Se ha desarrollado el módulo **Demandas**, que permite registrar y gestionar las necesidades de búsqueda de inmuebles de cada cliente (tipo de operación, rango de precio, superficie mínima, habitaciones, zonas y características extra como garaje o piscina).  
+
+El módulo respeta la arquitectura MVC existente, se integra con la ficha de cliente y aplica control estricto por rol:  
+- **Admin / Coordinador:** ven y gestionan todas las demandas.  
+- **Comercial:** solo puede ver y crear demandas de los **clientes que tiene asignados**.
+
+Además, se ha unificado el flujo de navegación con el patrón `return_to`, permitiendo ir y volver de la ficha del cliente sin “perderse” por el backoffice.
+
+### 🔧 Cambios realizados
+
+#### 1. Modelo `Demanda` (app/Models/Demanda.php)
+
+- Nuevo modelo que mapea la tabla `demandas` (16 campos principales: `cliente_id`, `comercial_id`, `tipo_operacion`, `rango_precio_min`, `rango_precio_max`, `superficie_min`, `habitaciones_min`, `banos_min`, `zonas`, `caracteristicas`, `estado`, flags `activo/archivado`, fechas, etc.).
+- Conexión a BD centralizada vía `Database::conectar()`.
+- Métodos implementados:
+  - `paginateAdmin(int $userId, string $rol, array $filtros, int $page, int $perPage)`: listado con paginación y filtro por rol (comercial solo ve demandas de sus clientes).
+  - `findById(int $id)`: obtención de una demanda concreta.
+  - `getByCliente(int $clienteId)`: listado de demandas asociadas a un cliente.
+  - `create(array $data)`: alta de demanda.
+  - `update(int $id, array $data)`: actualización de demanda.
+  - `delete(int $id)`: borrado definitivo, respetando las FKs `ON DELETE CASCADE`.
+- Campo JSON `caracteristicas`:
+  - **Al guardar:** se serializa como `json_encode(array)` (nunca `NULL`).
+  - **Al leer:** se deserializa siempre a `array` (`[]` por defecto), evitando avisos en PHP.
+
+#### 2. Controlador `DemandaController` (app/Controllers/DemandaController.php)
+
+- Reescritura completa del controlador con los métodos:
+  - `index()`: listado con filtros (tipo de operación, estado, comercial, rango de precio) y paginación.
+  - `create()`: muestra formulario de alta, soportando `cliente_id` + `return_to` al venir desde la ficha de cliente.
+  - `store()`: alta con validación de datos, permisos por rol y protección CSRF.
+  - `edit($id)`: carga de demanda existente, controlando que el comercial solo edite demandas de sus clientes.
+  - `update($id)`: actualización con las mismas reglas de validación y permisos que `store()`.
+  - `delete($id)`: borrado disponible solo para admin/coordinador (POST + CSRF).
+- Helpers reutilizados/replicados siguiendo el patrón de `InmuebleController`:
+  - `currentUserId()`, `currentUserRole()`, `isAdminOrCoordinador()`
+  - `requireAuth()`, `requireRole()`, `ensurePost()`
+  - `csrfToken()`, `csrfValidate()`
+  - `validateReturnTo()`, `addQueryParam()`
+- Lógica de negocio clave:
+  - El `comercial_id` de la demanda **siempre se hereda del cliente** (`cliente.usuario_id`).
+  - Un comercial **no puede** crear ni editar demandas de clientes que no le pertenecen.
+
+#### 3. Vistas admin de Demandas (app/Views/admin/demandas)
+
+- `index.php` (NUEVA):
+  - Tabla con columnas: Cliente, Comercial, Tipo, Precio min–max, Superficie mín., Habitaciones mín., Estado, Fecha alta y Acciones.
+  - Filtros por GET: tipo de operación, estado, comercial (solo visible para admin/coordinador) y rango de precio.
+  - Botón **“+ Nueva demanda”** que lleva a `/admin/demandas/nueva`.
+  - Paginación manteniendo filtros activos.
+  - Mensajes de estado (`?msg=created|updated|deleted`).
+
+- `form.php` (NUEVA, sustituyendo placeholder):
+  - Soporta dos flujos:
+    - Alta desde ficha de cliente: cliente en `readonly` + `cliente_id` oculto.
+    - Alta desde listado global: `select` de cliente (filtrado por comercial si rol = comercial).
+  - Campos:
+    - Tipo de operación: `compra | alquiler | vacacional`.
+    - Rango de precio: `rango_precio_min` / `rango_precio_max` (`step="1"`).
+    - Criterios mínimos: `superficie_min`, `habitaciones_min`, `banos_min`.
+    - Zonas: `textarea`.
+    - Características (checkboxes → JSON): garaje, piscina, ascensor, terraza, amueblado, trastero, jardín, etc.
+    - Estado: `activa | en_gestion | pausada | archivada`.
+  - Campos ocultos:
+    - `csrf_token`
+    - `return_to`
+    - `id` (en edición).
+  - Gestión de errores y `old()` para repintar el formulario cuando hay validaciones fallidas.
+
+#### 4. Integración con Clientes
+
+- `app/Controllers/ClienteController.php`:
+  - Se inyecta el modelo `Demanda` (`$this->demandaModel = new Demanda();`).
+  - En `edit()` se cargan las demandas del cliente: `$demandasCliente = $this->demandaModel->getByCliente($id);`.
+
+- `app/Views/admin/clientes/edit.php`:
+  - Sección nueva **“Demandas de este cliente”** con tabla resumen.
+  - Botón **“➕ Añadir demanda”** que pasa `cliente_id` y `return_to=/admin/clientes/editar?id=...`.
+  - En la tabla cada fila incluye enlace “Editar” que respeta `return_to` para volver a la ficha del cliente tras guardar.
+
+#### 5. Rutas y navegación
+
+- `public/index.php`:
+  - Registro de rutas del módulo:
+    - GET  `/admin/demandas`
+    - GET  `/admin/demandas/nueva`
+    - POST `/admin/demandas/guardar`
+    - GET  `/admin/demandas/editar`
+    - POST `/admin/demandas/actualizar`
+    - POST `/admin/demandas/borrar`
+- `app/Views/admin/dashboard.php`:
+  - Añadido acceso directo a **Demandas** junto a otros módulos del backoffice.
+
+### 📝 Archivos clave creados/modificados
+
+- **Modelos**
+  - `app/Models/Demanda.php` (NUEVO)
+
+- **Controladores**
+  - `app/Controllers/DemandaController.php` (REESCRITO)
+  - `app/Controllers/ClienteController.php` (MODIFICADO – integración de demandas)
+
+- **Vistas**
+  - `app/Views/admin/demandas/index.php` (NUEVA)
+  - `app/Views/admin/demandas/form.php` (NUEVA)
+  - `app/Views/admin/clientes/edit.php` (MODIFICADA – sección de demandas + botón de alta)
+
+- **Core / Routing / Navegación**
+  - `public/index.php` (MODIFICADO – rutas de demandas)
+  - `app/Views/admin/dashboard.php` (MODIFICADO – acceso desde panel)
+
+### ✅ Estado Final
+
+El módulo **Demandas** queda **operativo y alineado con el resto del CRM**:
+
+- Control de permisos coherente con el rol del usuario.
+- Flujo natural desde la ficha del cliente.
+- Datos estructurados y consistentes (incluyendo características en JSON).
+- Preparado para futuros cruces automáticos `demandas ↔ inmuebles`.
