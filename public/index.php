@@ -142,8 +142,12 @@ $router->post('/admin/inmuebles/actualizar', [InmuebleController::class, 'update
 $router->post('/admin/inmuebles/borrar', [InmuebleController::class, 'delete']);
 
 // Demandas
-$router->get('/admin/demandas/nuevo', [DemandaController::class, 'create']);
-// $router->post('/admin/demandas/guardar', [DemandaController::class, 'store']);
+$router->get('/admin/demandas', [DemandaController::class, 'index']);
+$router->get('/admin/demandas/nueva', [DemandaController::class, 'create']);
+$router->post('/admin/demandas/guardar', [DemandaController::class, 'store']);
+$router->get('/admin/demandas/editar', [DemandaController::class, 'edit']);
+$router->post('/admin/demandas/actualizar', [DemandaController::class, 'update']);
+$router->post('/admin/demandas/borrar', [DemandaController::class, 'delete']);
 
 // ===============================
 // 6. Despachar

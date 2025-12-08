@@ -16,7 +16,11 @@
                 <a href="<?= htmlspecialchars($nuevoInmuebleLink) ?>" class="btn btn-outline-primary me-2">
                     <i class="bi bi-house-add"></i> ➕ Añadir inmueble
                 </a>
-                <a href="/admin/demandas/nuevo?cliente_id=<?= (int)$cliente->id_cliente ?>" class="btn btn-outline-secondary">
+                <?php
+                    $returnPath = '/admin/clientes/editar?id=' . (int)$cliente->id_cliente;
+                    $nuevaDemandaLink = '/admin/demandas/nueva?cliente_id=' . (int)$cliente->id_cliente . '&return_to=' . urlencode($returnPath);
+                ?>
+                <a href="<?= htmlspecialchars($nuevaDemandaLink) ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-search"></i> ➕ Añadir demanda
                 </a>
             </div>
@@ -152,8 +156,95 @@
                     <?php endif; ?>
                 </div>
             </div>
+        <!-- Demandas del Cliente -->
+<div class="card mt-4 shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0">Demandas de este cliente</h5>
+    </div>
+    <div class="card-body">
+        <?php if (empty($demandasCliente)): ?>
+            <p class="text-muted mb-0">Este cliente no tiene demandas registradas todavía.</p>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Precio</th>
+                            <th>Superficie</th>
+                            <th>Hab./Baños</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($demandasCliente as $dem): ?>
+                            <tr>
+                                <td>
+                                    <span class="badge bg-<?= match($dem['tipo_operacion']) {
+                                        'compra' => 'primary',
+                                        'alquiler' => 'info',
+                                        'vacacional' => 'warning',
+                                        default => 'secondary'
+                                    } ?>">
+                                        <?= htmlspecialchars(ucfirst($dem['tipo_operacion'])) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small>
+                                        <?php if ($dem['rango_precio_min'] || $dem['rango_precio_max']): ?>
+                                            <?= $dem['rango_precio_min'] ? number_format((float)$dem['rango_precio_min'], 0, ',', '.') : '0' ?> - 
+                                            <?= $dem['rango_precio_max'] ? number_format((float)$dem['rango_precio_max'], 0, ',', '.') : '∞' ?> €
+                                        <?php else: ?>
+                                            -
+                                        <?php endif; ?>
+                                    </small>
+                                </td>
+                                <td>
+                                    <small><?= $dem['superficie_min'] ? $dem['superficie_min'] . ' m²' : '-' ?></small>
+                                </td>
+                                <td>
+                                    <small>
+                                        <?= $dem['habitaciones_min'] ?? '-' ?> / <?= $dem['banos_min'] ?? '-' ?>
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-<?= match($dem['estado']) {
+                                        'activa' => 'success',
+                                        'en_gestion' => 'primary',
+                                        'pausada' => 'warning',
+                                        'archivada' => 'secondary',
+                                        default => 'secondary'
+                                    } ?>">
+                                        <?= htmlspecialchars(ucfirst(str_replace('_', ' ', $dem['estado']))) ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small><?= date('d/m/Y', strtotime($dem['fecha_alta'])) ?></small>
+                                </td>
+                                <td class="text-end">
+                                    <?php
+                                        $returnPathDemanda = '/admin/clientes/editar?id=' . $cliente->id_cliente;
+                                        $editLinkDemanda = '/admin/demandas/editar?id=' . $dem['id_demanda'] . '&return_to=' . urlencode($returnPathDemanda);
+                                    ?>
+                                    <a href="<?= htmlspecialchars($editLinkDemanda) ?>" class="btn btn-sm btn-outline-primary">
+                                        Editar
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+            </div>
         </div>
     </div>
 </div>
 
 <?php require VIEW . '/layouts/footer.php'; ?>
+

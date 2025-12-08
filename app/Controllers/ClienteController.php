@@ -6,12 +6,14 @@ namespace App\Controllers;
 use App\Core\Csrf;
 use App\Models\Cliente;
 use App\Models\User;
+use App\Models\Demanda;
 
 class ClienteController
 {
     private Cliente $clienteModel;
     private User $userModel;
     private \App\Models\Inmueble $inmuebleModel;
+    private Demanda $demandaModel;
 
     public function __construct()
     {
@@ -22,6 +24,7 @@ class ClienteController
         $this->clienteModel = new Cliente();
         $this->userModel = new User();
         $this->inmuebleModel = new \App\Models\Inmueble();
+        $this->demandaModel = new Demanda();
     }
 
     public function index(): void
@@ -83,6 +86,9 @@ class ClienteController
         
         // Obtener inmuebles del cliente
         $inmueblesCliente = $this->inmuebleModel->getByPropietario($id);
+        
+        // Obtener demandas del cliente
+        $demandasCliente = $this->demandaModel->getByCliente($id);
 
         $csrfToken = Csrf::token();
         require VIEW . '/admin/clientes/edit.php';
