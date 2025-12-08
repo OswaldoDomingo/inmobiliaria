@@ -936,3 +936,44 @@ El módulo **Demandas** queda **operativo y alineado con el resto del CRM**:
 - Flujo natural desde la ficha del cliente.
 - Datos estructurados y consistentes (incluyendo características en JSON).
 - Preparado para futuros cruces automáticos `demandas ↔ inmuebles`.
+
+## 🗓️ 2025-12-08 (Seguridad por roles en el módulo de Inmuebles)
+
+**Tema:** Hardening de permisos en el CRUD de inmuebles  
+**Tipo de avance:** Backend / Seguridad de roles
+
+### 🚀 Resumen
+
+Se ha corregido un fallo crítico de seguridad: un comercial podía ver y editar inmuebles de otros comerciales e incluso “quedárselos” cambiando el propietario desde el formulario o manipulando la URL.  
+Ahora cada comercial solo puede trabajar con los inmuebles de **su propia cartera de clientes**.
+
+### 🔧 Cambios realizados
+
+- **Modelo `Inmueble`**
+  - `paginateAdmin()` ahora recibe también `userId` y `rol`.
+  - Para roles `admin`/`coordinador` devuelve todos los inmuebles.
+  - Para rol `comercial` añade un JOIN con `clientes` y filtra por `clientes.usuario_id = :userId`, de forma que solo se paginan inmuebles de sus clientes.
+
+- **`InmuebleController`**
+  - `index()` pasa al modelo el `userId` y el `rol` actual para que la paginación ya venga filtrada.
+  - `create()/store()`:
+    - Admin/Coordinador pueden seleccionar cualquier propietario.
+    - El comercial solo ve en el `<select>` clientes de su cartera.
+    - En servidor se valida que el `cliente_id` pertenece al comercial; si no, se devuelve error de permisos.
+  - `edit()/update()`:
+    - Solo permite editar inmuebles cuyo propietario (`clientes.usuario_id`) coincide con el `userId` del comercial.
+    - Si intenta cambiar el propietario a un cliente de otro comercial, se cancela la operación (403 / mensaje de error).
+
+### ✅ Archivos clave tocados
+
+- `app/Models/Inmueble.php`
+- `app/Controllers/InmuebleController.php`
+
+### 🧪 Pruebas realizadas
+
+- Como **comercial**:
+  - Listado `/admin/inmuebles` solo muestra inmuebles de sus clientes.
+  - Acceso directo por URL a un inmueble de otro comercial → bloqueado.
+  - Intento de crear/editar inmueble para cliente ajeno → error de permisos.
+- Como **admin/coordinador**:
+  - Sigue viendo y gestionando todos los inmuebles sin restricciones.

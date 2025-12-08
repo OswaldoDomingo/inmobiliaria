@@ -13,7 +13,7 @@ Gestión completa de inmuebles en backoffice (CRUD) y publicación en parte púb
 - POST /admin/inmuebles/actualizar → edición (CSRF)
 - POST /admin/inmuebles/borrar → borrado (CSRF)
 
-Permisos: admin/coordinador.
+Permisos: admin/coordinador (gestión completa) y comercial (solo inmuebles de su cartera de clientes).
 
 ### Público
 - GET /inmuebles → listado solo estado='Publicado'
@@ -199,3 +199,36 @@ Con esta mejora, el módulo de inmuebles ofrece una navegación mucho más coher
 
 Adicionalmente, se ha creado el documento `docs/verificacion_return_path.md` donde se describe de forma detallada el plan de pruebas, los casos ejecutados (incluyendo pruebas específicas de persistencia del `return_to` tras errores de validación) y los resultados obtenidos.  
 Durante estas pruebas se confirmó también el comportamiento de seguridad frente a intentos de redirección externa, verificando que el sistema realiza siempre un fallback seguro cuando el `return_to` no supera la validación.
+
+## Control de seguridad por roles en Inmuebles (Actualización 08/12/2025)
+
+En la primera versión del CRUD de inmuebles se detectó un problema grave:  
+un comercial podía acceder, mediante URL directa o manipulando el formulario, a inmuebles de otros comerciales e incluso “quedárselos” cambiando el propietario.
+
+Para respetar la regla de negocio **“cada comercial solo gestiona los inmuebles de sus clientes”**, se han aplicado las siguientes medidas:
+
+### 1. Filtrado en el modelo (`Inmueble::paginateAdmin()`)
+
+- Nueva firma: `paginateAdmin(int $userId, string $rol, array $filtros, int $page, int $perPage)`.
+- Comportamiento:
+  - **Admin / Coordinador** → sin filtro por comercial (ven todos los inmuebles).
+  - **Comercial** → se añade JOIN con `clientes` y condición `clientes.usuario_id = :userId`, de forma que solo se devuelven inmuebles de su cartera.
+
+### 2. Validaciones en el controlador (`InmuebleController`)
+
+- `index()`:
+  - Obtiene `userId` y `rol` desde la sesión y los pasa al modelo.
+- `create()/store()`:
+  - Admin/Coordinador → `<select>` de propietarios con todos los clientes.
+  - Comercial → `<select>` limitado a **sus** clientes.
+  - En servidor se valida que el `cliente_id` enviado pertenece al comercial logueado, incluso si manipula el HTML desde las herramientas de desarrollo.
+- `edit()/update()`:
+  - Carga el inmueble con el cliente asociado.
+  - Solo permite editar si `clientes.usuario_id === userId` (para comerciales).
+  - Si se intenta cambiar el propietario a un cliente ajeno, el sistema devuelve error de permiso y no guarda cambios.
+
+### 3. Resultado
+
+- Cada comercial trabaja únicamente con la cartera de inmuebles de sus clientes.
+- Se evita que un comercial pueda ver, editar o “robar” inmuebles de otros compañeros.
+- Se refuerza el principio de **Security by Design** en uno de los módulos más críticos del panel de administración.

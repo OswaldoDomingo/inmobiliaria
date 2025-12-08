@@ -287,6 +287,34 @@ Se han realizado pruebas manuales con diferentes escenarios:
 
 Durante estas pruebas apareció una advertencia deprecada en PHP 8.5 relacionada con `finfo_close()`, que se solucionó eliminando la llamada explícita, ya que los objetos `finfo` se liberan automáticamente en versiones recientes del intérprete. Esta incidencia ha servido para ajustar el código a las nuevas versiones de PHP y mantener la compatibilidad futura.
 
+### 3.3.5.5 Refuerzo de seguridad en el módulo de Inmuebles (control por rol)
+
+Durante las pruebas del módulo de Inmuebles se detectó un fallo crítico de seguridad:  
+un usuario con rol **Comercial** podía acceder a inmuebles de otros comerciales e incluso cambiar el propietario desde el formulario, “apropiándose” de la propiedad.
+
+Este comportamiento vulneraba directamente la regla de negocio definida para la agencia:  
+**cada comercial solo puede gestionar la cartera de inmuebles de sus propios clientes**.
+
+Para corregirlo se han introducido varios mecanismos de protección:
+
+- **Filtrado en el modelo (`Inmueble::paginateAdmin`)**  
+  El listado de inmuebles ahora recibe el `user_id` y el `rol` del usuario:
+  - Admin y coordinador ven todos los inmuebles.
+  - El rol comercial solo recibe inmuebles cuyo propietario (`clientes.usuario_id`) coincide con su `user_id`.
+
+- **Validaciones en controladores (`InmuebleController`)**  
+  Se han reforzado los métodos `create`, `store`, `edit` y `update`:
+  - En alta, un comercial solo puede seleccionar clientes de su cartera (y el servidor lo valida).
+  - En edición, únicamente puede abrir inmuebles de sus clientes.
+  - Si intenta cambiar el propietario a un cliente de otro comercial, la operación se bloquea y se devuelve un error de permisos.
+
+- **Consistency con la gestión de clientes**  
+  El módulo de Inmuebles queda alineado con la lógica de asignación de clientes (apartado 3.3.4), garantizando que:
+  - Si un cliente se reasigna a otro comercial, sus inmuebles pasan a formar parte de la nueva cartera.
+  - Nadie puede “robar” inmuebles manipulando formularios o URLs.
+
+Con este refuerzo, el módulo de Inmuebles deja de ser solo un CRUD técnico y pasa a comportarse como una herramienta de trabajo segura y coherente con la operativa real de una agencia inmobiliaria.
+
 ### 3.3.6. Cumplimiento normativo (RGPD y cookies)
 *   Paginas legales provisionales (aviso legal, privacidad, cookies) publicadas bajo `/legal/*` con controlador dedicado y vistas en `app/Views/legal/`, marcando que el contenido es temporal hasta validacion juridica.
 *   Footer reorganizado con enlaces legales visibles y las redes sociales oficiales en formato horizontal, debajo del bloque legal.
