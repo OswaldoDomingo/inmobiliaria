@@ -17,7 +17,7 @@ require VIEW . '/layouts/header.php';
             <p class="text-muted small mb-0">Gestión de propiedades</p>
         </div>
         <div class="btn-group">
-            <a href="/admin/dashboard" class="btn btn-outline-secondary">
+            <a href="/dashboard" class="btn btn-outline-secondary">
                 <i class="bi bi-speedometer2"></i> Mi Panel
             </a>
             <a href="/admin/inmuebles/nuevo" class="btn btn-primary">
@@ -222,3 +222,4 @@ require VIEW . '/layouts/header.php';
 </div>
 
 <?php require VIEW . '/layouts/footer.php'; ?>
+
