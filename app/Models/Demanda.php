@@ -43,7 +43,7 @@ class Demanda
         
         // Control por rol: comerciales solo ven demandas de sus clientes
         if (!$isAdminOrCoord) {
-            $sql .= " AND c.comercial_id = :user_id";
+            $sql .= " AND c.usuario_id = :user_id";
             $params[':user_id'] = $userId;
         }
         
@@ -240,4 +240,5 @@ class Demanda
         return $rows;
     }
 }
+
 

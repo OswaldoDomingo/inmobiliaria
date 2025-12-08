@@ -977,3 +977,11 @@ Ahora cada comercial solo puede trabajar con los inmuebles de **su propia carter
   - Intento de crear/editar inmueble para cliente ajeno → error de permisos.
 - Como **admin/coordinador**:
   - Sigue viendo y gestionando todos los inmuebles sin restricciones.
+### 7. Hotfix de visibilidad en listado de Demandas (08/12/2025)
+
+- Se detectó que los usuarios con rol **comercial** no veían ninguna demanda en `/admin/demandas`, incluso teniendo clientes con demandas creadas.
+- **Causa técnica:** en `Demanda::paginateAdmin()` el filtro del JOIN usaba la columna `c.comercial_id`, que no corresponde con el esquema actual, en lugar de `c.usuario_id` (FK real que enlaza clientes con su comercial).
+- **Solución aplicada:** se actualizó el JOIN para filtrar por `c.usuario_id = :userId` cuando el rol es `comercial`, manteniendo el comportamiento esperado:
+  - **Admin / Coordinador:** siguen viendo todas las demandas.
+  - **Comercial:** ve únicamente las demandas de los clientes que tiene asignados.
+- **Impacto:** corrección puntual y acotada al modelo `Demanda`; no se han tocado controladores ni vistas. Se valida que el control de roles descrito en esta sección se cumple también en el listado global de demandas.
