@@ -12,7 +12,7 @@ use PDOException;
  */
 class Inmueble
 {
-    public function paginateAdmin(array $filters, int $page, int $perPage): array
+    public function paginateAdmin(int $userId, string $rol, array $filters, int $page, int $perPage): array
     {
         $pdo = Database::conectar();
 
@@ -22,8 +22,18 @@ class Inmueble
 
         $params = [];
         $whereSql = $this->buildFilterWhere($filters, $params, false);
+        
+        // Control por rol: comerciales solo ven inmuebles de SUS clientes
+        $isComercial = !in_array($rol, ['admin', 'coordinador'], true);
+        if ($isComercial) {
+            // Añadir filtro: el cliente del inmueble debe pertenecer al comercial
+            $whereSql .= " AND c.usuario_id = :comercial_user_id";
+            $params[':comercial_user_id'] = $userId;
+        }
 
-        $countSql = "SELECT COUNT(*) FROM inmuebles i {$whereSql}";
+        $countSql = "SELECT COUNT(*) FROM inmuebles i 
+                     JOIN clientes c ON i.propietario_id = c.id_cliente
+                     {$whereSql}";
         $countStmt = $pdo->prepare($countSql);
         foreach ($params as $key => $value) {
             $countStmt->bindValue($key, $value);
@@ -67,7 +77,9 @@ class Inmueble
         $params = [];
         $whereSql = $this->buildFilterWhere($filters, $params, true);
 
-        $countSql = "SELECT COUNT(*) FROM inmuebles i {$whereSql}";
+        $countSql = "SELECT COUNT(*) FROM inmuebles i 
+                     JOIN clientes c ON i.propietario_id = c.id_cliente
+                     {$whereSql}";
         $countStmt = $pdo->prepare($countSql);
         foreach ($params as $key => $value) {
             $countStmt->bindValue($key, $value);
@@ -295,3 +307,5 @@ class Inmueble
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 }
+
+

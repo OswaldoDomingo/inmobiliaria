@@ -37,7 +37,9 @@ final class InmuebleController
         $page    = max(1, (int)($_GET['page'] ?? 1));
         $perPage = 15;
 
-        $result = $this->inmuebles->paginateAdmin($filters, $page, $perPage);
+        $userId = $this->currentUserId();
+        $rol = $this->currentUserRole();
+        $result = $this->inmuebles->paginateAdmin($userId, $rol, $filters, $page, $perPage);
         $propietarios = $this->clientes->listForSelect();
         $csrfToken = $this->csrfToken();
 
@@ -234,11 +236,20 @@ final class InmuebleController
 
         [$data, $errors] = $this->validateInput($_POST);
 
-        // propietario existe
+        // propietario existe y pertenece al comercial (si es comercial)
         if (empty($errors['propietario_id'])) {
             $prop = $this->clientes->findById((int)$data['propietario_id']);
             if (!$prop) {
                 $errors['propietario_id'] = 'Propietario no válido.';
+            } else {
+                // Control por rol: comercial solo puede actualizar inmuebles para sus clientes
+                $rol = $this->currentUserRole();
+                $userId = $this->currentUserId();
+                if (!in_array($rol, ['admin', 'coordinador'], true)) {
+                    if ((int)$prop->usuario_id !== $userId) {
+                        $errors['propietario_id'] = 'No tienes permiso para modificar inmuebles de este cliente.';
+                    }
+                }
             }
         }
 
@@ -614,4 +625,9 @@ $mimeType = $finfo->file($file['tmp_name']);
         return $uniqueName;
     }
 }
+
+
+
+
+
 
