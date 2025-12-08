@@ -26,13 +26,13 @@ class HomeController
         // El sÃ­mbolo '!' significa NO.
         // Traducción: "Si NO está definida la variable 'tarjeta_vista'..."
 
-        $mostrar_tarjeta = true; // Variable para mostrar la tarjeta de temporada o no
+        $mostrar_tarjeta = false; // Variable para mostrar la tarjeta de temporada o no
         if (!isset($_SESSION['tarjeta_vista'])) {
         // 2. IMPORTANTE: Ponemos el "sello" inmediatamente para la próxima vez
             $_SESSION['tarjeta_vista'] = true;
         } else {
             // Si ya existe la variable, es que ya entró antes
-            $mostrar_tarjeta = false;
+            $mostrar_tarjeta = true;
         }
         require VIEW . '/layouts/header.php';
         require VIEW . '/home.php';
