@@ -190,22 +190,17 @@
                                     <td class="text-end">
                                         <a href="/admin/demandas/editar?id=<?= (int)$dem['id_demanda'] ?>" 
                                            class="btn btn-sm btn-outline-primary" title="Editar">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
+                                            <i class="bi bi-pencil"></i> Editar</a>
                                         
-                                        <?php 
-                                            $rolActual = $_SESSION['user_role'] ?? ($_SESSION['rol'] ?? 'comercial');
-                                            if (in_array($rolActual, ['admin', 'coordinador'], true)): 
-                                        ?>
-                                            <form action="/admin/demandas/borrar" method="POST" class="d-inline" 
-                                                  onsubmit="return confirm('¿Seguro que deseas eliminar esta demanda?')">
-                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
-                                                <input type="hidden" name="id" value="<?= (int)$dem['id_demanda'] ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
-                                        <?php endif; ?>
+
+                                        <form action="/admin/demandas/borrar" method="POST" class="d-inline"
+                                              onsubmit="return confirm('¿Seguro que deseas eliminar esta demanda?')">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
+                                            <input type="hidden" name="id" value="<?= (int)$dem['id_demanda'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                <i class="bi bi-trash"></i> Borrar
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -238,3 +233,5 @@
 </div>
 
 <?php require VIEW . '/layouts/footer.php'; ?>
+
+

@@ -985,3 +985,28 @@ Ahora cada comercial solo puede trabajar con los inmuebles de **su propia carter
   - **Admin / Coordinador:** siguen viendo todas las demandas.
   - **Comercial:** ve únicamente las demandas de los clientes que tiene asignados.
 - **Impacto:** corrección puntual y acotada al modelo `Demanda`; no se han tocado controladores ni vistas. Se valida que el control de roles descrito en esta sección se cumple también en el listado global de demandas.
+
+Tema: Visibilidad de botones y permisos de borrado para comerciales
+Tipo de avance: Frontend / Backend / Permisos
+
+🐛 Problemas detectados
+UI: En el listado /admin/demandas, los botones de "Editar" y "Borrar" mostraban solo iconos sin texto visible, dificultando su reconocimiento.
+Permisos: Los comerciales no podían eliminar demandas de sus propios clientes, aunque sí podían editarlas. Esta restricción era innecesariamente estricta y no había riesgo de conflicto con la estructura de BD (la FK cliente_id con ON DELETE CASCADE gestiona la integridad correctamente).
+🔧 Solución aplicada
+1. Vista app/Views/admin/demandas/index.php
+Añadido texto visible a los botones de acción:
+Antes: <i class="bi bi-pencil"></i> (solo icono)
+Ahora: <i class="bi bi-pencil"></i> Editar (icono + texto)
+Antes: <i class="bi bi-trash"></i> (solo icono)
+Ahora: <i class="bi bi-trash"></i> Borrar (icono + texto)
+Eliminada restricción de rol para mostrar el botón de borrado (ahora visible para todos los roles, pero validado en servidor).
+2. Controlador app/Controllers/DemandaController.php (método delete())
+Antes: Solo admin y coordinador podían borrar (requireRole).
+Ahora: Comerciales pueden borrar demandas de sus propios clientes con validación: php // Se carga la demanda y se verifica el propietario if (!$this->isAdminOrCoordinador($rol)) {     $cliente = $this->clientes->findById((int)$demanda->cliente_id);     if (!$cliente || (int)$cliente->usuario_id !== $userId) {         $this->redirect('/admin/demandas?error=forbidden');     } } 
+✅ Resultado
+Todos los roles: Ven claramente los textos "Editar" y "Borrar" en los botones de acción.
+Admin/Coordinador: Pueden borrar cualquier demanda (sin cambios).
+Comercial: Ahora pueden borrar demandas de sus clientes asignados, pero no de clientes ajenos (validación en servidor).
+📝 Archivos modificados
+app/Views/admin/demandas/index.php
+app/Controllers/DemandaController.php
