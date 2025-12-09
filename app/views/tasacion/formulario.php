@@ -168,8 +168,8 @@
                 </div>
 
                 <!-- 2. Estado Intermedio: Formulario de Contacto (Captación) -->
-                <div id="contact-form-container"
-                    class="hidden bg-white border border-gray-200 rounded-2xl p-6 shadow-lg flex-1 flex-col animate-fade-in absolute inset-0 z-10">
+                <div id="contact-form-container" style="display:none;"
+                    class="hidden bg-white border border-gray-200 rounded-2xl p-6 shadow-lg flex-1 flex-col animate-fade-in w-full">
 
                     <!-- Gancho visual: Precio Estimado -->
                     <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center mb-6">
@@ -225,7 +225,7 @@
                 </div>
 
                 <!-- 3. Estado Final: Resultado Detallado -->
-                <div id="result-content"
+                <div id="result-content" style="display:none;"
                     class="hidden bg-indigo-50 border border-indigo-100 rounded-2xl p-6 sm:p-8 flex-1 flex-col animate-fade-in relative z-0">
                     <div class="flex items-center gap-2 text-indigo-700 font-semibold mb-4">
                         <i data-lucide="check-circle" class="w-5 h-5"></i>
@@ -558,9 +558,16 @@
 
             // Mostrar el formulario de contacto con el precio preview
             els.previewPriceRange.textContent = `${fmt.format(priceMin)} - ${fmt.format(priceMax)}`;
+            
+            // Ocultar placeholder y resultado previo (si existe)
             els.resultPlaceholder.classList.add('hidden');
+            els.resultPlaceholder.style.display = 'none';
+            els.resultContent.classList.add('hidden');
+            els.resultContent.style.display = 'none';
+            
+            // Mostrar formulario de contacto
             els.contactContainer.classList.remove('hidden');
-            els.contactContainer.classList.add('flex');
+            els.contactContainer.style.display = 'flex';
         }
 
         // PASO 2: Enviar Emails y Mostrar Resultado Final
@@ -609,12 +616,14 @@
 
                 // Transición al resultado final
                 els.contactContainer.classList.add('hidden');
+                els.contactContainer.style.display = 'none';
                 renderFinalResult();
 
             } catch (error) {
                 console.error("Error intentando enviar email (continuando flujo):", error);
                 // Si falla el email, mostramos el resultado igual para no perder al usuario
                 els.contactContainer.classList.add('hidden');
+                els.contactContainer.style.display = 'none';
                 renderFinalResult();
             } finally {
                 btn.disabled = false;
@@ -643,7 +652,7 @@
             }
 
             els.resultContent.classList.remove('hidden');
-            els.resultContent.classList.add('flex');
+            els.resultContent.style.display = 'flex';
         }
 
         document.addEventListener('DOMContentLoaded', () => {
