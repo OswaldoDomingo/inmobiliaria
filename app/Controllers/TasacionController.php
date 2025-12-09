@@ -94,6 +94,7 @@ class TasacionController
             }
 
             // 1. Sanitizacion estricta
+            $nombre = trim(strip_tags((string)($data['user_name'] ?? '')));
             $email_cliente = trim(filter_var($data['to_email'] ?? '', FILTER_SANITIZE_EMAIL));
             $telefono = trim(strip_tags((string)($data['user_phone'] ?? '')));
             $cp = trim(strip_tags((string)($data['cp'] ?? '')));
@@ -107,6 +108,10 @@ class TasacionController
 
             // 2. Validacion estricta
             $errors = [];
+
+            if (empty($nombre)) {
+                $errors[] = "El nombre es obligatorio.";
+            }
 
             if (empty($email_cliente) || !filter_var($email_cliente, FILTER_VALIDATE_EMAIL)) {
                 $errors[] = "El email no es valido.";
@@ -142,6 +147,7 @@ class TasacionController
             // Datos para las plantillas
             $templateData = [
                 'fecha' => $fecha,
+                'nombre' => $nombre,
                 'email_cliente' => $email_cliente,
                 'telefono' => $telefono,
                 'cp' => $cp,

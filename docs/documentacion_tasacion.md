@@ -10,7 +10,7 @@ El sistema funciona como un "gancho" comercial (Lead Magnet) para captar datos d
 2.  **Formulario**: Introduce datos básicos del inmueble:
     *   Ubicación (Barrio, Zona, CP).
     *   Características (Superficie, Habitaciones, etc.).
-    *   Datos de contacto (Email, Teléfono).
+    *   Datos de contacto (Nombre, Email, Teléfono).
 3.  **Resultado**:
     *   Se muestra en pantalla un rango de precio estimado (ej: 150.000€ - 180.000€).
     *   Se informa que un agente revisará la valoración.
