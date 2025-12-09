@@ -77,34 +77,46 @@ Este proyecto incorpora:
 
 ---
 
+## 🛠 Puesta en marcha rápida
+
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/OswaldoDomingo/inmobiliaria.git
+   cd inmobiliaria
+   ```
+
+2. **Base de datos:**
+   - Crear una base de datos en MySQL/MariaDB.
+   - Importar los scripts SQL ubicados en `database/`.
+
+3. **Configuración del entorno:**
+   - Copiar el archivo de ejemplo: `cp config/.env.example config/.env`
+   - Editar `config/.env` con tus credenciales de base de datos.
+   - Establecer `APP_ENV=local` para desarrollo.
+
+4. **Servidor Web:**
+   - Configurar VirtualHost en Apache apuntando a la carpeta `/public`.
+   - Acceder a `http://inmobiliaria.loc/` (Portal) o `http://inmobiliaria.loc/login` (Admin).
+
+---
+
 ## 🗁️ Estructura actual del proyecto
 
 ```bash
 /inmobiliaria/
 ├── app/
-│   ├── controllers/     # Controladores de la aplicación
-│   ├── core/            # Núcleo del MVC (Database, Autoloader, Router más adelante)
-│   ├── models/          # Modelos y acceso a datos
-│   └── views/           # Plantillas HTML/PHP
+│   ├── Controllers/     # Lógica de negocio y gestión de peticiones
+│   ├── Core/            # Núcleo del framework (Router, Database, Env...)
+│   ├── Lib/             # Librerías auxiliares (PDF, Utilidades...)
+│   ├── Models/          # Acceso a datos y lógica de dominio
+│   ├── Services/        # Servicios de aplicación (Email...)
+│   └── views/           # Plantillas HTML/PHP (admin, auth, layouts, partials...)
 │
-├── config/
-│   ├── env.php          # Carga del archivo .env
-│   ├── database.php     # Configuración de conexión
-│   └── paths.php        # Constantes de rutas absolutas
-│
-├── public/
-│   ├── index.php        # Punto de entrada del MVC
-│   └── assets/
-│       ├── css/
-│       ├── js/
-│       └── img/
-│
-├── storage/             # Logs, archivos temporales, etc.
-│
-├── docs/                # Documentación técnica y académica
-│
-├── .env                 # Variables de entorno (no se sube a GitHub)
-└── README.md
+├── config/              # Configuración centralizada (.env, constantes)
+├── database/            # Scripts SQL, seeds, migraciones
+├── public/              # DocumentRoot (assets, uploads, index.php)
+├── logs/                # Logs y archivos de depuración
+└── docs/                # Documentación del proyecto
 ```
 
 ---
@@ -120,19 +132,44 @@ https://www.figma.com/design/69B6hKjCAikIMAUKihlpLt/Inmobiliaria?node-id=0-1
 
 ---
 
+## 🚀 Funcionalidades Implementadas
+
+El proyecto se encuentra en una fase avanzada de desarrollo, con los módulos críticos operativos:
+
+### 🔐 Núcleo y Seguridad
+- **Router MVC propio:** Gestión de rutas limpias, parámetros y métodos HTTP.
+- **Seguridad:** Protección CSRF, sanitización de inputs, hash de contraseñas y prevención de fuerza bruta.
+- **Configuración:** Sistema robusto basado en variables de entorno (`.env`) nativo.
+
+### 🏢 Gestión e Intranet (Backoffice)
+- **Autenticación:** Login seguro, gestión de sesiones y roles (Admin, Coordinador, Comercial).
+- **Usuarios:** Gestión de empleados con fotos de perfil y control de accesos.
+- **CRM Clientes:** Cartera de clientes, asignación a comerciales y ficha detallada.
+- **Inmuebles:** CRUD completo, galería de imágenes, asignación de propietarios y comerciales.
+- **Demandas:** Registro de preferencias de búsqueda asociadas a clientes (operación, precio, zonas, características…), base para cruce futuro con inmuebles.
+
+### 📏 Tasador Online
+- **Formulario avanzado:** Herramienta de valoración integrada en el portal.
+- **Envío de informes:** Generación y envío de datos por correo a la agencia y al cliente.
+- **Seguridad:** Validación y sanitización exhaustiva para evitar inyecciones.
+
+### 🌍 Portal Público
+- **Landing Page y Buscador:** Página de inicio con destacados.
+- **Catálogo de Propiedades:** Listado paginado y ficha de detalle.
+- **Legal:** Módulo de cumplimiento RGPD (Cookies, Privacidad, Aviso Legal).
+
+---
+
 ## 🦯 Estado actual del proyecto
 
-Actualmente el proyecto incluye:
+Actualmente el proyecto cuenta con:
 
-- ✔ Estructura MVC inicial organizada  
-- ✔ Sistema de configuración basado en `.env`  
-- ✔ Archivos de configuración (`env.php`, `paths.php`, `database.php`)  
-- ✔ Clase `Database` modernizada y completamente funcional  
-- ✔ Punto de entrada (`public/index.php`) operativo  
-- ✔ Conexión a la base de datos probada exitosamente  
-- ✔ Documentación inicial (`avances.md` y `memoria.md`)  
+- ✔ Arquitectura MVC sólida y segura.
+- ✔ Backend 100% funcional (Auth, CRM, CMS Inmuebles).
+- ✔ Frontend público integrado.
+- ✔ Base de datos optimizada y relacional.
 
-El siguiente paso será implementar el **Router**, seguido de los primeros controladores y vistas.
+El proyecto se encuentra en fase de **pulido final y ampliación de funcionalidades públicas**.
 
 ---
 
@@ -164,7 +201,7 @@ El proyecto sigue las fases establecidas por el IES Abastos para el módulo de P
 ## 👨‍💻 Autor
 
 **Oswaldo Domingo Pérez**  
-📧 [oswaldodomingop@gmail.com](mailto:oswaldo.domingo@gmail.com)  
+📧 [oswaldo.domingo@gmail.com](mailto:oswaldo.domingo@gmail.com)  
 🌐 https://github.com/OswaldoDomingo/inmobiliaria
 🌐 https://inmobiliaria.oswaldo.dev
 
