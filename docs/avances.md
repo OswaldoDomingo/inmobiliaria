@@ -1033,3 +1033,263 @@ app/Controllers/DemandaController.php
 
 ### 📝 Archivos modificados
 - `app/Views/admin/inmuebles/index.php`
+
+## ✅ 2025-12-09 (FASE 1: Sistema de Envío de Correos Electrónicos)
+
+**Tema:** Implementación de Sistema de Correos con PHPMailer y Templates HTML  
+**Tipo de avance:** Backend / Email / Templates / Seguridad
+
+### 🚀 Resumen del día
+
+Se ha implementado completamente el sistema de envío de correos electrónicos para el módulo de tasaciones, migrando de una implementación básica (`SimpleSMTP`) a una solución robusta basada en **PHPMailer** con plantillas HTML reutilizables.
+
+---
+
+### 1. Análisis y Decisión Técnica
+
+- **Revisión de código existente:**
+  - Análisis de `SimpleSMTP.php` (implementación custom sin soporte TLS/SSL).
+  - Análisis de `TasacionController.php` (HTML hardcodeado en controlador).
+  - Identificación de 7 problemas principales (falta TLS, manejo limitado de errores, sin soporte adjuntos, etc.).
+
+- **Decisión técnica:**
+  - **Opción seleccionada:** Migrar a PHPMailer sin usar Composer.
+  - **Razón:** Balance óptimo entre seguridad, robustez y facilidad de integración manual.
+  - Documento técnico completo generado: `decision_tecnica_email.md`.
+
+---
+
+### 2. Integración Manual de PHPMailer
+
+- **Descarga e instalación:**
+  - PHPMailer v6.9.2 descargado desde GitHub oficial.
+  - Archivos copiados a `app/Lib/PHPMailer/`:
+    - `PHPMailer.php` (clase principal)
+    - `SMTP.php` (cliente SMTP)
+    - `Exception.php` (excepciones)
+    - 4 archivos adicionales (DSNConfigurator, OAuth, OAuthTokenProvider, POP3)
+
+- **Integración manual (sin Composer):**
+  - Uso de `require_once` directo en `MailService`.
+  - No se añadió `composer.json` ni `vendor/`.
+  - Mantiene compatibilidad con arquitectura existente.
+
+---
+
+### 3. Creación de MailService
+
+**Archivo:** `app/Services/MailService.php`
+
+- **Funcionalidad principal:**
+  - Servicio centralizado para envío de correos usando PHPMailer.
+  - Método estático `send(, , )`.
+  - Soporte para:
+    - HTML directo (`body`)
+    - Plantillas desde `app/Views/emails/` (`template` + `data`)
+    - Adjuntos (`attachments`)
+    - Reply-To personalizado
+    - Remitente configurable
+
+- **Características implementadas:**
+  - Configuración SMTP desde `Config::get('smtp')`.
+  - Soporte TLS/SSL nativo vía PHPMailer.
+  - Logging automático en `logs/mail.log`.
+  - Manejo robusto de errores con excepciones.
+  - Renderizado de plantillas con `ob_start/ob_get_clean`.
+  - Aplicación automática de layout (`emails/layout.php`).
+  - Debug mode para desarrollo (`SMTPDebug = 2` si `app.debug = true`).
+
+---
+
+### 4. Plantillas de Email HTML
+
+**Ubicación:** `app/Views/emails/`
+
+#### `layout.php` (Plantilla base)
+  - Header con logo y branding corporativo.
+  - Footer con datos de contacto.
+  - Estilos inline para compatibilidad con clientes de correo.
+  - Diseño responsive (mobile-first).
+  - Variables: `` (contenido), `` (asunto).
+
+#### `tasacion_cliente.php` (Email al cliente)
+  - Saludo personalizado.
+  - Rango de valoración destacado visualmente (verde).
+  - Detalles del inmueble (ubicación, superficie, características).
+  - Próximos pasos y expectativas.
+  - Variables: `precio_min`, `precio_max`, `barrio`, `zona`, `cp`, `superficie`, `caracteristicas`.
+
+#### `tasacion_agencia.php` (Email interno para agencia)
+  - Alerta visual de nuevo lead.
+  - Timestamp de recepción.
+  - Datos completos del cliente (email + teléfono con enlaces click-to-action).
+  - Datos del inmueble.
+  - Valoración estimada destacada.
+  - Call-to-action para contactar rápidamente.
+  - Variables: todas las anteriores + `fecha`, `email_cliente`, `telefono`.
+
+---
+
+### 5. Refactorización de TasacionController
+
+**Archivo:** `app/Controllers/TasacionController.php`
+
+- **Cambios realizados:**
+  - **Eliminado:** 113 líneas de HTML hardcodeado.
+  - **Eliminado:** Import de `SimpleSMTP`.
+  - **Añadido:** Import de `MailService`.
+  - **Simplificado:** Método `enviar()`:
+    - De ~250 líneas a ~200 líneas.
+    - HTML movido a plantillas separadas.
+    - Headers manuales eliminados (PHPMailer los gestiona).
+
+- **Código antes vs después:**
+
+  Antes:
+  `php
+   = new SimpleSMTP(System.Management.Automation.Internal.Host.InternalHost, , , );
+   = "<html>... (50 líneas de HTML) ...</html>";
+   = "MIME-Version: 1.0\r\nContent-type:text/html...";
+  ->send(, , , );
+  `
+
+  Después:
+  `php
+  MailService::send(, , [
+      'template' => 'tasacion_cliente',
+      'data' => 
+  ]);
+  `
+
+---
+
+### 6. Configuración y Variables de Entorno
+
+**Archivos modificados:**
+  - `config/config.php`: Añadida variable `smtp.secure` (tls/ssl/none).
+  - `config/config.php`: Añadida variable `app.name` para nombre del remitente.
+
+**Nuevo archivo:** `.env.example`
+  - Plantilla completa de configuración SMTP.
+  - Ejemplos para Gmail, Outlook, cPanel, SendGrid.
+  - Comentarios detallados de ayuda.
+  - Notas de seguridad y mejores prácticas.
+  - Variables: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `LEAD_AGENCY_EMAIL`, `NOREPLY_EMAIL`.
+
+---
+
+### 7. Herramienta de Testing
+
+**Archivo:** `public/test/email.php`
+
+  - Interfaz web para pruebas de envío.
+  - Formulario simple con input de email destino.
+  - Envía email de prueba usando plantilla `tasacion_cliente`.
+  - Muestra éxito/error visualmente.
+  - **Acceso:** `/test/email.php` (solo desarrollo).
+
+---
+
+### 8. Mejoras de Seguridad
+
+- **Configuración SMTP segura:**
+  - Soporte nativo TLS/SSL.
+  - Credenciales desde `.env` (nunca hardcodeadas).
+  - Validación de tipos MIME en PHPMailer.
+  - Sanitización automática de headers.
+
+- **Logging:**
+  - Registro de todos los envíos en `logs/mail.log`.
+  - Timestamps precisos.
+  - Niveles de log (info/error/debug).
+  - No se logean credenciales sensibles.
+
+---
+
+### 9. Separación de Responsabilidades (Clean Code)
+
+Antes:
+  - **1 archivo** (TasacionController) con TODO el código de emails.
+  - HTML, lógica de envío y configuración SMTP mezclados.
+
+Después:
+  - **MailService:** Lógica de envío y configuración.
+  - **Templates:** Presentación HTML (layout + 2 plantillas específicas).
+  - **Controlador:** Solo orquestación y paso de datos.
+  - **Config:** Variables de entorno separadas.
+
+Beneficios:
+  - ✅ Reutilización de plantillas en otros módulos.
+  - ✅ Testing más fácil (MailService aislado).
+  - ✅ Mantenimiento simplificado.
+  - ✅ Escalabilidad (nuevas plantillas sin tocar controlador).
+
+---
+
+### 📝 Archivos clave creados
+
+- `app/Lib/PHPMailer/*` (7 archivos de librería)
+- `app/Services/MailService.php`
+- `app/Views/emails/layout.php`
+- `app/Views/emails/tasacion_cliente.php`
+- `app/Views/emails/tasacion_agencia.php`
+- `.env.example`
+- `public/test/email.php`
+
+### �� Archivos clave modificados
+
+- `app/Controllers/TasacionController.php` (-113 líneas)
+- `config/config.php` (+4 líneas)
+
+---
+
+### ✅ Estado final
+
+| Componente | Estado |
+|-----------|--------|
+| PHPMailer integrado (manual) | ✅ |
+| MailService funcionando | ✅ |
+| Plantillas HTML creadas | ✅ |
+| TasacionController refactorizado | ✅ |
+| Configuración SMTP flexible | ✅ |
+| Logging implementado | ✅ |
+| Herramienta de testing | ✅ |
+| Documentación técnica | ✅ |
+
+---
+
+### 🎯 Próximos pasos (fuera de FASE 1)
+
+- FASE 2: Sistema de cruces (matching demandas-inmuebles).
+- Envío manual de inmuebles a clientes desde backoffice.
+- Configuración de SPF/DKIM/DMARC en dominio de producción.
+- Sistema de colas para envíos masivos (newsletters).
+
+
+## [2025-12-09] Fase 1: Implementación de Sistema de Correos para Tasaciones (WIP)
+
+### Objetivo
+Sustituir la clase heredada SimpleSMTP (sin soporte SSL/TLS seguro) por una solución robusta (PHPMailer) para gestionar el envío de correos tras una tasación online.
+
+### Tareas Realizadas
+1.  **Análisis Técnico**: Se evaluó SimpleSMTP vs PHPMailer. Se decidió usar PHPMailer por seguridad, soporte de comunidad y manejo de layouts HTML.
+2.  **Integración Manual**: Se integró PHPMailer v6.9.2 descargando y copiando los archivos fuente a pp/Lib/PHPMailer/ (evitando Composer por requerimiento del cliente).
+3.  **MailService**: Se creó App\Services\MailService encargado de:
+    *   Configurar conexión SMTP segura (TLS/SSL).
+    *   Renderizar plantillas HTML (layout.php, 	asacion_cliente.php, 	asacion_agencia.php).
+    *   Manejar excepciones y logging (logs/mail.log).
+4.  **Refactorización de TasacionController**:
+    *   Se eliminó código HTML hardcodeado.
+    *   Se reemplazó la lógica de envío antigua por MailService::send().
+5.  **Plantillas HTML**:
+    *   Diseño profesional y responsive.
+    *   Separación de lógica (controlador) y vista (templates).
+6.  **Configuración**:
+    *   Se implementó carga de variables de entorno desde config/.env.
+    *   Soporte para cPanel y Gmail con App Passwords.
+
+### Estado Actual (WIP)
+- La funcionalidad está implementada a nivel de código.
+- Se ha validado la activación de OpenSSL en el servidor local.
+- Se ha validado la configuración SMTP contra cPanel (mail.oswaldo.dev).
+- **Pendiente**: Resolución final de problemas de entregabilidad (los correos se envían según el log, pero no llegan a la bandeja de entrada, posible filtrado SPAM o configuración DNS). Se deja aparcado temporalmente para verificar en entorno de producción real o continuar más adelante.

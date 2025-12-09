@@ -245,6 +245,22 @@ Para evitar vulnerabilidades típicas en sistemas de subida de archivos (ejecuci
   * desactiva la ejecución del motor PHP dentro de ese directorio,
   * deshabilita el listado de directorios.
 
+### 3.3.6. Módulo de Tasación Online (Fase 1 - Email)
+
+Implementado para captar leads y ofrecer valor añadido a visitantes web.
+
+#### Funcionalidad
+1.  **Formulario Público**: `/tasacion`. Recoge datos del inmueble (ubicación, características) y del contacto.
+2.  **Algoritmo de Valoración**: Calcula un rango de precio estimado aplicando incrementos porcentuales (ascensor, exterior, estado) sobre un precio base por zona.
+3.  **Comunicación**: Envía dos correos electrónicos mediante SMTP seguro (`PHPMailer`):
+    *   **Cliente**: Recibe la valoración estimada y confirmación de recepción.
+    *   **Agencia**: Recibe los datos del lead para seguimiento comercial.
+
+#### Retos Técnicos y Soluciones
+*   **Envío de Correos**: Se sustituyó la clase básica `SimpleSMTP` por `PHPMailer` para soportar autenticación segura (SSL/TLS) requerida por servidores modernos como cPanel y Gmail.
+*   **Plantillas HTML**: Se implementó un sistema de templates (separando lógica de vista) para enviar correos corporativos con diseño responsive.
+*   **Seguridad**: Credenciales SMTP alojadas en variables de entorno (`.env`), fuera del código fuente.
+
 En caso de fallo en cualquiera de estas validaciones, el método devuelve `null` y el controlador muestra un mensaje genérico de error en la imagen, manteniendo el resto de datos del formulario para no penalizar la experiencia del usuario.
 
 #### Integración en el ciclo de vida del inmueble

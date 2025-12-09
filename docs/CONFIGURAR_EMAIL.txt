@@ -1,0 +1,55 @@
+# ==============================================
+# CONFIGURACIÓN RÁPIDA PARA ARREGLAR EL ERROR
+# ==============================================
+
+# El error "Invalid address: (From):" ocurre porque falta el email remitente.
+# Añade estas líneas a tu archivo .env:
+
+# 1. SMTP User (OBLIGATORIO - es tu email de envío)
+SMTP_USER=tu-email@gmail.com
+
+# 2. SMTP Password (OBLIGATORIO)
+SMTP_PASS=tu-app-password
+
+# 3. SMTP Host y Puerto (OBLIGATORIO)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=tls
+
+# 4. Email de la Agencia (OBLIGATORIO - recibe los leads)
+LEAD_AGENCY_EMAIL=agencia@tudominio.com
+
+# 5. Email Noreply (OPCIONAL - si no lo pones, usará SMTP_USER)
+NOREPLY_EMAIL=noreply@tudominio.com
+
+# ==============================================
+# GUÍA PARA GMAIL:
+# ==============================================
+# 1. NO uses tu contraseña normal de Gmail
+# 2. Debes crear una "App Password":
+#    a) Ve a https://myaccount.google.com/security
+#    b) Activa "Verificación en 2 pasos" si no la tienes
+#    c) Busca "Contraseñas de aplicaciones" o "App Passwords"
+#    d) Genera una contraseña para "Correo"
+#    e) Usa ESA contraseña (16 caracteres sin espacios) en SMTP_PASS
+#
+# Ejemplo:
+# SMTP_USER=oswaldo.domingo@gmail.com
+# SMTP_PASS=abcd efgh ijkl mnop  (sin espacios: abcdefghijklmnop)
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_SECURE=tls
+# LEAD_AGENCY_EMAIL=oswaldo.domingo@gmail.com
+#
+# IMPORTANTE: Si LEAD_AGENCY_EMAIL es tu mismo email de Gmail,
+# puedes dejarlo así. Los leads te llegarán a ti mismo.
+
+# ==============================================
+# ¿QUÉ HACER DESPUÉS?
+# ==============================================
+# 1. Guarda el archivo .env
+# 2. Recarga la página de diagnóstico:
+#    http://inmobiliaria.loc/test/diagnostico.php
+# 3. Verifica que todas las variables estén configuradas
+# 4. Prueba el envío:
+#    http://inmobiliaria.loc/test/email.php

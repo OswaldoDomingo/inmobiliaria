@@ -1,0 +1,28 @@
+ERROR DETECTADO: EXTENSIÓN OPENSSL DESACTIVADA
+============================================
+
+El envío de correos falla porque PHP no tiene activada la extensión OpenSSL.
+Esto es necesario para conectar con servidores SMTP seguros (TLS/SSL).
+
+PASOS PARA SOLUCIONARLO:
+------------------------
+
+1. Localiza tu archivo de configuración de PHP:
+   Ruta detectada: C:\servidor\php\php.ini
+
+2. Abre ese archivo con un editor de texto (Notepad, VS Code, etc).
+
+3. Busca la siguiente línea (suele estar por la línea 900-950):
+   ;extension=openssl
+
+4. QUITA el punto y coma (;) del principio. Debe quedar así:
+   extension=openssl
+
+5. Guarda los cambios en el archivo.
+
+6. MUY IMPORTANTE: REINICIA EL SERVIDOR APACHE.
+   - Si usas consola: net stop Apache2.4 && net start Apache2.4
+   - O usa el panel de control de tu servidor (XAMPP/WAMP/etc).
+
+7. Prueba de nuevo el envío:
+   http://inmobiliaria.loc/test/email.php

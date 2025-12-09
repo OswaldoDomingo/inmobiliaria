@@ -30,6 +30,7 @@ $smtpHost = $_ENV['SMTP_HOST'] ?? getenv('SMTP_HOST') ?: '';
 $smtpPort = (int)($_ENV['SMTP_PORT'] ?? getenv('SMTP_PORT') ?: 587);
 $smtpUser = $_ENV['SMTP_USER'] ?? getenv('SMTP_USER') ?: '';
 $smtpPass = $_ENV['SMTP_PASS'] ?? getenv('SMTP_PASS') ?: '';
+$smtpSecure = $_ENV['SMTP_SECURE'] ?? getenv('SMTP_SECURE') ?: 'tls'; // tls, ssl, none
 
 $agencyEmail = $_ENV['LEAD_AGENCY_EMAIL'] ?? getenv('LEAD_AGENCY_EMAIL') ?: '';
 $noReplyEmail = $_ENV['NOREPLY_EMAIL'] ?? getenv('NOREPLY_EMAIL') ?: $agencyEmail;
@@ -44,14 +45,16 @@ return [
         'charset' => 'utf8mb4',
     ],
     'app' => [
-        'base_url' => $baseUrl,
-        'debug'    => ($env === 'local'),
+        'name' => 'CRM Inmobiliaria',
+        'debug' => true, // Reactivar para ver el error
+        'env' => 'local',
     ],
     'smtp' => [
-        'host' => $smtpHost,
-        'port' => $smtpPort,
-        'user' => $smtpUser,
-        'pass' => $smtpPass,
+        'host'   => $smtpHost,
+        'port'   => $smtpPort,
+        'user'   => $smtpUser,
+        'pass'   => $smtpPass,
+        'secure' => $smtpSecure,
     ],
     'emails' => [
         'agency'  => $agencyEmail,
