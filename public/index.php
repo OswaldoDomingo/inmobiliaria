@@ -96,9 +96,9 @@ $router->get('/login', [AuthController::class, 'login']);
 $router->post('/login', [AuthController::class, 'authenticate']);
 $router->get('/logout', [AuthController::class, 'logout']);
 
-// Inmuebles Público
-$router->get('/inmuebles', [InmueblePublicController::class, 'index']);
-$router->get('/inmuebles/ver', [InmueblePublicController::class, 'show']);
+// Propiedades Público
+$router->get('/propiedades', [InmueblePublicController::class, 'index']);
+$router->get('/propiedades/ver', [InmueblePublicController::class, 'show']);
 
 // --------------------------------------------------------------------------
 // Rutas de Administración

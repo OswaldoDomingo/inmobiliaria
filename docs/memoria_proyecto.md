@@ -499,6 +499,60 @@ Gracias a las claves externas definidas en la base de datos, se garantiza ademá
 
 En conjunto, el módulo de Demandas convierte la aplicación en una herramienta más cercana a un CRM real, permitiendo cruzar de forma estructurada **lo que el cliente busca** con **lo que la agencia tiene en cartera** (funcionalidad de cruces prevista para desarrollos posteriores).
 
+
+### 3.3.10. Front público de propiedades
+
+Una vez estabilizado el módulo de inmuebles en el backoffice, se implementó la parte pública del catálogo de propiedades, accesible desde el menú principal del sitio.
+
+El objetivo de este apartado es permitir que cualquier usuario pueda consultar los inmuebles activos sin necesidad de registrarse, pero apoyándose en la misma base de datos y reglas de negocio que se utilizan internamente en la agencia.
+
+#### Rutas públicas y arquitectura
+
+Se definieron dos rutas principales:
+
+- `GET /propiedades` → listado público de inmuebles.
+- `GET /propiedades/ver?id=ID` → ficha de detalle de un inmueble.
+
+Estas rutas se atienden desde el controlador `InmueblePublicController`, que actúa como capa de orquestación entre el Router, el modelo `Inmueble` y las vistas específicas de la parte pública.
+
+En el modelo se reutilizan las mismas columnas y flags que en el backoffice (`activo`, `archivado`, `estado`), de forma que solo se muestran inmuebles que la agencia considera “publicables” (por ejemplo, activos y no retirados). Esta decisión evita mantener dos lógicas distintas para decidir qué se publica en la web.
+
+#### Listado con paginación
+
+Para el listado de propiedades se optó por una paginación de **10 elementos por página**, una cifra que ofrece una buena experiencia en escritorio y en móvil y reduce los tiempos de carga. Cada card del listado muestra:
+
+- Imagen principal o un placeholder si no existe aún.
+- Precio destacado.
+- Localidad/provincia.
+- Superficie en m², número de habitaciones y baños (si están informados).
+- Un extracto de la descripción.
+- Botones de acción (“Más información” y “Contactar”).
+
+En el pie del listado se incluye un paginador clásico (Anterior/Siguiente y números de página), implementado en PHP sin dependencias externas.
+
+#### Ficha detallada
+
+La ficha de detalle (`/propiedades/ver?id=ID`) amplía la información mostrada en el listado:
+
+- Imagen grande del inmueble.
+- Título y ubicación completa.
+- Todos los datos públicos relevantes (tipo, operación, superficie, habitaciones, baños, estado, referencia interna, etc.).
+- Descripción extendida.
+- Zona/localidad y código postal.
+- En una columna lateral, el precio y botones de contacto (email/teléfono) que derivan al formulario de tasación/contacto.
+
+Si el inmueble no existe o no cumple las condiciones de publicación (no está activo, está archivado o se encuentra en un estado no publicable), el sistema devuelve un error 404 en lugar de mostrar la ficha.
+
+#### Decisiones técnicas y de diseño
+
+- Se ha mantenido la arquitectura MVC: Router → controlador público → modelo → vistas específicas bajo `app/views/propiedades/`.
+- Se ha reutilizado la lógica de visibilidad del backoffice para evitar inconsistencias.
+- Se ha priorizado un diseño responsive y orientado al usuario final, separando claramente lo que ve el cliente de la información interna que solo utiliza la agencia.
+
+Con este módulo, la plataforma pasa de ser una herramienta exclusivamente interna a ofrecer también un front público funcional, alineado con el trabajo real de una inmobiliaria.
+
+
+
 ## 3.4. Manejo de Errores
 He implementado un manejador global de excepciones (`set_exception_handler`) en el punto de entrada. Esto asegura que, en producción, los errores técnicos (como fallos de BD) se registren en el log del servidor pero se muestre un mensaje genérico y amigable al usuario final, evitando la fuga de información sensible.
 
@@ -545,3 +599,90 @@ El desarrollo de este proyecto ha permitido consolidar conocimientos avanzados d
 *   **PSR Standards (PHP-FIG):** https://www.php-fig.org/psr/
 *   **OWASP Top 10:** https://owasp.org/www-project-top-ten/
 *   **Bootstrap 5 Docs:** https://getbootstrap.com/docs/5.0/getting-started/introduction/
+
+### 3.3.7. Front público de propiedades (09/12/2025)
+
+Una vez consolidado el backoffice del módulo de inmuebles, se procedió a implementar la parte pública: un **catálogo de propiedades** accesible para cualquier usuario (sin autenticación) donde se muestran únicamente los inmuebles disponibles que cumplen criterios de visibilidad.
+
+#### Rutas públicas
+
+Se han definido dos rutas principales fuera del área /admin:
+
+- **GET /propiedades**: List ado paginado con filtros de búsqueda (localidad, tipo de inmueble, operación).
+- **GET /propiedades/ver?id=ID**: Ficha detallada de un inmueble concreto.
+
+Ambas rutas están accesibles desde el menú principal del sitio (enlace "Propiedades" en el header).
+
+#### Arquitectura de la implementación
+
+**Controlador dedicado (InmueblePublicController)**
+
+Se creó un controlador separado del administrativo para garantizar la separación de responsabilidades:
+
+- `index()`: gestiona la visualización del listado aplicando filtros de búsqueda y **paginación de 10 inmuebles por página**, respetando el criterio de "publicable" definido en el apartado **3.3.5.2**.
+- `show()`: muestra la ficha de un inmueble concreto solo si cumple con todos los requisitos de visibilidad.
+
+**Modelo y filtrado automático**
+
+El modelo `Inmueble` ya disponía del método `paginatePublic()`, implementado con anterioridad, que aplica de forma **automática** el filtrado de:
+
+- stado = 'activo'
+- ctivo = 1
+- rchivado = 0
+
+Esto asegura que nunca se expongan públicamente inmuebles en borrador, vendidos, retirados o archivados, eliminando cualquier riesgo de visualización no deseada.
+
+**Cambio de parámetro en ficha pública**
+
+Inicialmente, se planteó el acceso a la ficha con ?ref=REF (referencia alfanumérica del inmueble). Para homogeneizar el funcionamiento con el resto de la aplicación, se modificó a ?id=ID (clave primaria numérica), simplificando la lógica del controlador y evitando lookups innecesarios.
+
+#### Vistas y experiencia de usuari o
+
+Las vistas se encuentran en `app/views/propiedades/` para separar claramente la parte pública del backoffice:
+
+**Listado (index.php)**
+
+- Formulario de búsqueda con tres selectores (localidad, tipo, operación) y botón de búsqueda.
+- Tarjetas de inmuebles con diseño responsive (Bootstrap 5):
+  - Imagen principal del inmueble (con fallback a placeholder si no existe).
+  - Título (tipo + operación), ubicación (localidad, provincia), referencia.
+  - Precio destacado en formato legible.
+  - Descripción breve (máximo 120 caracteres).
+  - Iconos con superficie (m²), habitaciones y baños.
+  - Botones "Más información" (enlaza a ficha) y "Contactar" (enlaza a /tasacion).
+- Paginador con números de página, botones "Anterior/Siguiente" y contador de resultados.
+
+**Ficha de detalle (show.php)**
+
+- Breadcrumb de navegación (Inicio \u003e Propiedades \u003e immueble actual).
+- Imagen principal a tamaño completo.
+- Título, ubicación y precio destacado.
+- Sección de características con iconografía (superficie, habitaciones, baños).
+- Descripción completa del inmueble.
+- Lista de detalles (dirección, localidad, provincia, CP, tipo, operación, referencia).
+- Botón "Volver al listado"  (regresa a /propiedades).
+- Sidebar sticky con precio, botones de contacto (Contactar, Llamar, WhatsApp) e información de la agencia.
+
+#### Decisiones de  diseño y usabilidad
+
+- **Paginación ajustada a 10 items** en lugar de 12: decisión tomada para mejorar el tiempo de carga percibido y la experiencia en dispositivos móviles.
+- **Imagen con gestión de errores (onerror)**: si la imagen principal no existe o falla al cargar, se muestra automáticamente un placeholder genérico, evitando imágenes rotas.
+- **Enlaces duplicados (imagen + botón)**: tanto la imagen como el botón "Más información" enlazan a la ficha, siguiendo el patrón de usabilidad de los principales portales inmobiliarios (Idealista, Fotocasa).
+- **Botón "Contactar" centralizado**: en lugar de múltiples formularios de contacto, se reutiliza la ruta /tasacion, consolidando el lead capture en un único punto.
+- **Breadcrumb y navegación contextual**: facilita la  orientación del usuario y permite volver al listado sin perder el contexto de búsqueda (filtros activos se mantienen en la URL mediante query string).
+
+#### Seguridad y coherencia
+
+A nivel de seguridad, la implementación reutiliza los mecanismos del núcleo:
+
+- Escape de todas las salidas HTML mediante función helper () (equivalente a htmlspecialchars).
+- Parámetros de URL ya validados en el controlador (id numérico entero positivo).
+- Verificación estricta  de visibilidad en show(): si el inmueble no está activo, se devuelve **404** (no se expone información de inmuebles no publicables).
+
+Por otra parte, la separación de vistas públicas/admin en directorios distintos (/propiedades vs /admin/inmuebles) refuerza la modularidad y facilita el mantenimiento.
+
+#### Integración final
+
+Con la implementación de este módulo público, el proyecto ofrece **valor inmediato** tanto para la agencia (catálogo profesional) como para el usuario final (consulta de propiedades sin necesidad de registro ni intermediarios).
+
+Al mismo tiempo, el enlace desde el menú principal garantiza que el catálogo sea **descubrible**, cumpliendo con uno de los objetivos iniciales: posicionar la web como punto de captación de leads cualificados.

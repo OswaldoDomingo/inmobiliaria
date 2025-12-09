@@ -1304,3 +1304,100 @@ Sustituir la clase heredada SimpleSMTP (sin soporte SSL/TLS seguro) por una solu
 *   **Incidencia:** El editor de archivos 'moderno' de cPanel corrompe caracteres UTF-8 (como la 'ñ' de la contraseña SMTP) al guardar, convirtiéndolos en ''.
 *   **Solución:** Utilizar siempre el **Legacy Editor** de cPanel o subir el archivo .env vía FTP para preservar la codificación correcta.
 
+
+
+---
+
+## 09/12/2025 - Implementación del listado público de propiedades
+
+### Cambios realizados
+
+1. **Rutas públicas**:
+   - Cambiadas las rutas de `/inmuebles` a `/propiedades`
+   - GET /propiedades → listado público con paginación
+   - GET /propiedades/ver?id=ID → ficha pública del inmueble
+
+2. **Controlador públic**:
+   - Actualizado `InmueblePublicController`
+   - Paginación ajustada a **10 inmuebles por página**
+   - Método `show()` cambiado para usar parámetro `id` en lugar de `ref`
+   - Validación de inmuebles activos (activo=1, estado='activo', archivado=0)
+
+3. **Vistas públicas**:
+   - Creado `app/views/propiedades/index.php`
+     - Diseño de tarjetas con imagen, título, precio, ubicación
+     - Características visibles: superficie (m²), habitaciones, baños
+     - Filtros de búsqueda por localidad, tipo y operación
+     - Paginación con anterior/siguiente y números de página
+   - Creado `app/views/propiedades/show.php`
+     - Ficha detallada con imagen principal
+     - Información completa del inmueble
+     - Sidebar sticky con precio y botones de contacto
+     - Breadcrumb y botón 'Volver al listado'
+
+4. **Navegación**:
+   - Actualizado enlace 'Propiedades' en header para apuntar a `/propiedades`
+   - Enlaces desde imagen y botón 'Más información' a ficha del inmueble
+   - Botón 'Contactar' apuntando a `/tasacion`
+
+### Archivos modificados
+- `public/index.php` (rutas)
+- `app/views/layouts/header.php` (menú)
+- `app/Controllers/InmueblePublicController.php` (lógica y paginación)
+
+### Archivos creados
+- `app/views/propiedades/index.php` (listado público)
+- `app/views/propiedades/show.php` (ficha pública)
+
+### Resultado
+Los usuarios pueden navegar públicamente al catálogo de propiedades desde el menú principal, filtrar inmuebles y acceder a fichas detalladas. Solo se muestran inmuebles activos y no archivados.
+
+## 🗓️ 2025-12-09 (Front público de propiedades)
+
+**Tema:** Catálogo público de inmuebles  
+**Tipo de avance:** Frontend / Backend / UX
+
+### 🚀 Resumen
+
+Se ha implementado el **listado público de propiedades** y la **ficha de detalle** accesibles desde el menú principal, mostrando únicamente inmuebles activos y publicables. Con esto, la parte pública de la web ya ofrece un catálogo real de inmuebles basado en los datos del CRM.
+
+### 🔧 Cambios realizados
+
+1. **Rutas públicas**
+   - Se han registrado las rutas:
+     - `GET /propiedades` → listado de inmuebles.
+     - `GET /propiedades/ver?id=ID` → ficha de inmueble.
+   - El acceso es público (sin autenticación), pero respetando las reglas de visibilidad (`activo`, `archivado`, `estado`).
+
+2. **Controlador**
+   - Se ha creado/ajustado `InmueblePublicController` con:
+     - `index()` → obtiene filtros, llama a `Inmueble::paginatePublic(...)` y pinta el listado.
+     - `show()` → recupera el inmueble por `id_inmueble` y muestra la ficha si es publicable, o 404 en caso contrario.
+   - Paginación configurada a **10 inmuebles por página**.
+
+3. **Vistas**
+   - `app/views/propiedades/index.php`:
+     - Tarjetas con imagen, precio, superficie, habitaciones, baños y descripción corta.
+     - Botones “Más información” (ficha) y “Contactar” (formularios de tasación/contacto).
+     - Paginador con navegación entre páginas.
+   - `app/views/propiedades/show.php`:
+     - Ficha detallada con imagen grande, descripción completa y todos los datos públicos clave.
+     - Sidebar con precio y botones de contacto.
+     - Botón para volver al listado.
+
+4. **Integración con el menú**
+   - El enlace “Propiedades” del header ahora apunta a `/propiedades`, conectando la navegación principal con el catálogo real.
+
+### 📝 Archivos clave creados/modificados
+
+- `public/index.php` (rutas públicas `/propiedades` y `/propiedades/ver`)
+- `app/Controllers/InmueblePublicController.php`
+- `app/views/layouts/header.php` (enlace del menú a `/propiedades`)
+- `app/views/propiedades/index.php`
+- `app/views/propiedades/show.php`
+- `docs/documentacion_inmuebles.md` (sección de front público actualizada)
+
+### 💡 Justificación técnica para el tribunal
+
+Se ha decidido concentrar la lógica de visibilidad (inmuebles activos/publicables) en el modelo y reutilizarla tanto para el backoffice como para el front público, evitando duplicar reglas de negocio.  
+La paginación a 10 elementos por página y el diseño en tarjetas buscan un equilibrio entre rendimiento, legibilidad y experiencia de usuario, alineado con los portales inmobiliarios reales.

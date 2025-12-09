@@ -25,7 +25,7 @@ final class InmueblePublicController
         ];
 
         $page    = max(1, (int)($_GET['page'] ?? 1));
-        $perPage = 12;
+        $perPage = 10;
 
         $result = $this->inmuebles->paginatePublic($filters, $page, $perPage);
 
@@ -35,21 +35,19 @@ final class InmueblePublicController
         // I will do the same here to ensure it looks good.
         
         require VIEW . '/layouts/header.php';
-        require VIEW . '/inmuebles/index.php';
+        require VIEW . '/propiedades/index.php';
         require VIEW . '/layouts/footer.php';
     }
 
     public function show(): void
     {
-        $ref = trim((string)($_GET['ref'] ?? ''));
-        if ($ref === '') {
-            http_response_code(404);
-            // Render basic 404
-            echo '404 Not Found';
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id <= 0) {
+            $this->redirect('/propiedades');
             return;
         }
 
-        $inmueble = $this->inmuebles->findByRef($ref);
+        $inmueble = $this->inmuebles->findById($id);
         if (!$inmueble) {
             http_response_code(404);
             echo '404 Not Found';
@@ -69,7 +67,13 @@ final class InmueblePublicController
         }
 
         require VIEW . '/layouts/header.php';
-        require VIEW . '/inmuebles/show.php';
+        require VIEW . '/propiedades/show.php';
         require VIEW . '/layouts/footer.php';
+    }
+
+    private function redirect(string $path): void
+    {
+        header('Location: ' . $path);
+        exit;
     }
 }

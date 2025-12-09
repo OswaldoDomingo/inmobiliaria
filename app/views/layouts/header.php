@@ -28,7 +28,7 @@
                 <div class="collapse navbar-collapse" id="mainNavbar">
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item"><a class="nav-link" href="/">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Propiedades</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/propiedades">Propiedades</a></li>
                         <?php if (isset($_SESSION['user_id'])): ?>
                         <li class="nav-item"><a class="nav-link" href="/admin/clientes">Clientes</a></li>
                         <?php endif; ?>
