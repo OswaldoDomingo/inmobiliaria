@@ -17,7 +17,7 @@ $title = 'Tu Valoración Inmobiliaria';
 ob_start();
 ?>
 
-<h2 style="color: #191A2E; margin-top: 0;">Hola,</h2>
+<h2 style="color: #191A2E; margin-top: 0;">Hola <?= htmlspecialchars($nombre ?? '') ?>,</h2>
 
 <p>Gracias por utilizar nuestro <strong>Tasador Online</strong>. A continuación, encontrarás el resumen de tu valoración inmobiliaria.</p>
 

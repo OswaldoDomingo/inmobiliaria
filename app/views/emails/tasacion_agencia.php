@@ -45,6 +45,12 @@ ob_start();
     </h3>
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
+            <td style="padding: 8px 0; color: #666; font-size: 14px; width: 120px;"><strong>Nombre:</strong></td>
+            <td style="padding: 8px 0; color: #333; font-size: 14px;">
+                <?= htmlspecialchars($nombre ?? '') ?>
+            </td>
+        </tr>
+        <tr>
             <td style="padding: 8px 0; color: #666; font-size: 14px; width: 120px;"><strong>Email:</strong></td>
             <td style="padding: 8px 0; color: #333; font-size: 14px;">
                 <a href="mailto:<?= htmlspecialchars($email_cliente ?? '') ?>" style="color: #3b82f6; text-decoration: none;">

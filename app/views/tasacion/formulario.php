@@ -183,6 +183,11 @@
 
                     <div class="space-y-4 flex-1">
                         <div>
+                            <label class="text-sm font-medium text-gray-700 block mb-1">Nombre <span class="text-red-500">*</span></label>
+                            <input type="text" id="input-name" placeholder="Tu nombre"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div>
                             <label class="text-sm font-medium text-gray-700 block mb-1">Correo Electrónico <span
                                     class="text-red-500">*</span></label>
                             <input type="email" id="input-email" placeholder="tu@email.com"
@@ -318,6 +323,7 @@
 
             // Contacto
             contactContainer: document.getElementById('contact-form-container'),
+            inputName: document.getElementById('input-name'),
             inputEmail: document.getElementById('input-email'),
             inputPhone: document.getElementById('input-phone'),
             checkPrivacy: document.getElementById('check-privacy'),
@@ -463,18 +469,20 @@
 
             // Validación formulario contacto
             const validateContact = () => {
+                const nameValid = els.inputName.value.trim().length > 0;
                 const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(els.inputEmail.value);
                 const phoneValid = els.inputPhone.value.length > 6;
                 const privacy = els.checkPrivacy.checked;
                 const commercial = els.checkCommercial.checked;
 
-                if (emailValid && phoneValid && privacy && commercial) {
+                if (nameValid && emailValid && phoneValid && privacy && commercial) {
                     els.btnSendLead.disabled = false;
                 } else {
                     els.btnSendLead.disabled = true;
                 }
             };
 
+            els.inputName.addEventListener('input', validateContact);
             els.inputEmail.addEventListener('input', validateContact);
             els.inputPhone.addEventListener('input', validateContact);
             els.checkPrivacy.addEventListener('change', validateContact);
@@ -581,6 +589,7 @@
             els.sendErrorMsg.classList.add('hidden');
 
             const params = {
+                user_name: els.inputName.value,
                 to_email: els.inputEmail.value,
                 user_phone: els.inputPhone.value,
                 cp: currentCalculation.cp,
