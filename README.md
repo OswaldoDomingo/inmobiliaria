@@ -102,22 +102,43 @@ Este proyecto incorpora:
 
 ## 🗁️ Estructura actual del proyecto
 
+## 🗁️ Estructura actual del proyecto
+
 ```bash
 /inmobiliaria/
-├── app/
-│   ├── Controllers/     # Lógica de negocio y gestión de peticiones
-│   ├── Core/            # Núcleo del framework (Router, Database, Env...)
-│   ├── Lib/             # Librerías auxiliares (PDF, Utilidades...)
-│   ├── Models/          # Acceso a datos y lógica de dominio
-│   ├── Services/        # Servicios de aplicación (Email...)
-│   └── views/           # Plantillas HTML/PHP (admin, auth, layouts, partials...)
+├── app/                         # Código de la aplicación (MVC)
+│   ├── Autoloader.php           # Carga automática de clases
+│   ├── Controllers/             # Controladores (Auth, Clientes, Inmuebles, Demandas, Tasación, etc.)
+│   ├── Core/                    # Núcleo del framework (Router, Config, Database, Env, CSRF...)
+│   ├── Lib/                     # Librerías auxiliares (PHPMailer, SimpleSMTP, etc.)
+│   ├── Models/                  # Modelos de dominio (User, Cliente, Inmueble, Demanda...)
+│   ├── Services/                # Servicios de aplicación (MailService, ...)
+│   └── views/                   # Vistas (admin, auth, propiedades, tasación, legal, layouts, partials...)
 │
-├── config/              # Configuración centralizada (.env, constantes)
-├── database/            # Scripts SQL, seeds, migraciones
-├── public/              # DocumentRoot (assets, uploads, index.php)
-├── logs/                # Logs y archivos de depuración
-└── docs/                # Documentación del proyecto
-```
+├── config/                      # Configuración centralizada (.env, BD, rutas...)
+├── database/                    # Esquema y migraciones de la base de datos
+│   ├── migrations/              # Scripts incrementales (CRM, imágenes, etc.)
+│   ├── p261985_inmobiliaria.sql # Dump de referencia
+│   └── schema.sql               # Esquema general
+│
+├── docs/                        # Documentación del proyecto
+│   ├── memoria_proyecto.md      # Memoria oficial para el módulo de Proyecto
+│   ├── presentacion_tribunal.md # Guion de la defensa
+│   ├── documentacion_*.md       # Módulos (BD, inmuebles, demandas, tasación, etc.)
+│   └── fct/ ...                 # Documentación específica de las FCT (empresa, tasador widget, evidencias)
+│
+├── logs/                        # Logs de aplicación (auth.log, mail.log, ...)
+├── public/                      # DocumentRoot (única carpeta accesible desde la web)
+│   ├── index.php                # Front controller
+│   ├── assets/                  # Recursos estáticos (CSS, JS, imágenes)
+│   ├── uploads/                 # Archivos subidos (inmuebles, perfiles)
+│   └── test/ ...                # Scripts de diagnóstico (solo en desarrollo)
+│
+├── storage/                     # Carpeta reservada para datos temporales / futuros backups
+├── tests/ ...                   # Scripts de prueba (verificación de esquema, mocks, etc.)
+├── index.php                    # Redirección / bootstrap mínimo hacia /public (opcional)
+└── README.md                    # Documentación principal del repositorio
+
 
 ---
 
@@ -152,6 +173,8 @@ El proyecto se encuentra en una fase avanzada de desarrollo, con los módulos cr
 - **Formulario avanzado:** Herramienta de valoración integrada en el portal.
 - **Envío de informes:** Generación y envío de datos por correo a la agencia y al cliente.
 - **Seguridad:** Validación y sanitización exhaustiva para evitar inyecciones.
+- **Versión FCT (widget independiente):** Además del módulo integrado en el MVC, existe una versión del tasador desarrollada específicamente para la empresa de prácticas e incrustada en su CRM Inmovilla. En este entorno, sin backend propio, la lógica se ejecuta íntegramente en JavaScript, leyendo datos de mercado desde Google Sheets (CSV) y enviando correos mediante EmailJS.
+
 
 ### 🌍 Portal Público
 - **Landing Page y Buscador:** Página de inicio con destacados.
@@ -176,7 +199,7 @@ El proyecto se encuentra en fase de **pulido final y ampliación de funcionalida
 ## 📄 Documentación
 
 Toda la documentación del proyecto (memoria, anexos, diagramas, avances diarios…) se encuentra en `docs/`.
-Toda la información detallada de la FCT (empresa, contexto, tareas, evidencias y presentación) se encuentra en la carpeta: `docs/fct/`
+Toda la información detallada de la FCT (empresa, contexto, tareas, evidencias y presentación) se encuentra en la carpeta: `docs/fct/`.
 
 El proyecto sigue las fases establecidas por el IES Abastos para el módulo de Proyecto:
 
