@@ -1299,3 +1299,8 @@ Sustituir la clase heredada SimpleSMTP (sin soporte SSL/TLS seguro) por una solu
 *   **Causa:** El payload JSON enviado por JavaScript contenía valores numéricos (int) para campos como superficie o 	elefono, y strip_tags requiere strings.
 *   **Solución:** Se implementó casting explícito a (string) en todas las variables de entrada ($data[...]) antes de la sanitización.
 
+
+### [2025-12-09] Nota Importante: Despliegue en cPanel
+*   **Incidencia:** El editor de archivos 'moderno' de cPanel corrompe caracteres UTF-8 (como la 'ñ' de la contraseña SMTP) al guardar, convirtiéndolos en ''.
+*   **Solución:** Utilizar siempre el **Legacy Editor** de cPanel o subir el archivo .env vía FTP para preservar la codificación correcta.
+
