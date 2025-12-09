@@ -16,7 +16,7 @@ El módulo sigue el patrón MVC (Modelo-Vista-Controlador) del framework propio.
 ### TasacionController::enviar()
 Método principal que recibe el POST vía AJAX.
 1.  **Validación CSRF**: Protege contra ataques Cross-Site Request Forgery.
-2.  **Sanitización**: Limpia inputs (strip_tags, filter_var).
+2.  **Sanitización**: Limpia inputs (cast a string + strip_tags, filter_var) para asegurar compatibilidad de tipos.
 3.  **Cálculo**: Aplica lógica de precio por m² según zona.
 4.  **Envío de Correos**:
     ```php

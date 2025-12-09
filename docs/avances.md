@@ -1293,3 +1293,9 @@ Sustituir la clase heredada SimpleSMTP (sin soporte SSL/TLS seguro) por una solu
 - Se ha validado la activación de OpenSSL en el servidor local.
 - Se ha validado la configuración SMTP contra cPanel (mail.oswaldo.dev).
 - **Pendiente**: Resolución final de problemas de entregabilidad (los correos se envían según el log, pero no llegan a la bandeja de entrada, posible filtrado SPAM o configuración DNS). Se deja aparcado temporalmente para verificar en entorno de producción real o continuar más adelante.
+
+### [2025-12-09] Corrección Bug Backend Tasación (Mail)
+*   **Error detectado:** TypeError: strip_tags(): Argument #1 () must be of type string en TasacionController.
+*   **Causa:** El payload JSON enviado por JavaScript contenía valores numéricos (int) para campos como superficie o 	elefono, y strip_tags requiere strings.
+*   **Solución:** Se implementó casting explícito a (string) en todas las variables de entrada ($data[...]) antes de la sanitización.
+

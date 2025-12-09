@@ -95,14 +95,14 @@ class TasacionController
 
             // 1. Sanitizacion estricta
             $email_cliente = trim(filter_var($data['to_email'] ?? '', FILTER_SANITIZE_EMAIL));
-            $telefono = trim(strip_tags($data['user_phone'] ?? ''));
-            $cp = trim(strip_tags($data['cp'] ?? ''));
-            $barrio = trim(strip_tags($data['barrio'] ?? ''));
-            $zona = trim(strip_tags($data['zona'] ?? ''));
-            $superficie = trim(strip_tags($data['superficie'] ?? ''));
-            $precio_min = trim(strip_tags($data['precio_min'] ?? ''));
-            $precio_max = trim(strip_tags($data['precio_max'] ?? ''));
-            $caracteristicas = trim(strip_tags($data['caracteristicas'] ?? ''));
+            $telefono = trim(strip_tags((string)($data['user_phone'] ?? '')));
+            $cp = trim(strip_tags((string)($data['cp'] ?? '')));
+            $barrio = trim(strip_tags((string)($data['barrio'] ?? '')));
+            $zona = trim(strip_tags((string)($data['zona'] ?? '')));
+            $superficie = trim(strip_tags((string)($data['superficie'] ?? '')));
+            $precio_min = trim(strip_tags((string)($data['precio_min'] ?? '')));
+            $precio_max = trim(strip_tags((string)($data['precio_max'] ?? '')));
+            $caracteristicas = trim(strip_tags((string)($data['caracteristicas'] ?? '')));
             $fecha = date('d/m/Y H:i');
 
             // 2. Validacion estricta
