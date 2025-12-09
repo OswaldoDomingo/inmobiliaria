@@ -32,7 +32,7 @@ $ubicacion = $direccion . ($localidad ? ', ' . $localidad : '') . ($provincia ? 
 // Imagen principal
 $imagenSrc = $imagen 
     ? '/uploads/inmuebles/' . e($imagen) 
-    : '/assets/img/placeholder-property.jpg';
+    : '/assets/img/placeholder-property.png';
 ?>
 
 <div class="container py-5">
@@ -54,7 +54,7 @@ $imagenSrc = $imagen
                      class="img-fluid rounded shadow w-100" 
                      style="max-height: 500px; object-fit: cover;"
                      alt="<?= e($titulo) ?>"
-                     onerror="this.src='/assets/img/placeholder-property.jpg'">
+                     onerror="this.src='/assets/img/placeholder-property.png'">
             </div>
 
             <!-- Título y ubicación -->

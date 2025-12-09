@@ -86,7 +86,7 @@ $operacion = (string)($_GET['operacion'] ?? '');
                     // Imagen
                     $imagenSrc = $img 
                         ? '/uploads/inmuebles/' . e($img) 
-                        : '/assets/img/placeholder-property.jpg';
+                        : '/assets/img/placeholder-property.png';
                     
                     // Descripción breve (máx 120 caracteres)
                     $descBreve = $desc ? (mb_strlen($desc) > 120 ? mb_substr($desc, 0, 120) . '...' : $desc) : $ubicacion;
@@ -101,7 +101,7 @@ $operacion = (string)($_GET['operacion'] ?? '');
                                          class="img-fluid rounded-start h-100 w-100" 
                                          style="object-fit: cover; min-height: 250px; max-height: 300px;"
                                          alt="<?= e($titulo) ?>"
-                                         onerror="this.src='/assets/img/placeholder-property.jpg'">
+                                         onerror="this.src='/assets/img/placeholder-property.png'">
                                 </a>
                             </div>
                             
