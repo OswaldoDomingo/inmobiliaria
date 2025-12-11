@@ -366,7 +366,9 @@ Exponer en la parte pública de la web un catálogo de inmuebles “publicables�
       - Superficie (m²), habitaciones y baños (si existen).
       - Extracto de la descripción.
       - Botón **“Más información”** que enlaza a la ficha (`/propiedades/ver?id=...`).
-      - Botón **“Contactar”** que enlaza al formulario de tasación/contacto (`/tasacion`).
+      - Botón **“Contactar”** El botón "Contactar" abre un flujo de captación de leads:
+        - En el listado puede seguir dirigiendo al formulario de tasación (`/tasacion`) como lead magnet.
+        - En la ficha de inmueble se ha añadido un formulario de contacto específico (`/contacto`) que incluye referencia y datos básicos del inmueble, descrito en detalle en la documentación del módulo de contacto.
     - Incluye paginador (Anterior / Siguiente y número de página).
 
   - `app/views/propiedades/show.php`:

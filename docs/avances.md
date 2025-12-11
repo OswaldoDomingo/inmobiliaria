@@ -1401,3 +1401,123 @@ Se ha implementado el **listado público de propiedades** y la **ficha de detall
 
 Se ha decidido concentrar la lógica de visibilidad (inmuebles activos/publicables) en el modelo y reutilizarla tanto para el backoffice como para el front público, evitando duplicar reglas de negocio.  
 La paginación a 10 elementos por página y el diseño en tarjetas buscan un equilibrio entre rendimiento, legibilidad y experiencia de usuario, alineado con los portales inmobiliarios reales.
+
+
+## ✅ 2025-12-11 (Campo teléfono en usuarios y vista pública de propiedades)
+
+**Tema:** Implementación de campo teléfono en usuarios y visualización de contacto comercial/coordinador en vista pública de propiedades  
+**Tipo de avance:** Backend / DB / Frontend / UX / Lógica de negocio
+
+### 🚀 Resumen del día
+
+Se ha implementado un sistema completo para gestionar números de teléfono de usuarios (admin, coordinador, comercial) y mostrar información de contacto (nombre, email, teléfono) en la vista pública de propiedades.
+
+La lógica incluye un sistema de **fallback** inteligente: si el comercial asignado al inmueble no tiene teléfono, se utiliza el teléfono del coordinador general. Si el inmueble no tiene comercial asignado, se muestran todos los datos del coordinador.
+
+### 1. Base de Datos - Migración
+
+- **Archivo:** database/migrations/add_telefono_usuarios.sql
+- **Cambio:** Se añadió la columna telefono VARCHAR(25) DEFAULT NULL a la tabla usuarios
+- Campo opcional, no afecta a registros existentes
+
+### 2. Backend - Modelos actualizados
+
+- **Inmueble.php:** Métodos findById() y findByRef() incluyen ahora comercial_email y comercial_telefono
+- **User.php:** Nuevo método getCoordinadorGeneral() para fallback, métodos create() y update() actualizados
+
+### 3. Backend - Controladores
+
+- **UserController.php:** Métodos store() y update() sanitizan y procesan el campo telefono
+- **InmueblePublicController.php:** Implementada lógica de fallback:
+  - Sin comercial → usa datos del coordinador
+  - Con comercial sin teléfono → usa nombre y email del comercial, teléfono del coordinador
+  - Con comercial con teléfono → usa todos los datos del comercial
+
+### 4. Frontend - Formularios
+
+- **create.php y edit.php:** Campo telefono añadido con tipo tel, placeholder y ayuda
+- Campo opcional, se pre-rellena en modo edición
+
+### 5. Frontend - Vista Pública
+
+- **propiedades/show.php:** Sección de información adicional actualizada
+- Muestra dinámicamente: nombre, email (mailto), teléfono (tel)
+- Campos se ocultan si están vacíos
+
+### 6. Decisiones de Implementación
+
+- **Sin validación de formato:** Permite flexibilidad internacional
+- **Campo opcional:** Sistema funciona sin teléfonos
+- **Fallback inteligente:** Siempre hay contacto visible para visitantes
+
+### 7. Archivos modificados
+
+- database/migrations/add_telefono_usuarios.sql
+- app/Models/Inmueble.php
+- app/Models/User.php
+- app/Controllers/UserController.php
+- app/Controllers/InmueblePublicController.php
+- app/views/admin/users/create.php
+- app/views/admin/users/edit.php
+- app/views/propiedades/show.php
+
+### 8. Testing
+
+✅ Migración ejecutada  
+✅ Formularios probados  
+✅ Vista pública verificada en todos los escenarios  
+✅ Enlaces mailto/tel funcionando  
+
+## ✅ 2025-12-11 (Formulario de Contacto Público y Automatización de Emails)
+
+**Tema:** Implementación de formulario de contacto con validación, seguridad antispam y flujo de correos automatizado.
+**Tipo de avance:** Backend / Frontend / Security / Email
+
+### 🚀 Resumen del día
+
+Se ha desarrollado e integrado el **Formulario de Contacto Público**, accesible globalmente (`/contacto`) y desde las fichas de inmuebles. El sistema gestiona consultas generales y solicitudes específicas de propiedades, garantizando la entrega de información a la agencia, al comercial responsable y una confirmación inmediata al cliente.
+
+### 🔧 Características Implementadas
+
+#### 1. Backend (`ContactController`)
+- **Validación robusta:** Verificación en servidor de todos los campos (nombre, email, telefono, mensaje, privacidad).
+- **Seguridad Antispam:**
+  - **Honeypot:** Campo oculto para detectar bots.
+  - **Rate Limiting:** Bloqueo de envíos múltiples desde la misma sesión (cooldown de 30s).
+  - **CSRF:** Protección contra falsificación de solicitudes.
+- **Logging:** Registro detallado de actividad en `storage/logs/contacto.log` (intentos de spam, errores SMTP, envíos exitosos).
+
+#### 2. Sistema de Emails (`MailService`)
+- **Flujo de 3 vías:**
+  1. **Agencia:** Recibe aviso inmediato del lead (`contacto_agencia`).
+  2. **Comercial:** Recibe copia (CC) si el inmueble tiene asignado un comercial.
+  3. **Cliente:** Recibe auto-respuesta de confirmación (`contacto_cliente`).
+- **Reutilización:** Se aprovechó la infraestructura de `MailService` existente, corrigiendo plantillas para evitar renderizado de código PHP crudo.
+
+#### 3. Frontend y UX
+- **Vistas:**
+  - `contacto/form.php`: Formulario con feedback visual de errores y pre-rellenado de datos si viene de un inmueble.
+  - `contacto/exito.php`: Página de agradecimiento con navegación de retorno.
+- **Integración:** Botones "Contactar" en ficha de inmueble ahora redirigen a `/contacto?id_inmueble=XXX`.
+
+### 🐛 Solución de Bugs (Hotfixes)
+Durante la implementación se detectaron y resolvieron 3 incidencias críticas:
+1. **Fatal Error `stdClass`:** El modelo devolvía objetos pero el controlador esperaba arrays. Se aplicó casting explícito `(array)`.
+2. **Función indefinida `e()`:** Se sustituyó el helper `e()` (no existente en el core) por `htmlspecialchars()` nativo en las vistas.
+3. **Renderizado de Email:** Se corrigieron las plantillas de email que imprimían código PHP (`require ...`) debido a tags de cierre incorrectos.
+
+### 📝 Archivos clave creados/modificados
+- `app/Controllers/ContactController.php`
+- `app/Views/contacto/form.php`
+- `app/Views/contacto/exito.php`
+- `app/Views/emails/contacto_agencia.php`
+- `app/Views/emails/contacto_cliente.php`
+- `public/index.php` (Rutas)
+
+### 📝 Verificación de Logs
+- Verificado el archivo `storage/logs/contacto.log`.
+- El log registra:
+  - Timestamp + IP del usuario.
+  - Estados: FORM_OK, VALIDATION_ERROR, EMAIL_SENT, AUTO_REPLY_SENT, SMTP_ERROR (si ocurre).
+  - Datos básicos de contexto (email, teléfono, id_inmueble si aplica).
+- No se han realizado cambios en la lógica del formulario, solo comprobación de trazabilidad.
