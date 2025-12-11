@@ -120,7 +120,7 @@ Dado que no se utilizan frameworks ni gestores de dependencias como Composer, he
 *   **Errores detectados y resueltos:** Ajuste de la tabla `clientes` (faltaban `usuario_id`, `telefono`) que provocaba `Unknown column` al crear clientes; se corrigió el esquema y se añadió la migración completa.
 *   **Compatibilidad PHP 8:** Se normalizó el tipo de `user_id` (casteo a int en `ClienteController::index()`) para evitar excepciones de tipado en producción y se eliminó `E_STRICT` de `error_reporting`, usando `\PDOException` en el handler global para limpiar warnings.
 
-### 3.3.5.1. Gestión de Inmuebles (estado actual: bloqueado por routing)
+### 3.3.5.1. Gestión de Inmuebles
 
 Se inició la implementación del módulo **Inmuebles** para cubrir dos áreas:
 
@@ -129,10 +129,12 @@ Se inició la implementación del módulo **Inmuebles** para cubrir dos áreas:
 
 **Regla de negocio clave:** cada inmueble pertenece a un **cliente/propietario**. Dado que cada cliente está asignado a un **comercial**, los inmuebles deben quedar gestionados por dicho comercial. Si un cliente cambia de comercial, los inmuebles vinculados deben pasar automáticamente a ser gestionados por el nuevo comercial y aparecer en su listado.
 
-**Trabajo realizado (a nivel técnico):**
-- Se desarrolló el **modelo `Inmueble`** alineado con el esquema real de la tabla: `ref`, `propietario_id`, `comercial_id`, `direccion`, `localidad`, `provincia`, `cp`, `tipo`, `operacion`, `precio`, `estado`, `activo`, `archivado`, `fecha_alta`, etc.
-- Se implementaron **controladores** (admin y público), **vistas** (listado y formulario en admin, y estructura prevista para catálogo público) y se registraron las **rutas** correspondientes en `public/index.php`.
-- Se añadieron validaciones de servidor y ajustes para compatibilidad con ENUMs y columnas existentes.
+**Trabajo realizado (a nivel técnico):**  
+- Se desarrolló el **modelo `Inmueble`** alineado con el esquema real de la tabla `inmuebles`: `ref`, `propietario_id`, `comercial_id`, `direccion`, `localidad`, `provincia`, `cp`, `tipo`, `operacion`, `precio`, `estado`, `activo`, `archivado`, `fecha_alta`, etc.  
+- Se implementaron **controladores** (admin y público), **vistas** (listado y formulario en admin, y estructura del catálogo público) y se registraron las **rutas** correspondientes en `public/index.php`.  
+- Desde la ficha pública de inmueble, el usuario dispone de un botón **“Contactar”** (y “Solicitar información”) que abre el formulario `\`/contacto\``, pre-rellenado con la referencia y datos básicos del inmueble. Este formulario está descrito en detalle en el apartado 3.3.11, incluyendo las medidas de seguridad y el sistema de trazabilidad mediante logs.  
+- Se añadieron validaciones de servidor y ajustes para compatibilidad con los tipos `ENUM` y las columnas existentes en la base de datos.
+
 
 **Bloqueo técnico actual:**
 A pesar de que el código no presenta errores de sintaxis y el mapeo del modelo está alineado con la base de datos, el acceso a rutas del módulo devuelve **404 Not Found** (por ejemplo `/admin/inmuebles/nuevo`), impidiendo acceder al formulario y completar el flujo de alta.
@@ -668,7 +670,7 @@ Las vistas se encuentran en `app/views/propiedades/` para separar claramente la 
 - **Paginación ajustada a 10 items** en lugar de 12: decisión tomada para mejorar el tiempo de carga percibido y la experiencia en dispositivos móviles.
 - **Imagen con gestión de errores (onerror)**: si la imagen principal no existe o falla al cargar, se muestra automáticamente un placeholder genérico, evitando imágenes rotas.
 - **Enlaces duplicados (imagen + botón)**: tanto la imagen como el botón "Más información" enlazan a la ficha, siguiendo el patrón de usabilidad de los principales portales inmobiliarios (Idealista, Fotocasa).
-- **Botón "Contactar" centralizado**: en lugar de múltiples formularios de contacto, se reutiliza la ruta /tasacion, consolidando el lead capture en un único punto.
+- **Puntos de contacto centralizados**: la aplicación diferencia entre el formulario de tasación (/tasacion, pensado como lead magnet para posibles vendedores) y el formulario de contacto general (/contacto), accesible desde la navegación y desde las fichas de inmueble. Ambos reutilizan la misma infraestructura de correo y las mismas medidas de seguridad (validación en servidor, CSRF, sanitización y logs).
 - **Breadcrumb y navegación contextual**: facilita la  orientación del usuario y permite volver al listado sin perder el contexto de búsqueda (filtros activos se mantienen en la URL mediante query string).
 
 #### Seguridad y coherencia
@@ -686,3 +688,37 @@ Por otra parte, la separación de vistas públicas/admin en directorios distinto
 Con la implementación de este módulo público, el proyecto ofrece **valor inmediato** tanto para la agencia (catálogo profesional) como para el usuario final (consulta de propiedades sin necesidad de registro ni intermediarios).
 
 Al mismo tiempo, el enlace desde el menú principal garantiza que el catálogo sea **descubrible**, cumpliendo con uno de los objetivos iniciales: posicionar la web como punto de captación de leads cualificados.
+
+### 3.3.11. Formulario de Contacto y Sistema de Trazabilidad (Logs)
+
+Se ha implementado un sistema de contacto centralizado accesible a través de la ruta `/contacto`. Este módulo permite a los usuarios enviar consultas generales o solicitar información específica sobre un inmueble directamente desde su ficha pública.
+
+#### Funcionalidad y Flujo
+El formulario es contextual: si se accede desde un inmueble, pre-carga la referencia y datos básicos de la propiedad. Al enviar, el sistema dispara un flujo de notificaciones triple:
+1.  **A la Agencia:** Aviso inmediato con todos los datos del lead.
+2.  **Al Comercial Asignado:** Si el inmueble tiene un agente responsable, recibe una copia (CC).
+3.  **Al Cliente:** Email de auto-respuesta confirmando la recepción (`contacto_cliente`).
+
+#### Seguridad y Trazabilidad
+El formulario de contacto público no solo valida y sanitiza los datos en servidor, sino que además implementa un sistema de trazabilidad mediante logs.
+
+**Medidas de seguridad implementadas:**
+*   **Validación estricta:** Todos los campos (nombre, email, teléfono, mensaje) se validan en el servidor.
+*   **Honeypot:** Campo oculto para detectar y bloquear bots automáticos.
+*   **Rate Limiting:** Control de frecuencia que bloquea envíos sucesivos desde la misma sesión (30 segundos de espera) para evitar spam/flooding.
+*   **Protección CSRF:** Uso de tokens para garantizar que la petición proviene del sitio legítimo.
+
+**Sistema de Logs (`storage/logs/contacto.log`):**
+Cada envío genera una entrada en `storage/logs/contacto.log` donde se registra la fecha y hora, la IP, el estado del intento (`FORM_OK`, `VALIDATION_ERROR`, `EMAIL_SENT`, `AUTO_REPLY_SENT`, `SMTP_ERROR`, etc.) y datos básicos de contexto (como email, teléfono o la referencia del inmueble asociado).
+
+Esto permite auditar el funcionamiento del formulario, detectar patrones de uso o errores y analizar posibles intentos de abuso, sin necesidad de una tabla específica en base de datos en esta primera versión del proyecto.
+
+### 3.3.12. Estabilización y Correcciones (Hotfixes)
+
+Durante la fase de integración final se detectaron y resolvieron incidencias críticas para garantizar la estabilidad del entorno de producción:
+
+*   **Tipado Estricto (stdClass vs Array):** Se corrigió la incompatibilidad en la gestión de objetos devueltos por `PDO::fetchObject` vs arrays asociativos en el controlador de contacto.
+*   **Renderizado de Plantillas de Email:** Ajuste en el búfer de salida (`ob_start` / `ob_get_clean`) en `MailService` para evitar la impresión de código PHP crudo en los correos y asegurar la correcta interpretación de HTML.
+*   **Sanitización en Vistas:** Estandarización del uso de `htmlspecialchars()` en lugar de helpers no definidos (`e()`), previniendo errores fatales en tiempo de ejecución.
+
+
