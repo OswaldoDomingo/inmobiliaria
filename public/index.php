@@ -100,6 +100,11 @@ $router->get('/logout', [AuthController::class, 'logout']);
 $router->get('/propiedades', [InmueblePublicController::class, 'index']);
 $router->get('/propiedades/ver', [InmueblePublicController::class, 'show']);
 
+// Contacto Público
+use App\Controllers\ContactController;
+$router->get('/contacto', [ContactController::class, 'index']);
+$router->post('/contacto/enviar', [ContactController::class, 'enviar']);
+
 // --------------------------------------------------------------------------
 // Rutas de Administración
 // --------------------------------------------------------------------------

@@ -55,14 +55,15 @@ class User
     {
         $pdo = Database::conectar();
         
-        $sql = "INSERT INTO usuarios (nombre, email, password_hash, rol, foto_perfil, activo) 
-                VALUES (:nombre, :email, :password_hash, :rol, :foto_perfil, :activo)";
+        $sql = "INSERT INTO usuarios (nombre, email, telefono, password_hash, rol, foto_perfil, activo) 
+                VALUES (:nombre, :email, :telefono, :password_hash, :rol, :foto_perfil, :activo)";
         
         $stmt = $pdo->prepare($sql);
         
         return $stmt->execute([
             ':nombre'        => $data['nombre'],
             ':email'         => $data['email'],
+            ':telefono'      => $data['telefono'] ?? null,
             ':password_hash' => $data['password_hash'],
             ':rol'           => $data['rol'],
             ':foto_perfil'   => $data['foto_perfil'] ?? null,
@@ -99,12 +100,13 @@ class User
         $pdo = Database::conectar();
         
         // Construcción dinámica de la query según si hay password o no
-        $fields = "nombre = :nombre, email = :email, rol = :rol";
+        $fields = "nombre = :nombre, email = :email, telefono = :telefono, rol = :rol";
         $params = [
-            ':id'     => $id,
-            ':nombre' => $data['nombre'],
-            ':email'  => $data['email'],
-            ':rol'    => $data['rol']
+            ':id'       => $id,
+            ':nombre'   => $data['nombre'],
+            ':email'    => $data['email'],
+            ':telefono' => $data['telefono'] ?? null,
+            ':rol'      => $data['rol']
         ];
 
         if (array_key_exists('foto_perfil', $data)) {
@@ -167,7 +169,7 @@ class User
     }
 
     /**
-     * Obtiene comerciales/coordinadores activos para asignaci�n de clientes.
+     * Obtiene comerciales/coordinadores activos para asignación de clientes.
      *
      * @return array
      */
@@ -182,5 +184,24 @@ class User
                 ORDER BY nombre ASC";
         $stmt = $pdo->query($sql);
         return $stmt->fetchAll() ?: [];
+    }
+
+    /**
+     * Obtiene el coordinador general para fallback cuando no hay comercial asignado.
+     *
+     * @return object|null
+     */
+    public function getCoordinadorGeneral(): ?object
+    {
+        $pdo = Database::conectar();
+        $sql = "SELECT id_usuario, nombre, email, telefono
+                FROM usuarios
+                WHERE es_coordinador_general = 1
+                  AND activo = 1
+                  AND (archivado IS NULL OR archivado = 0)
+                LIMIT 1";
+        $stmt = $pdo->query($sql);
+        $result = $stmt->fetch();
+        return $result ?: null;
     }
 }

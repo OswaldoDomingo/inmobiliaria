@@ -174,9 +174,9 @@ $imagenSrc = $imagen
                         <?= number_format($precio, 0, ',', '.') ?> €
                     </h3>
                     
-                    <!-- Botones de contacto -->
+     <!-- Botones de contacto -->
                     <div class="d-grid gap-3 mb-4">
-                        <a href="/tasacion" class="btn btn-dark btn-lg">
+                        <a href="/contacto?id_inmueble=<?= $id ?>" class="btn btn-dark btn-lg">
                             <i class="bi bi-envelope"></i> Contactar
                         </a>
                         <a href="tel:+34900000000" class="btn btn-outline-dark">
@@ -195,10 +195,35 @@ $imagenSrc = $imagen
                             <i class="bi bi-info-circle"></i>
                             <strong>Referencia:</strong> <?= e($ref) ?>
                         </p>
-                        <p class="mb-2">
-                            <i class="bi bi-building"></i>
-                            Gestionado por <strong>Inmobiliaria</strong>
-                        </p>
+                        <?php if (!empty($contacto)): ?>
+                            <p class="mb-2">
+                                <i class="bi bi-person-badge"></i>
+                                <strong>Gestionado por:</strong> <?= e($contacto['nombre'] ?? 'No disponible') ?>
+                            </p>
+                            <?php if (!empty($contacto['email'])): ?>
+                                <p class="mb-2">
+                                    <i class="bi bi-envelope"></i>
+                                    <strong>Correo contacto:</strong> 
+                                    <a href="mailto:<?= e($contacto['email']) ?>" class="text-decoration-none">
+                                        <?= e($contacto['email']) ?>
+                                    </a>
+                                </p>
+                            <?php endif; ?>
+                            <?php if (!empty($contacto['telefono'])): ?>
+                                <p class="mb-2">
+                                    <i class="bi bi-telephone"></i>
+                                    <strong>Teléfono:</strong> 
+                                    <a href="tel:<?= e($contacto['telefono']) ?>" class="text-decoration-none">
+                                        <?= e($contacto['telefono']) ?>
+                                    </a>
+                                </p>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <p class="mb-2">
+                                <i class="bi bi-building"></i>
+                                Gestionado por <strong>Inmobiliaria</strong>
+                            </p>
+                        <?php endif; ?>
                         <p class="mb-0">
                             <i class="bi bi-shield-check"></i>
                             Propiedad verificada
@@ -214,7 +239,7 @@ $imagenSrc = $imagen
                     <p class="card-text small text-muted mb-3">
                         Nuestro equipo está disponible para resolver todas tus dudas sobre esta propiedad.
                     </p>
-                    <a href="/tasacion" class="btn btn-sm btn-outline-primary w-100">
+                    <a href="/contacto?id_inmueble=<?= $id ?>" class="btn btn-sm btn-outline-primary w-100">
                         Solicitar información
                     </a>
                 </div>

@@ -113,7 +113,7 @@ class Inmueble
         $pdo = Database::conectar();
         $sql = "SELECT i.*,
                        c.nombre AS propietario_nombre, c.apellidos AS propietario_apellidos,
-                       u.nombre AS comercial_nombre
+                       u.nombre AS comercial_nombre, u.email AS comercial_email, u.telefono AS comercial_telefono
                 FROM inmuebles i
                 JOIN clientes c ON i.propietario_id = c.id_cliente
                 LEFT JOIN usuarios u ON i.comercial_id = u.id_usuario
@@ -131,7 +131,7 @@ class Inmueble
         $pdo = Database::conectar();
         $sql = "SELECT i.*,
                        c.nombre AS propietario_nombre, c.apellidos AS propietario_apellidos,
-                       u.nombre AS comercial_nombre
+                       u.nombre AS comercial_nombre, u.email AS comercial_email, u.telefono AS comercial_telefono
                 FROM inmuebles i
                 JOIN clientes c ON i.propietario_id = c.id_cliente
                 LEFT JOIN usuarios u ON i.comercial_id = u.id_usuario

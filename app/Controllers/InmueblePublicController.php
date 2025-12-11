@@ -66,6 +66,40 @@ final class InmueblePublicController
             return;
         }
 
+
+        // Obtener coordinador para fallback de teléfono
+        $userModel = new \App\Models\User();
+        $coordinador = $userModel->getCoordinadorGeneral();
+        
+        $contacto = null;
+        $comercialId = is_array($inmueble) ? ($inmueble['comercial_id'] ?? null) : ($inmueble->comercial_id ?? null);
+        
+        if (!$comercialId) {
+            // No hay comercial asignado → Mostrar todos los datos del coordinador
+            if ($coordinador) {
+                $contacto = [
+                    'nombre'   => is_array($coordinador) ? $coordinador['nombre'] : $coordinador->nombre,
+                    'email'    => is_array($coordinador) ? $coordinador['email'] : $coordinador->email,
+                    'telefono' => is_array($coordinador) ? $coordinador['telefono'] : $coordinador->telefono,
+                ];
+            }
+        } else {
+            // Hay comercial asignado → Usar sus datos
+            $comercialTelefono = is_array($inmueble) ? ($inmueble['comercial_telefono'] ?? '') : ($inmueble->comercial_telefono ?? '');
+            
+            // Si el comercial no tiene teléfono, usar el del coordinador como fallback
+            if (empty($comercialTelefono) && $coordinador) {
+                $comercialTelefono = is_array($coordinador) ? $coordinador['telefono'] : $coordinador->telefono;
+            }
+            
+            $contacto = [
+                'nombre'   => is_array($inmueble) ? ($inmueble['comercial_nombre'] ?? '') : ($inmueble->comercial_nombre ?? ''),
+                'email'    => is_array($inmueble) ? ($inmueble['comercial_email'] ?? '') : ($inmueble->comercial_email ?? ''),
+                'telefono' => $comercialTelefono,
+            ];
+        }
+
+
         require VIEW . '/layouts/header.php';
         require VIEW . '/propiedades/show.php';
         require VIEW . '/layouts/footer.php';

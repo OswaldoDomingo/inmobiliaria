@@ -43,6 +43,14 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono" 
+                                   value="<?= htmlspecialchars($telefono ?? '') ?>" 
+                                   placeholder="+34 XXX XXX XXX">
+                            <div class="form-text">Opcional. Ejemplo: +34 644 403 640</div>
+                        </div>
+
+                        <div class="mb-3">
                             <label for="password" class="form-label">Contrasena <span class="text-danger">*</span></label>
                             <input type="password" class="form-control" id="password" name="password" 
                                    minlength="6" required>
