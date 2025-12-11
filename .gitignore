@@ -66,3 +66,4 @@ logs/*.log
 tests/
 
 presentacion_tribunal.md
+docs/presentacion_tribunal_optimizado.md
