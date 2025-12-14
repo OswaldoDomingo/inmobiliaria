@@ -35,7 +35,7 @@
                         <?php endif; ?>
                         <li class="nav-item"><a class="nav-link" href="#">Vende</a></li>
                         <li class="nav-item"><a class="nav-link fw-bold text-primary" href="/tasacion">Tasador Online</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">Contacto</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/contacto">Contacto</a></li>
                         <li class="nav-item ms-2">
                             <?php if (isset($_SESSION['user_id'])): ?>
                                 <div class="d-flex align-items-center">
