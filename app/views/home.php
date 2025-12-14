@@ -17,7 +17,7 @@
             <div class="carousel-wrapper position-relative">
                 <!-- Botón Anterior -->
                 <button id="carousel-prev" class="carousel-nav carousel-nav-prev" aria-label="Anterior">
-                    <i class="bi bi-chevron-left"></i>
+                    <i class="bi bi-arrow-left"></i>
                 </button>
 
                 <!-- Contenedor del carrusel -->
@@ -31,7 +31,7 @@
 
                 <!-- Botón Siguiente -->
                 <button id="carousel-next" class="carousel-nav carousel-nav-next" aria-label="Siguiente">
-                    <i class="bi bi-chevron-right"></i>
+                    <i class="bi bi-arrow-right"></i>
                 </button>
             </div>
         <?php else: ?>
@@ -126,6 +126,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-size: 1.3rem; /* Tamaño de flecha bonito */
 }
 
 .carousel-nav:hover:not(:disabled) {
@@ -175,7 +176,7 @@
     }
     
     .carousel-nav i {
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
 }
 </style>
@@ -214,14 +215,23 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Mostrar botones por defecto
         prevBtn.style.display = 'flex';
         nextBtn.style.display = 'flex';
         
-        // Deshabilitar botón prev si está al inicio
-        prevBtn.disabled = scrollLeft <= 1;
+        // Debug
+        // console.log('Scroll:', scrollLeft, 'Client:', clientWidth, 'Total:', scrollWidth);
+
+        // Ocultar botón prev si está al inicio (con margen de tolerancia)
+        if (scrollLeft <= 10) {
+            prevBtn.style.display = 'none';
+        }
         
-        // Deshabilitar botón next si está al final
-        nextBtn.disabled = scrollLeft + clientWidth >= scrollWidth - 1;
+        // Ocultar botón next si está al final (con margen de tolerancia)
+        // Usamos Math.ceil o un margen pequeño para evitar decimales
+        if (Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 5) {
+            nextBtn.style.display = 'none';
+        }
     }
     
     // Navegación

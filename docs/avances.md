@@ -1554,6 +1554,7 @@ Se ha implementado un carrusel de "Propiedades Destacadas" en la página princip
 #### 2. Implementación Frontend (Vanilla)
 - **CSS Moderno:** Uso de `display: flex`, `overflow-x: auto` y `scroll-snap-type: x mandatory` para un carrusel nativo, ligero y responsive sin dependencias JS pesadas.
 - **JavaScript UI:** Script vanilla para gestionar la visibilidad de los botones "Anterior/Siguiente" (ocultarlos si no hay scroll) y permitir navegación por clic además del swipe táctil nativo.
+- **Navegación Intuitiva:** Se han incorporado flechas visuales (`bi-arrow-left/right`) acordes al estilo del sitio, con lógica de auto-ocultado (smart auto-hide) cuando se alcanza el inicio o el final del carrusel.
 - **Card Reutilizable:** Creación de `partials/inmueble_card.php` para estandarizar la visualización de tarjetas de inmueble en toda la web (home, listados, relacionados).
 
 ### 🐛 Problemas Encontrados y Resolución
