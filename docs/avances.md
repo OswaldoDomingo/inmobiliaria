@@ -1532,3 +1532,47 @@ Durante la implementación se detectaron y resolvieron 3 incidencias críticas:
 - Se detectó un comportamiento diferente entre local y servidor en el teléfono del coordinador.
 - En lugar de parchear campo a campo, se borró la BBDD de producción y se volcó una copia completa de la BBDD local.
 - Resultado: estructura y datos totalmente alineados; el fallback de teléfono (coordinador) funciona correctamente.
+
+---
+
+## ✅ 2025-12-14
+
+**Tema:** Carrusel de Propiedades Destacadas en Landing (Home)
+**Tipo de avance:** Frontend + Backend (UX)
+
+### 🚀 Resumen
+Se ha implementado un carrusel de "Propiedades Destacadas" en la página principal (`/`) para mejorar la UX y mostrar una selección dinámica de la cartera de inmuebles. El objetivo era lograr esto sin modificar la estructura de la base de datos (sin columna "destacado"), utilizando una lógica de selección pseudo-aleatoria consistente.
+
+### 🔧 Cambios Realizados
+
+#### 1. Lógica de Selección (Backend)
+- **Método `Inmueble::getHomeCarousel()`:** Recupera hasta 6 inmuebles que cumplen:
+  - `activo = 1` (único criterio de publicación tras simplificación).
+- **Aleatoriedad Estable:** Se utiliza `ORDER BY RAND(TO_DAYS(CURDATE()))` para que la selección de inmuebles varíe cada día pero se mantenga estable durante las 24 horas, evitando que el slider cambie en cada recarga de página (sensación de sitio más sólido).
+- **Límite Seguro:** Parámetro `$limit` restringido internamente entre 1 y 12.
+
+#### 2. Implementación Frontend (Vanilla)
+- **CSS Moderno:** Uso de `display: flex`, `overflow-x: auto` y `scroll-snap-type: x mandatory` para un carrusel nativo, ligero y responsive sin dependencias JS pesadas.
+- **JavaScript UI:** Script vanilla para gestionar la visibilidad de los botones "Anterior/Siguiente" (ocultarlos si no hay scroll) y permitir navegación por clic además del swipe táctil nativo.
+- **Card Reutilizable:** Creación de `partials/inmueble_card.php` para estandarizar la visualización de tarjetas de inmueble en toda la web (home, listados, relacionados).
+
+### 🐛 Problemas Encontrados y Resolución
+
+1.  **Fatal Error `stdClass`:** El método `fetchObject()` devolvía objetos `stdClass`, pero la vista iteraba esperando arrays.
+    *   **Solución:** Se forzó `fetchAll(\PDO::FETCH_ASSOC)` en el modelo para garantizar consistencia de tipos.
+
+2.  **Criterios de Publicación Confusos:** Inicialmente se requerían 3 flags (`estado='activo'`, `activo=1`, `archivado=0`), lo que dejaba el carrusel vacío porque pocos inmuebles cumplían todo.
+    *   **Solución:** Se simplificó la lógica de negocio pública para depender **únicamente** de `activo = 1`, alineando el comportamiento con la expectativa del usuario gestor.
+
+3.  **Layout CSS Colapsado:** Los items del carrusel se montaban o no respetaban el ancho.
+    *   **Solución:** Se aplicó una estrategia CSS robusta con `white-space: nowrap` en el contenedor y `display: inline-block` en los items, asegurando la visualización horizontal correcta en todos los navegadores.
+
+### 📝 Archivos clave creados/modificados
+- `app/Models/Inmueble.php` (Método `getHomeCarousel`)
+- `app/Controllers/HomeController.php`
+- `app/Views/home.php`
+- `app/Views/partials/inmueble_card.php` (Nuevo partial)
+
+### 🔮 Roadmap
+- Futuro: añadir columna real `destacado` en BBDD para selección manual desde admin.
+- Futuro: permitir ordenar manualmente las destacadas.

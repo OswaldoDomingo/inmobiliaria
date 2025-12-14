@@ -333,6 +333,27 @@ Para corregirlo se han introducido varios mecanismos de protección:
 
 Con este refuerzo, el módulo de Inmuebles deja de ser solo un CRUD técnico y pasa a comportarse como una herramienta de trabajo segura y coherente con la operativa real de una agencia inmobiliaria.
 
+### 3.3.5.6. Carrusel de propiedades destacadas en la landing (Home)
+
+Con el objetivo de mejorar la experiencia de usuario (UX) en la página de inicio y mostrar una imagen más dinámica de la cartera, se implementó un carrusel de propiedades destacadas.
+
+**Motivación y Diseño:**
+Se buscaba que la landing page no fuera estática, sino que invitara a la navegación mostrando inmuebles reales. Para ello, se decidió reutilizar el criterio de **"inmueble publicable"** (`activo=1`) definido para el catálogo, garantizando consistencia: lo que sale en el carrusel es navegable y está disponible.
+
+**Decisión Técnica (Gestión de Riesgos):**
+En esta fase final del proyecto, se decidió **no modificar la estructura de la base de datos** (evitando añadir columnas como `destacado` o `orden_home`) para minimizar riesgos de regresión. En su lugar, se optó por una estrategia de selección algorítmica:
+*   **Selección Aleatoria Estable:** Se utiliza `ORDER BY RAND(TO_DAYS(CURDATE()))`. Esto selecciona propiedades al azar, pero mantiene la misma selección durante todo el día (24h). Esto evita el efecto de "sitio roto" o inestable donde el contenido cambia con cada refresco de página (F5).
+
+**Implementación:**
+*   **Backend:** Método `Inmueble::getHomeCarousel()` con un límite de seguridad (clamped 1-12).
+*   **Frontend:** Implementación "Vanilla" (sin librerías externas) usando CSS `scroll-snap` para el desplazamiento horizontal y JavaScript nativo para la gestión de botones (ocultar anterior/siguiente según scroll).
+
+**Retos y Soluciones:**
+Durante la integración surgió un error crítico (`Fatal Error: Cannot use object of type stdClass as array`) en el renderizado de las tarjetas. Esto se debió a que el método de acceso a datos devolvía objetos genéricos mientras la vista esperaba arrays asociativos. Se solucionó forzando el modo de recuperación `PDO::FETCH_ASSOC` en el modelo, lo que además estandarizó el formato de datos con el resto de la aplicación.
+
+**Resultado Final:**
+El carrusel es funcional, responsive (soporta swipe en móviles) y mejora la percepción de calidad del sitio sin haber comprometido la estabilidad de la base de datos en la entrega final.
+
 ### 3.3.6. Cumplimiento normativo (RGPD y cookies)
 *   Paginas legales provisionales (aviso legal, privacidad, cookies) publicadas bajo `/legal/*` con controlador dedicado y vistas en `app/Views/legal/`, marcando que el contenido es temporal hasta validacion juridica.
 *   Footer reorganizado con enlaces legales visibles y las redes sociales oficiales en formato horizontal, debajo del bloque legal.
