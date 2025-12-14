@@ -285,13 +285,62 @@ class Inmueble
                 $params[':estado'] = $filters['estado'];
             }
         } else {
-            $conditions[] = "i.estado = 'activo'";
+            // Para vista pública: solo mostrar inmuebles activos
             $conditions[] = "i.activo = 1";
-            $conditions[] = "i.archivado = 0";
         }
 
         return 'WHERE ' . implode(' AND ', $conditions);
     }
+    /**
+     * Obtiene inmuebles publicables aleatorios para el carrusel de la home.
+     * 
+     * @param int $limit Número de inmuebles a obtener (1-12)
+     * @param bool $stableDaily Si true, mantiene orden aleatorio estable durante el día
+     * @return array Array de inmuebles con campos mínimos para cards
+     */
+    public static function getHomeCarousel(int $limit = 6, bool $stableDaily = true): array
+    {
+        // Validar y limitar el parámetro limit
+        $limit = max(1, min(12, $limit));
+        
+        $pdo = Database::conectar();
+        
+        // Filtro publicable: solo mostrar inmuebles activos
+        $whereSql = 'WHERE i.activo = 1';
+        
+        // Determinar el ORDER para aleatorización
+        $orderBy = $stableDaily 
+            ? 'ORDER BY RAND(TO_DAYS(CURDATE()))' 
+            : 'ORDER BY RAND()';
+        
+        // Query con campos mínimos necesarios para las cards
+        $sql = "SELECT 
+                    i.id_inmueble,
+                    i.ref,
+                    i.tipo,
+                    i.operacion,
+                    i.localidad,
+                    i.provincia,
+                    i.precio,
+                    i.habitaciones,
+                    i.banos,
+                    i.superficie,
+                    i.imagen
+                FROM inmuebles i
+                {$whereSql}
+                {$orderBy}
+                LIMIT {$limit}";
+        
+        try {
+            $stmt = $pdo->query($sql);
+            $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            return $result ?: [];
+        } catch (\PDOException $e) {
+            error_log("Error en getHomeCarousel: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function getByPropietario(int $propietarioId): array
     {
         $pdo = Database::conectar();

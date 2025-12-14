@@ -20,6 +20,10 @@ class HomeController
         $heroTitle = "Encuentra tu hogar ideal";
         $heroSubTitle = "Miles de propiedades te esperan en Valencia";
         $heroImage = "https://picsum.photos/1920/600";
+        
+        // Carrusel de propiedades destacadas
+        $carouselInmuebles = \App\Models\Inmueble::getHomeCarousel(6, true);
+        
         // --- LA LOGICA DE LA TARJETA ---
 
         // Preguntamos: ¿Existe la variable 'tarjeta_vista' en la sesión?
