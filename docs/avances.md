@@ -1521,3 +1521,14 @@ Durante la implementación se detectaron y resolvieron 3 incidencias críticas:
   - Estados: FORM_OK, VALIDATION_ERROR, EMAIL_SENT, AUTO_REPLY_SENT, SMTP_ERROR (si ocurre).
   - Datos básicos de contexto (email, teléfono, id_inmueble si aplica).
 - No se han realizado cambios en la lógica del formulario, solo comprobación de trazabilidad.
+
+### TODO futuro
+- Revisar lógica del teléfono mostrado en ficha pública:
+  - Actualmente, si el comercial no tiene teléfono se muestra el del coordinador.
+  - Pendiente decidir si:
+    - ocultar el teléfono en ese caso, o
+    - mostrar un texto tipo "Llámanos al teléfono de oficina" en lugar de un móvil personal.
+### 2025-12-11 – Sincronización BBDD local → producción
+- Se detectó un comportamiento diferente entre local y servidor en el teléfono del coordinador.
+- En lugar de parchear campo a campo, se borró la BBDD de producción y se volcó una copia completa de la BBDD local.
+- Resultado: estructura y datos totalmente alineados; el fallback de teléfono (coordinador) funciona correctamente.
