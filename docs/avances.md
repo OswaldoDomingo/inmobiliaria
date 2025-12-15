@@ -1577,3 +1577,29 @@ Se ha implementado un carrusel de "Propiedades Destacadas" en la página princip
 ### 🔮 Roadmap
 - Futuro: añadir columna real `destacado` en BBDD para selección manual desde admin.
 - Futuro: permitir ordenar manualmente las destacadas.
+
+---
+
+## ✅ 2025-12-15 (Hotfix – Subida de Foto de Perfil >2MB)
+
+**Tema:** Corrección de error fatal al subir imágenes demasiado pesadas en edición de usuario.  
+**Tipo de avance:** Backend / Seguridad / UX
+
+### 🐛 Problema detectado
+Al subir una imagen de perfil por encima del límite (≈2MB), se producía una excepción no controlada que terminaba en **fatal error**, mostrando **rutas internas** del servidor en pantalla en lugar de un mensaje amigable.
+
+### ✅ Solución aplicada
+- Se robusteció el flujo de subida de archivos para **capturar correctamente errores de PHP** (`UPLOAD_ERR_INI_SIZE`, `UPLOAD_ERR_FORM_SIZE`, etc.).
+- Se ajustó el manejo de excepciones para que el error se muestre **inline en el formulario** (alert Bootstrap), sin redirecciones que pierdan el contexto.
+- Se asegura la **preservación de datos** del formulario (nombre/email/teléfono/rol) cuando hay error.
+- Se mantiene la validación de seguridad: **tamaño máximo** y **MIME real** (JPG/PNG/WEBP).
+
+### 🧪 Pruebas realizadas (manual)
+✅ Subida de imagen >2MB → muestra “La imagen es demasiado pesada. Máximo 2MB.”  
+✅ Formatos no permitidos → error controlado en UI  
+✅ Subida válida → actualiza correctamente  
+✅ Sin fuga de paths / sin fatal error
+
+### 📝 Archivos modificados
+- `app/Controllers/UserController.php`
+

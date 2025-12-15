@@ -103,6 +103,7 @@ Dado que no se utilizan frameworks ni gestores de dependencias como Composer, he
 *   **Fotos de Perfil:** Sistema de subida de imágenes seguro con validación de tipo MIME, renombrado aleatorio y limpieza automática de archivos antiguos.
 *   **Sistema de Auditoría:** Implementación de logs de seguridad en archivo de texto (Flat-File) para registrar accesos, fallos y bloqueos, con visor integrado en el panel de administración.
 *   **Mejora de UX en Dashboard:** Personalización de la interfaz (Header y Dashboard) para mostrar la foto y el email del usuario logueado, mejorando la orientación y el feedback visual.
+*   **Fotos de Perfil:** Sistema de subida de imágenes seguro con validación de tipo MIME real, control de tamaño (≤2MB), manejo de errores `UPLOAD_ERR_*` y mensajes amigables en UI (sin exponer rutas internas), con limpieza de archivos antiguos.
 
 ### 3.3.4. Gestión de Clientes
 *   **Migración y esquema:** Se creó `database/migrations/03_create_crm_tables.sql` con las tablas `clientes` e `inmuebles`, FKs a `usuarios` y `clientes`, flags de operación e índices de filtrado.
