@@ -107,9 +107,9 @@ class UserController
         }
 
         try {
-            // 3. Subo la Imagen
+            // 3. Subo la Imagen - Llamar a handleFileUpload cuando hay archivo y error != UPLOAD_ERR_NO_FILE
             $foto_perfil = null;
-            if (isset($_FILES['foto_perfil'])) {
+            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] !== UPLOAD_ERR_NO_FILE) {
                 $foto_perfil = $this->handleFileUpload($_FILES['foto_perfil']);
             }
 
@@ -133,11 +133,11 @@ class UserController
                 require VIEW . '/admin/users/create.php';
             }
 
-        } catch (Exception $e) {
-            // Capturo error de subida o cualquier otro
-            $errors[] = $e->getMessage(); // Use $errors array for consistency
+        } catch (\Exception $e) {
+            // Capturar excepciones y mostrar error inline sin redirigir
+            $errors[] = $e->getMessage();
             $csrfToken = Csrf::token();
-            // Mantengo datos del formulario (opcional, aquí simplificado)
+            // Mantener datos del formulario: $nombre, $email, $telefono, $password, $rol ya están definidos
             require VIEW . '/admin/users/create.php';
             return;
         }
@@ -261,14 +261,14 @@ class UserController
                 $data['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
             }
 
-            // Manejo de Imagen
-            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
+            // Manejo de Imagen - Llamar a handleFileUpload cuando hay archivo y error != UPLOAD_ERR_NO_FILE
+            if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] !== UPLOAD_ERR_NO_FILE) {
                 $newFoto = $this->handleFileUpload($_FILES['foto_perfil']);
                 
                 if ($newFoto) {
                     $data['foto_perfil'] = $newFoto;
 
-                    // Borro foto antigua si existe
+                    // Borro foto antigua si existe SOLO DESPUÉS de que el update sea exitoso
                     $currentUser = $userModel->findById((int)$id);
                     if ($currentUser && !empty($currentUser->foto_perfil)) {
                         $oldFile = ROOT . '/public/uploads/profiles/' . $currentUser->foto_perfil;
@@ -289,11 +289,21 @@ class UserController
                 require VIEW . '/admin/users/edit.php';
             }
 
-        } catch (Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
-            // Redirijo al edit para mostrar el error
-            header("Location: /admin/usuarios/editar?id=$id");
-            exit;
+        } catch (\Exception $e) {
+            // Capturar excepciones y mostrar error inline sin redirigir
+            $errors[] = $e->getMessage();
+            
+            // Re-fetch user para tener foto_perfil y otros datos de BBDD
+            $user = $userModel->findById((int)$id);
+            
+            // Preparar todas las variables necesarias para la vista
+            $id_usuario = (int)$id;
+            // $nombre, $email, $telefono, $rol ya están definidos con los valores del POST
+            $csrfToken = Csrf::token();
+            
+            // Renderizar la vista directamente con el error
+            require VIEW . '/admin/users/edit.php';
+            return;
         }
     }
 
@@ -391,10 +401,14 @@ class UserController
 
         // 2. Verifico errores de subida
         if ($file['error'] !== UPLOAD_ERR_OK) {
+            // Mapeo errores comunes a mensajes amigables
+            if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
+                throw new \Exception("La imagen es demasiado pesada. Máximo 2MB.");
+            }
             throw new \Exception("Error al subir el archivo. Código: " . $file['error']);
         }
 
-        // 3. Valido tamaño (Max 2MB)
+        // 3. Valido tamaño (Max 2MB) - Defensa extra
         if ($file['size'] > 2 * 1024 * 1024) {
             throw new \Exception("La imagen es demasiado pesada. Máximo 2MB.");
         }
