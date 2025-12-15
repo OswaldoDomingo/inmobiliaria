@@ -1603,3 +1603,79 @@ Al subir una imagen de perfil por encima del límite (≈2MB), se producía una 
 ### 📝 Archivos modificados
 - `app/Controllers/UserController.php`
 
+---
+
+## ✅ 2025-12-15 (Página pública "Quiénes somos")
+
+**Tema:** Implementación de página estática pública "Quiénes somos" accesible desde el footer  
+**Tipo de avance:** Frontend / Backend / UX / Navegación
+
+### 🚀 Resumen
+
+Se ha creado una nueva página pública informativa "Quiénes somos" siguiendo el patrón establecido para páginas estáticas (similar a `LegalController`). La página es accesible desde el enlace del footer, incluye información corporativa sobre la inmobiliaria y un CTA al formulario de contacto.
+
+### 🔧 Implementación realizada
+
+#### 1. Backend (MVC)
+
+**Nuevo Controlador:** `app/Controllers/QuienesSomosController.php`
+- Controlador simple con un único método `index()`.
+- Sigue el patrón ya establecido por `LegalController`: carga header, vista de contenido y footer.
+- Declaración estricta de tipos (`declare(strict_types=1)`).
+- Namespace correcto y uso de la constante `VIEW`.
+
+**Nueva Vista:** `app/views/quienes_somos/index.php`
+- Diseño responsive con Bootstrap 5.
+- Estructura limpia en contenedor (`container py-5`).
+- **Contenido incluido:**
+  - Sección "Nuestra misión" → párrafo descriptivo sobre el propósito de la inmobiliaria.
+  - Sección "Nuestros valores" → lista con 5 valores (Transparencia, Profesionalidad, Compromiso, Cercanía, Innovación) con iconos Bootstrap Icons.
+  - Sección "Dónde trabajamos" → descripción de la zona de actuación (Valencia y alrededores).
+  - CTA destacado → botón primario grande que enlaza a `/contacto`.
+- Cards con sombra y borde cero para diseño moderno y limpio.
+- Uso de iconografía consistente (Bootstrap Icons: compass, heart, geo-alt, envelope).
+
+#### 2. Routing
+
+**Modificado:** `public/index.php`
+- Añadido `use App\Controllers\QuienesSomosController;` en la sección de controladores públicos (línea ~78).
+- Registrada nueva ruta: `$router->get('/quienes-somos', [QuienesSomosController::class, 'index']);` en la sección de rutas públicas, después de legal y antes de tasación.
+
+#### 3. Navegación
+
+**Modificado:** `app/views/layouts/footer.php`
+- Actualizado el enlace "Quienes somos" de `href="#"` a `href="/quienes-somos"` (línea 11).
+- Ahora funcional y accesible desde cualquier página del sitio.
+
+### ✅ Decisiones técnicas
+
+- **Casing correcto:** Se utilizó `app/views/` (minúsculas) y `app/Controllers/` (mayúsculas) respetando la estructura real del repo para evitar problemas en entornos Linux/producción.
+- **Patrón de nomenclatura:** Carpeta `quienes_somos` con guion bajo (underscore) para mantener coherencia con otras carpetas del proyecto (`app/views/quienes_somos/index.php`).
+- **Reutilización de layout:** La página carga automáticamente header y footer existentes, manteniendo coherencia visual total con el resto del sitio.
+- **Sin base de datos:** Página completamente estática, sin consultas SQL ni dependencias de modelos.
+
+### 🧪 Pruebas manuales realizadas
+
+✅ Navegación desde footer → ruta `/quienes-somos` carga correctamente  
+✅ Layout completo → se muestra header y footer  
+✅ Contenido visible → las 3 secciones (misión, valores, zona) se renderizan correctamente  
+✅ CTA funcional → botón "Contactar" redirige a `/contacto`  
+✅ Responsive → probado en 375px (móvil), 768px (tablet) y 1200px (desktop) sin problemas de layout
+
+### 📝 Archivos creados/modificados
+
+**Creados:**
+- `app/Controllers/QuienesSomosController.php`
+- `app/views/quienes_somos/index.php`
+
+**Modificados:**
+- `public/index.php` (routing)
+- `app/views/layouts/footer.php` (enlace funcional)
+- `docs/avances.md` (esta entrada)
+
+### 💡 Notas
+
+- Página alineada con el objetivo de ofrecer transparencia y cercanía al usuario final.
+- Facilita la captación de leads al incluir CTA directo a contacto.
+- Preparada para futura ampliación (ej: galería de equipo, testimonios, vídeo corporativo).
+
