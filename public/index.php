@@ -75,6 +75,7 @@ $router = new Router();
 // --------------------------------------------------------------------------
 use App\Controllers\HomeController;
 use App\Controllers\LegalController;
+use App\Controllers\QuienesSomosController;
 use App\Controllers\TasacionController;
 use App\Controllers\AuthController;
 use App\Controllers\InmueblePublicController;
@@ -86,6 +87,9 @@ $router->get('/', [HomeController::class, 'index']);
 $router->get('/legal/aviso-legal', [LegalController::class, 'avisoLegal']);
 $router->get('/legal/privacidad', [LegalController::class, 'privacidad']);
 $router->get('/legal/cookies', [LegalController::class, 'cookies']);
+
+// Quiénes somos
+$router->get('/quienes-somos', [QuienesSomosController::class, 'index']);
 
 // Tasación
 $router->get('/tasacion', [TasacionController::class, 'index']);
