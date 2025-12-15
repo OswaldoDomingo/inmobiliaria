@@ -9,7 +9,6 @@
                         <li><a class="text-decoration-none text-secondary" href="/">Inicio</a></li>
                         <li><a class="text-decoration-none text-secondary" href="/contacto">Contacto</a></li>
                         <li><a class="text-decoration-none text-secondary" href="/quienes-somos">Quienes somos</a></li>
-                        <li><a class="text-decoration-none text-secondary" href="#">Trabaja con nosotros</a></li>
                     </ul>
                 </div>
                 <div class="col-12 col-md-4 text-md-center">
