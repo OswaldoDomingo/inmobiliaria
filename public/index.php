@@ -95,6 +95,9 @@ $router->get('/quienes-somos', [QuienesSomosController::class, 'index']);
 $router->get('/tasacion', [TasacionController::class, 'index']);
 $router->post('/tasacion/enviar', [TasacionController::class, 'enviar']);
 
+//Vende 
+$router->get('/vende', [HomeController::class, 'vende']);
+
 // Auth
 $router->get('/login', [AuthController::class, 'login']);
 $router->post('/login', [AuthController::class, 'authenticate']);

@@ -33,7 +33,7 @@
                         <?php if (isset($_SESSION['user_id'])): ?>
                         <li class="nav-item"><a class="nav-link" href="/admin/clientes">Clientes</a></li>
                         <?php endif; ?>
-                        <li class="nav-item"><a class="nav-link" href="#">Vende</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/vende">Vende</a></li>
                         <li class="nav-item"><a class="nav-link fw-bold text-primary" href="/tasacion">Tasador Online</a></li>
                         <li class="nav-item"><a class="nav-link" href="/contacto">Contacto</a></li>
                         <li class="nav-item ms-2">

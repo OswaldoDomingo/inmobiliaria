@@ -42,4 +42,23 @@ class HomeController
         require VIEW . '/home.php';
         require VIEW . '/layouts/footer.php';
     }
+
+    public function vende(): void
+{
+    $telefono = "96 000 00 00";
+    $email = "contacto@inmobiliariaejemplo.luc";
+    $direccion = "C/ Ejemplo 123, Valencia";
+    $mapsUrl = "https://www.google.com/maps?q=" . urlencode($direccion);
+
+    // Imágenes (asegúrate de tenerlas en /public/assets/img/vende/)
+    $imgPlan = "/assets/img/vende/planificacion-ventas.png";
+    $imgVisita = "/assets/img/vende/inicio-visita.png";
+    $imgOnline = "/assets/img/vende/contacto-internet.png";
+
+    require VIEW . '/layouts/header.php';
+    require VIEW . '/vende/index.php';
+    require VIEW . '/layouts/footer.php';
+}
+
+
 }
