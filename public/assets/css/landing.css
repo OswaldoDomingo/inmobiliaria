@@ -55,37 +55,43 @@
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
-    white-space: nowrap !important; /* Forzar línea única */
-    
+    white-space: nowrap !important;
+    /* Forzar línea única */
+
     scroll-snap-type: x mandatory;
     gap: 20px;
     padding: 20px 5px;
-    
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-    
+
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+
     width: 100% !important;
     height: auto !important;
     align-items: stretch !important;
 }
 
 .carousel-container::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
+    /* Chrome/Safari */
 }
 
 .carousel-item {
     /* Forzar comportamiento de bloque en línea si flex falla */
-    display: inline-block !important; 
+    display: inline-block !important;
     vertical-align: top !important;
-    white-space: normal !important; /* Reset para el contenido interno */
-    
+    white-space: normal !important;
+    /* Reset para el contenido interno */
+
     /* Dimensiones fijas estrictas */
     flex: 0 0 280px !important;
     width: 280px !important;
     min-width: 280px !important;
     max-width: 280px !important;
-    
-    margin-right: 20px; /* Fallback para gap */
+
+    margin-right: 20px;
+    /* Fallback para gap */
     scroll-snap-align: start;
 }
 
@@ -117,7 +123,8 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    font-size: 1.3rem; /* Tamaño de flecha bonito */
+    font-size: 1.3rem;
+    /* Tamaño de flecha bonito */
 }
 
 .carousel-nav:hover:not(:disabled) {
@@ -160,14 +167,79 @@
     .carousel-wrapper {
         padding: 0 40px;
     }
-    
+
     .carousel-nav {
         width: 35px;
         height: 35px;
     }
-    
+
     .carousel-nav i {
         font-size: 1.2rem;
     }
 }
 
+/* =========================================
+   Sección de Vende
+   ========================================= */
+/* ===== Landing Vende ===== */
+.vende-section { padding: 3.5rem 0; }
+.vende-border { border-top: 1px solid #e9ecef; border-bottom: 1px solid #e9ecef; }
+
+.vende-kicker {
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: .8rem;
+  color: #6c757d;
+}
+
+.vende-media {
+  border-radius: 24px;
+  overflow: hidden;
+  background: #f8f9fa;
+  box-shadow: 0 10px 30px rgba(0,0,0,.06);
+}
+
+.vende-img-cover {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* alturas coherentes por sección */
+.vende-media--plan { height: 320px; }
+.vende-media--visita { height: 360px; }
+.vende-media--online { height: 360px; }
+
+@media (max-width: 991.98px){
+  .vende-media--plan { height: 240px; }
+  .vende-media--visita { height: 260px; }
+  .vende-media--online { height: 260px; }
+}
+
+.vende-card {
+  border-radius: 18px;
+  border: 1px solid #e9ecef;
+  box-shadow: 0 10px 30px rgba(0,0,0,.04);
+}
+
+/* CTA banner */
+.vende-cta {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.vende-cta::after{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(90deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.15) 60%, rgba(0,0,0,0) 100%);
+}
+
+.vende-cta-content{
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+}
