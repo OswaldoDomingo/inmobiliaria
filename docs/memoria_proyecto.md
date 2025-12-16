@@ -217,7 +217,7 @@ Esta mejora se ha probado con los tres perfiles definidos en la aplicación (adm
 Con este cambio se mejora de forma significativa la experiencia de usuario, se respeta el flujo de trabajo real de una agencia inmobiliaria (operar siempre “dentro” de la ficha de cliente) y se mantiene al mismo tiempo un nivel adecuado de seguridad frente a redirecciones abiertas y manipulación de URLs.
 
 
-### 3.3.5.4. Soporte de imagen principal de inmuebles (subida segura)
+### 3.3.5.5. Soporte de imagen principal de inmuebles (subida segura)
 
 Una vez resuelto el bloqueo de routing y estabilizado el CRUD del módulo **Inmuebles**, se decidió incorporar una mejora funcional y visual clave: permitir que cada inmueble tenga una **imagen principal** opcional, gestionada desde el backoffice y visible en el listado y en la ficha.
 
@@ -247,6 +247,34 @@ Para evitar vulnerabilidades típicas en sistemas de subida de archivos (ejecuci
 * **Crea el directorio de subida si no existe** (`/public/uploads/inmuebles`) y añade un archivo `.htaccess` que:
   * desactiva la ejecución del motor PHP dentro de ese directorio,
   * deshabilita el listado de directorios.
+
+### 3.3.5.6. Landing "Vende" (captación de propietarios)
+
+Con el objetivo de reforzar la captación de propietarios (vendedores) sin duplicar formularios, se ha incorporado una landing pública específica accesible desde el menú en la ruta **`/vende`**.
+
+**Objetivo (UX y negocio):**
+- Ofrecer una página clara para propietarios que quieren vender, explicando el acompañamiento durante el proceso.
+- Reforzar el mensaje “estamos aquí” mostrando **datos de oficina** (teléfono y dirección) para fomentar la visita presencial.
+- Mantener el flujo simple evitando “más formularios”: desde esta landing se redirige al usuario a los puntos ya existentes:
+  - **`/contacto`** (formulario de contacto general).
+  - **`/tasacion`** (tasador online para estimar el precio y generar un lead más cualificado).
+
+**Diseño (estructura de la landing):**
+- Sección 1: bloque principal con titular + imagen (planificación de ventas).
+- Sección 2: bloque de “oficina” con datos de contacto y mensaje de acompañamiento.
+- Sección 3: cierre orientado a acción: “contacta o usa el tasador online”.
+
+**Implementación técnica:**
+- **Ruta pública:** `GET /vende`.
+- **Controlador:** método `HomeController::vende()` renderizando la vista con layout (header/footer).
+- **Vista:** `app/views/vende/index.php`.
+- **Estilos desacoplados:** estilos específicos de esta landing en `public/assets/css/landing.css` (evita mezclar estilos de una landing con el CSS general).
+- **Recursos estáticos:** imágenes ubicadas en `public/assets/img/vende/` para mantener organización y reutilización.
+
+**Buenas prácticas aplicadas:**
+- Enfoque “single source of truth” para la captación: la landing no crea nuevos endpoints de envío; reutiliza **Contacto** y **Tasación**.
+- Diseño responsive usando grid (desktop con dos columnas y apilado en móvil).
+- Uso de `alt` en imágenes y `loading="lazy"` para optimización de carga.
 
 ### 3.3.6. Módulo de Tasación Online (Fase 1 - Email)
 

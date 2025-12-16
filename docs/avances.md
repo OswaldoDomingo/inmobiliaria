@@ -1679,3 +1679,38 @@ Se ha creado una nueva página pública informativa "Quiénes somos" siguiendo e
 - Facilita la captación de leads al incluir CTA directo a contacto.
 - Preparada para futura ampliación (ej: galería de equipo, testimonios, vídeo corporativo).
 
+## ✅ 2025-12-16 (Landing pública "Vende")
+
+**Tema:** Página de captación de propietarios (Vende)  
+**Tipo de avance:** Frontend / UX / Navegación
+
+### 🚀 Resumen
+Se ha implementado una nueva landing pública accesible desde el menú (`/vende`) orientada a propietarios que quieren vender. La página informa de cómo trabajamos, muestra datos de oficina y ofrece CTAs directos hacia **Contacto** y **Tasación online**.
+
+### 🔧 Cambios realizados
+1. **Ruta pública**
+   - `GET /vende` → renderiza la landing.
+
+2. **Controlador**
+   - `HomeController::vende()` ahora carga `app/views/vende/index.php` con layout (`header/footer`).
+
+3. **Vista**
+   - Nueva vista `app/views/vende/index.php` con:
+     - Sección principal “Vende tu vivienda con nosotros”.
+     - Bloque de “Oficina” (teléfono y dirección).
+     - Mensaje “Gestión ágil y comunicación clara”.
+     - Botones CTA a `/tasacion` y `/contacto`.
+     - Composición visual con 3 imágenes (hero / proceso / contacto online).
+
+4. **Estilos**
+   - Estilos específicos en `public/assets/css/landing.css`:
+     - Imágenes con `object-fit: cover`.
+     - Contenedores con bordes redondeados + sombra.
+     - Ajustes responsive móvil/tablet.
+
+### 📝 Archivos clave creados/modificados
+- `public/index.php` (ruta `/vende`)
+- `app/Controllers/HomeController.php` (método `vende()`)
+- `app/views/vende/index.php` (NUEVA)
+- `public/assets/css/landing.css` (bloque “Landing Vende”)
+- `public/assets/img/vende/{planificacion-ventas.png,inicio-visita.png,contacto-internet.png}` (assets)
