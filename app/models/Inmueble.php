@@ -274,6 +274,10 @@ class Inmueble
             $conditions[] = 'i.precio <= :precio_max';
             $params[':precio_max'] = (float)$filters['precio_max'];
         }
+        if (array_key_exists('m2_min', $filters) && $filters['m2_min'] !== null) {
+            $conditions[] = 'i.superficie >= :m2_min';
+            $params[':m2_min'] = (int)$filters['m2_min'];
+        }
         if (!empty($filters['propietario_id'])) {
             $conditions[] = 'i.propietario_id = :propietario_id';
             $params[':propietario_id'] = (int)$filters['propietario_id'];

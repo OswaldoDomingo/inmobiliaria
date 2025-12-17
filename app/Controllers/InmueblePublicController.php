@@ -16,18 +16,60 @@ final class InmueblePublicController
 
     public function index(): void
     {
-        $filters = [
-            'localidad'   => trim((string)($_GET['localidad'] ?? '')),
-            'tipo'        => trim((string)($_GET['tipo'] ?? '')),
-            'precio_min'  => trim((string)($_GET['precio_min'] ?? '')),
-            'precio_max'  => trim((string)($_GET['precio_max'] ?? '')),
-            'operacion'   => trim((string)($_GET['operacion'] ?? '')),
-        ];
+        // Allowed values (allowlist)
+        $operacionesPermitidas = ['venta', 'alquiler', 'vacacional'];
+        $tiposPermitidos = ['piso','casa','chalet','adosado','duplex','local','oficina','terreno','otros'];
+
+        // Read and validate operacion
+        $operacionRaw = strtolower(trim((string)filter_input(INPUT_GET, 'operacion', FILTER_UNSAFE_RAW)));
+        $operacion = in_array($operacionRaw, $operacionesPermitidas, true) ? $operacionRaw : '';
+
+        // Read and validate tipo
+        $tipoRaw = strtolower(trim((string)filter_input(INPUT_GET, 'tipo', FILTER_UNSAFE_RAW)));
+        $tipo = in_array($tipoRaw, $tiposPermitidos, true) ? $tipoRaw : '';
+
+        // Read and validate m2_min (integer with range)
+        $m2Min = filter_input(INPUT_GET, 'm2_min', FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0, 'max_range' => 100000]
+        ]);
+        if ($m2Min === false) $m2Min = null;
+
+        // Read and validate precio_max (integer with range)
+        $precioMax = filter_input(INPUT_GET, 'precio_max', FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0, 'max_range' => 100000000]
+        ]);
+        if ($precioMax === false) $precioMax = null;
+
+        // Read existing filters
+        $localidad = trim((string)filter_input(INPUT_GET, 'localidad', FILTER_UNSAFE_RAW));
+        $precioMin = filter_input(INPUT_GET, 'precio_min', FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 0, 'max_range' => 100000000]
+        ]);
+        if ($precioMin === false) $precioMin = null;
+
+        // Build filters array (only non-empty values)
+        $filters = [];
+        if ($localidad !== '') $filters['localidad'] = $localidad;
+        if ($tipo !== '') $filters['tipo'] = $tipo;
+        if ($operacion !== '') $filters['operacion'] = $operacion;
+        if ($precioMin !== null) $filters['precio_min'] = $precioMin;
+        if ($precioMax !== null) $filters['precio_max'] = $precioMax;
+        if ($m2Min !== null) $filters['m2_min'] = $m2Min;
 
         $page    = max(1, (int)($_GET['page'] ?? 1));
         $perPage = 10;
 
         $result = $this->inmuebles->paginatePublic($filters, $page, $perPage);
+
+        // Pass normalized filters to view for form persistence
+        $filtersNormalized = [
+            'localidad' => $localidad,
+            'tipo' => $tipo,
+            'operacion' => $operacion,
+            'precio_min' => $precioMin,
+            'precio_max' => $precioMax,
+            'm2_min' => $m2Min,
+        ];
 
         // Header and Footer inclusion handled by View or Main Controller logic?
         // User asked to match Public layout. 

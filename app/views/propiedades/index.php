@@ -14,9 +14,13 @@ $page    = (int)($result['page'] ?? 1);
 $perPage = (int)($result['perPage'] ?? 10);
 $pages   = $perPage > 0 ? (int)ceil($total / $perPage) : 1;
 
-$localidad = (string)($_GET['localidad'] ?? '');
-$tipo      = (string)($_GET['tipo'] ?? '');
-$operacion = (string)($_GET['operacion'] ?? '');
+// Use normalized filters from controller (not raw $_GET)
+$localidad = isset($filtersNormalized['localidad']) ? (string)$filtersNormalized['localidad'] : '';
+$tipo      = isset($filtersNormalized['tipo']) ? (string)$filtersNormalized['tipo'] : '';
+$operacion = isset($filtersNormalized['operacion']) ? (string)$filtersNormalized['operacion'] : '';
+$precioMin = isset($filtersNormalized['precio_min']) ? $filtersNormalized['precio_min'] : null;
+$precioMax = isset($filtersNormalized['precio_max']) ? $filtersNormalized['precio_max'] : null;
+$m2Min     = isset($filtersNormalized['m2_min']) ? $filtersNormalized['m2_min'] : null;
 ?>
 <div class="container py-5">
     <h1 class="mb-4">Nuestras Propiedades</h1>
@@ -45,7 +49,19 @@ $operacion = (string)($_GET['operacion'] ?? '');
                 <?php endforeach; ?>
             </select>
         </div>
-        <div class="col-md-3 d-flex align-items-end">
+        <div class="col-md-2">
+            <label for="m2_min" class="form-label small">Mín. m²</label>
+            <input type="number" name="m2_min" id="m2_min" class="form-control" placeholder="Ej: 80" min="0" step="1" value="<?= $m2Min !== null ? e((string)$m2Min) : '' ?>">
+        </div>
+        <div class="col-md-2">
+            <label for="precio_min" class="form-label small">Precio mín. (€)</label>
+            <input type="number" name="precio_min" id="precio_min" class="form-control" placeholder="Ej: 100000" min="0" step="1" value="<?= $precioMin !== null ? e((string)$precioMin) : '' ?>">
+        </div>
+        <div class="col-md-2">
+            <label for="precio_max" class="form-label small">Precio máx. (€)</label>
+            <input type="number" name="precio_max" id="precio_max" class="form-control" placeholder="Ej: 250000" min="0" step="1" value="<?= $precioMax !== null ? e((string)$precioMax) : '' ?>">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
             <button type="submit" class="btn btn-dark w-100">
                 <i class="bi bi-search"></i> Buscar
             </button>
