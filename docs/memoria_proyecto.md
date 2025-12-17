@@ -603,6 +603,27 @@ Si el inmueble no existe o no cumple las condiciones de publicación (no está a
 
 Con este módulo, la plataforma pasa de ser una herramienta exclusivamente interna a ofrecer también un front público funcional, alineado con el trabajo real de una inmobiliaria.
 
+### 3.3.11. Buscador rápido en Home (Hero Search)
+
+Con el objetivo de mejorar la experiencia de usuario en la Home, se implementó un **buscador rápido** integrado en el módulo principal (hero). Este buscador permite al visitante filtrar el catálogo público sin necesidad de conocer barrios/zona exacta, evitando errores típicos de escritura y reduciendo fricción.
+
+**Campos disponibles:**
+- **Operación:** todas / venta / alquiler (vacacional si aplica)
+- **Tipo de inmueble:** todos / piso / casa / chalet / adosado / duplex / local / oficina / terreno / otros
+- **Mín. m² (opcional):** filtra inmuebles con superficie igual o superior al valor indicado.
+- **Precio máx. (€) (opcional):** filtra inmuebles cuyo precio sea igual o inferior al valor indicado.
+
+**Funcionamiento:**
+El formulario utiliza método **GET**, por lo que los filtros viajan en la URL y son compartibles (ej.: `/propiedades?operacion=venta&tipo=piso&m2_min=80&precio_max=300000`).  
+El listado público `/propiedades` reutiliza el mismo controlador y vista, aplicando los filtros en servidor.
+
+**Seguridad aplicada:**
+- Validación por **allowlist** (operación y tipo).
+- Validación numérica estricta para `m2_min` y `precio_max` con rangos razonables.
+- Consultas a base de datos mediante **prepared statements** (prevención SQL Injection).
+- Prevención de **XSS** mediante escapado en la salida de vistas (no se confía en valores de querystring).
+
+Esta implementación mantiene el catálogo público simple y robusto, evitando depender de una base de datos externa de “zonas/barrios”, y reforzando el control y la coherencia de filtros sobre la cartera real publicada.
 
 
 ## 3.4. Manejo de Errores

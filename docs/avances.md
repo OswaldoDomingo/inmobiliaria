@@ -1714,3 +1714,55 @@ Se ha implementado una nueva landing pública accesible desde el menú (`/vende`
 - `app/views/vende/index.php` (NUEVA)
 - `public/assets/css/landing.css` (bloque “Landing Vende”)
 - `public/assets/img/vende/{planificacion-ventas.png,inicio-visita.png,contacto-internet.png}` (assets)
+
+## 🗓️ 2025-12-17
+
+**Tema:** Buscador rápido en Home (Hero Form) → Filtros en catálogo público  
+**Tipo de avance:** Frontend + Backend + Seguridad (filtros GET)
+
+### 🚀 Resumen
+Se ha convertido el formulario del hero de la Home en un buscador funcional que redirige al listado público `/propiedades` aplicando filtros por querystring (**GET**).  
+El objetivo es facilitar una búsqueda rápida desde la Home sin obligar al usuario a rellenar campos complejos como “zona/barrio”.
+
+### ✅ Copy definitivo aplicado en el hero
+- **Encuentra tu hogar en Valencia**
+- *Propiedades seleccionadas en Valencia y alrededores.*
+
+### 🔎 Campos del buscador (Home)
+- **Operación** (select): “Todas” (sin filtro), `venta`, `alquiler` (y `vacacional` si aplica)
+- **Tipo** (select): “Todos” (sin filtro), `piso`, `casa`, `chalet`, `adosado`, `duplex`, `local`, `oficina`, `terreno`, `otros`
+- **Mín. m²** (opcional): entero, mínimo 0
+- **Precio máx. (€)** (opcional): entero, mínimo 0
+
+### 🔐 Medidas de seguridad implementadas
+- **Allowlist estricta** para `operacion` y `tipo` (si no coincide, se ignora).
+- **Validación numérica** con límites razonables:
+  - `m2_min` entre 0 y 100000
+  - `precio_max` entre 0 y 100000000
+- **Prevención SQL Injection:** consultas con **prepared statements** (sin concatenación de valores del usuario).
+- **Prevención XSS:** escapado únicamente en salida (función `e()` / `htmlspecialchars`).  
+  No se “escapa HTML” al leer `$_GET` para evitar doble-escape.
+
+### 🧠 Integración MVC (resumen técnico)
+- El controlador de propiedades públicas lee `$_GET`, normaliza y valida.
+- Se construye `$filters` solo con valores válidos.
+- El modelo añade soporte a `m2_min` en el builder de filtros (`i.superficie >= :m2_min`).
+- En la vista de `/propiedades` se muestran valores persistidos usando filtros normalizados (no se lee `$_GET` directamente).
+
+### 🧪 Pruebas manuales realizadas
+- Filtros combinados (operación + tipo + m2_min + precio_max): resultados coherentes.
+- Persistencia de filtros en paginación.
+- URL compartible: abrir la misma URL mantiene filtros.
+- Test XSS/valores inválidos: no se ejecuta JS y los filtros inválidos se ignoran sin romper la página.
+
+### ⚠️ Nota importante de entorno local
+Las pruebas deben realizarse usando el dominio del VirtualHost (**`inmobiliaria.loc`**) para que las rutas absolutas como `action="/propiedades"` funcionen correctamente.
+
+### 📝 Archivos modificados
+- `app/views/.../hero.php`
+- `app/Controllers/InmueblePublicController.php`
+- `app/Models/Inmueble.php`
+- `app/views/propiedades/index.php`
+
+---
+
