@@ -177,9 +177,7 @@ $m2Min     = isset($filtersNormalized['m2_min']) ? $filtersNormalized['m2_min'] 
                                         <a href="/propiedades/ver?id=<?= $id ?>" class="btn btn-outline-dark flex-grow-1">
                                             <i class="bi bi-info-circle"></i> Más información
                                         </a>
-                                        <a href="/tasacion" class="btn btn-dark">
-                                            <i class="bi bi-envelope"></i> Contactar
-                                        </a>
+                                        
                                     </div>
                                 </div>
                             </div>
