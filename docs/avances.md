@@ -1758,11 +1758,77 @@ El objetivo es facilitar una búsqueda rápida desde la Home sin obligar al usua
 ### ⚠️ Nota importante de entorno local
 Las pruebas deben realizarse usando el dominio del VirtualHost (**`inmobiliaria.loc`**) para que las rutas absolutas como `action="/propiedades"` funcionen correctamente.
 
+
 ### 📝 Archivos modificados
 - `app/views/.../hero.php`
 - `app/Controllers/InmueblePublicController.php`
 - `app/Models/Inmueble.php`
 - `app/views/propiedades/index.php`
+
+---
+
+## ✅ 2025-12-21 (Configuración SMTP y Documentación)
+
+**Tema:** Diagnóstico y resolución de fallos en envío de correos + Documentación completa de configuración Gmail  
+**Tipo de avance:** Backend / Configuración / Documentación
+
+### 🚀 Resumen
+
+Se diagnosticó y resolvió un problema crítico que impedía el envío de correos electrónicos desde el módulo de Tasación Online. El error raíz era la ausencia de configuración SMTP en `config/.env`. Además, se implementó una mejora en `config/config.php` para sanitizar automáticamente las contraseñas SMTP y se creó documentación completa para facilitar la configuración en futuros despliegues.
+
+### 🔧 Cambios Realizados
+
+#### 1. Mejora en `config/config.php` (Sanitización de Contraseñas SMTP)
+
+- **Problema detectado:** Google muestra las Contraseñas de Aplicación con espacios (`abcd efgh ijkl mnop`) para facilitar la lectura, pero la contraseña real no contiene espacios. Los usuarios que copian la contraseña tal cual experimentan errores de autenticación SMTP.
+
+- **Solución implementada:** Se modificó la línea 32 de `config/config.php` para eliminar automáticamente los espacios de la contraseña SMTP:
+
+```php
+// Antes
+$smtpPass = $_ENV['SMTP_PASS'] ?? getenv('SMTP_PASS') ?: '';
+
+// Después
+$smtpPass = str_replace(' ', '', $_ENV['SMTP_PASS'] ?? getenv('SMTP_PASS') ?: '');
+```
+
+- **Beneficios:**
+  - Previene errores comunes de configuración
+  - Mejora la experiencia del usuario durante el setup inicial
+  - Funciona tanto si se copia la contraseña con espacios como sin ellos
+  - No afecta a contraseñas ya correctamente formateadas
+
+#### 2. Documentación Creada
+
+Se generaron dos guías completas en la carpeta `docs/`:
+
+##### `docs/configuracion_gmail_smtp.md`
+Guía paso a paso para configurar Gmail como servidor SMTP:
+- Activación de verificación en dos pasos en Google
+- Generación de Contraseña de Aplicación
+- Instrucciones detalladas con capturas conceptuales
+- Solución de problemas comunes
+- Procedimiento de revocación de contraseñas
+
+##### `docs/configuracion_env_smtp.md`
+Guía de configuración del archivo `config/.env`:
+- Descripción detallada de cada variable SMTP
+- Ejemplos completos de configuración
+- Notas de seguridad y buenas prácticas
+- Troubleshooting detallado
+- Script de verificación de configuración
+
+### 📝 Archivos clave creados/modificados
+
+- `config/config.php` (Línea 32: sanitización de contraseña SMTP)
+- `docs/configuracion_gmail_smtp.md` (Nueva guía)
+- `docs/configuracion_env_smtp.md` (Nueva guía)
+
+### 💡 Justificación Técnica
+
+La sanitización automática de la contraseña SMTP es una medida de **UX defensiva** que reduce la fricción durante la configuración inicial del sistema. Al eliminar espacios de forma transparente, se evita uno de los errores más comunes reportados por usuarios al configurar servicios de correo con Gmail.
+
+Esta modificación no compromete la seguridad (las contraseñas de aplicación de Google nunca contienen espacios reales) y hace el sistema más robusto frente a errores humanos durante el despliegue.
 
 ---
 

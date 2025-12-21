@@ -29,7 +29,7 @@ if (!empty($_ENV['APP_BASE_URL']) || getenv('APP_BASE_URL')) {
 $smtpHost = $_ENV['SMTP_HOST'] ?? getenv('SMTP_HOST') ?: '';
 $smtpPort = (int)($_ENV['SMTP_PORT'] ?? getenv('SMTP_PORT') ?: 587);
 $smtpUser = $_ENV['SMTP_USER'] ?? getenv('SMTP_USER') ?: '';
-$smtpPass = $_ENV['SMTP_PASS'] ?? getenv('SMTP_PASS') ?: '';
+$smtpPass = str_replace(' ', '', $_ENV['SMTP_PASS'] ?? getenv('SMTP_PASS') ?: '');
 $smtpSecure = $_ENV['SMTP_SECURE'] ?? getenv('SMTP_SECURE') ?: 'tls'; // tls, ssl, none
 
 $agencyEmail = $_ENV['LEAD_AGENCY_EMAIL'] ?? getenv('LEAD_AGENCY_EMAIL') ?: '';
