@@ -434,8 +434,9 @@ class UserController
         // 6. Creo directorio si no existe
         $uploadDir = ROOT . '/public/uploads/profiles/';
         if (!is_dir($uploadDir)) {
-            if (!mkdir($uploadDir, 0755, true)) {
-                throw new \Exception("No se pudo crear el directorio de subidas.");
+            if (!@mkdir($uploadDir, 0755, true)) {
+                $error = error_get_last();
+                throw new \Exception("No se pudo crear el directorio de subidas: " . $uploadDir);
             }
         }
 
