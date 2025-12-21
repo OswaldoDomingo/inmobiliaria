@@ -68,6 +68,11 @@ if (session_status() === PHP_SESSION_NONE) {
 // 5. Inicializar Router y Definir Rutas
 // ===============================
 
+// Mapear HEAD a GET para soportar health checks y curl -I
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'HEAD') {
+    $_SERVER['REQUEST_METHOD'] = 'GET';
+}
+
 $router = new Router();
 
 // --------------------------------------------------------------------------
