@@ -1,35 +1,166 @@
+/* =========================================
+   Hero Banner Section
+   ========================================= */
+
+.hero-banner {
+  position: relative;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-align: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* background-image set via inline style for dynamic PHP value */
+}
+
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  padding: 0 1.5rem;
+}
+
+.hero-content h1 {
+  font-size: 2.8rem;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+
+.hero-content p {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.search-box input,
+.search-box select,
+.search-box button {
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 0.35rem;
+  font-size: 1rem;
+}
+
+.search-box input,
+.search-box select {
+  width: 100%;
+  background-color: #fff;
+}
+
+.search-box select {
+  cursor: pointer;
+}
+
+.search-box button {
+  background-color: #111;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search-box button:hover {
+  background-color: #222;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .hero-banner {
+    height: 450px;
+  }
+
+  .hero-content h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+    margin-bottom: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-banner {
+    height: 420px;
+  }
+
+  .hero-content h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-content p {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+
+  .search-box {
+    gap: 0.5rem;
+  }
+
+  .search-box input,
+  .search-box select,
+  .search-box button {
+    padding: 0.75rem 0.85rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* =========================================
+   Legacy Hero Landing (if still used)
+   ========================================= */
+
 .hero-landing {
-    background-image: url("../img/cabecera-031.png");
-    /* usa la que tengas */
-    background-size: cover;
-    background-position: center;
-    height: 300px;
-    /* ajusta según el diseño de Figma */
+  background-image: url("../img/cabecera-031.png");
+  /* usa la que tengas */
+  background-size: cover;
+  background-position: center;
+  height: 300px;
+  /* ajusta según el diseño de Figma */
 }
 
 .section-title {
-    color: #191A2E;
-    text-align: center;
-    font-family: Montserrat;
-    font-size: 36px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
+  color: #191A2E;
+  text-align: center;
+  font-family: Montserrat;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
 }
 
 .propiedad-card .card-body {
-    padding: 1rem 1.25rem;
+  padding: 1rem 1.25rem;
 }
 
 .propiedad-card img {
-    object-fit: cover;
-    height: 180px;
+  object-fit: cover;
+  height: 180px;
 }
 
 .valoracion-box {
-    background-color: #f5f5f5;
-    /* o el gris de Figma */
-    border-radius: 4px;
+  background-color: #f5f5f5;
+  /* o el gris de Figma */
+  border-radius: 4px;
 }
 
 /* =========================================
@@ -37,153 +168,159 @@
    ========================================= */
 
 .section-title {
-    font-family: system-ui, -apple-system, sans-serif !important;
-    font-weight: 700 !important;
-    text-transform: uppercase;
+  font-family: system-ui, -apple-system, sans-serif !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
 }
 
 .carousel-wrapper {
-    position: relative;
-    padding: 0 50px;
-    margin-bottom: 2rem;
+  position: relative;
+  padding: 0 50px;
+  margin-bottom: 2rem;
 }
 
 .carousel-container {
-    /* Estrategia CSS Robusta */
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    white-space: nowrap !important;
-    /* Forzar línea única */
+  /* Estrategia CSS Robusta */
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  white-space: nowrap !important;
+  /* Forzar línea única */
 
-    scroll-snap-type: x mandatory;
-    gap: 20px;
-    padding: 20px 5px;
+  scroll-snap-type: x mandatory;
+  gap: 20px;
+  padding: 20px 5px;
 
-    scrollbar-width: none;
-    /* Firefox */
-    -ms-overflow-style: none;
-    /* IE/Edge */
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
 
-    width: 100% !important;
-    height: auto !important;
-    align-items: stretch !important;
+  width: 100% !important;
+  height: auto !important;
+  align-items: stretch !important;
 }
 
 .carousel-container::-webkit-scrollbar {
-    display: none;
-    /* Chrome/Safari */
+  display: none;
+  /* Chrome/Safari */
 }
 
 .carousel-item {
-    /* Forzar comportamiento de bloque en línea si flex falla */
-    display: inline-block !important;
-    vertical-align: top !important;
-    white-space: normal !important;
-    /* Reset para el contenido interno */
+  /* Forzar comportamiento de bloque en línea si flex falla */
+  display: inline-block !important;
+  vertical-align: top !important;
+  white-space: normal !important;
+  /* Reset para el contenido interno */
 
-    /* Dimensiones fijas estrictas */
-    flex: 0 0 280px !important;
-    width: 280px !important;
-    min-width: 280px !important;
-    max-width: 280px !important;
+  /* Dimensiones fijas estrictas */
+  flex: 0 0 280px !important;
+  width: 280px !important;
+  min-width: 280px !important;
+  max-width: 280px !important;
 
-    margin-right: 20px;
-    /* Fallback para gap */
-    scroll-snap-align: start;
+  margin-right: 20px;
+  /* Fallback para gap */
+  scroll-snap-align: start;
 }
 
 .carousel-card {
-    display: flex !important;
-    flex-direction: column;
-    height: 100%;
+  display: flex !important;
+  flex-direction: column;
+  height: 100%;
 }
 
 .carousel-card-img {
-    height: 200px;
-    object-fit: cover;
-    width: 100%;
+  height: 200px;
+  object-fit: cover;
+  width: 100%;
 }
 
 .carousel-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    background: rgba(255, 255, 255, 0.95);
-    border: 1px solid #dee2e6;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    font-size: 1.3rem;
-    /* Tamaño de flecha bonito */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #dee2e6;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-size: 1.3rem;
+  /* Tamaño de flecha bonito */
 }
 
 .carousel-nav:hover:not(:disabled) {
-    background: #212529;
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: #212529;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .carousel-nav:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .carousel-nav-prev {
-    left: 0;
+  left: 0;
 }
 
 .carousel-nav-next {
-    right: 0;
+  right: 0;
 }
 
 .carousel-nav i {
-    font-size: 1.2rem;
+  font-size: 1.2rem;
 }
 
 /* Responsive */
 @media (min-width: 576px) {
-    .carousel-item {
-        width: 300px;
-    }
+  .carousel-item {
+    width: 300px;
+  }
 }
 
 @media (min-width: 992px) {
-    .carousel-item {
-        width: 320px;
-    }
+  .carousel-item {
+    width: 320px;
+  }
 }
 
 @media (max-width: 575px) {
-    .carousel-wrapper {
-        padding: 0 40px;
-    }
+  .carousel-wrapper {
+    padding: 0 40px;
+  }
 
-    .carousel-nav {
-        width: 35px;
-        height: 35px;
-    }
+  .carousel-nav {
+    width: 35px;
+    height: 35px;
+  }
 
-    .carousel-nav i {
-        font-size: 1.2rem;
-    }
+  .carousel-nav i {
+    font-size: 1.2rem;
+  }
 }
 
 /* =========================================
    Sección de Vende
    ========================================= */
 /* ===== Landing Vende ===== */
-.vende-section { padding: 3.5rem 0; }
-.vende-border { border-top: 1px solid #e9ecef; border-bottom: 1px solid #e9ecef; }
+.vende-section {
+  padding: 3.5rem 0;
+}
+
+.vende-border {
+  border-top: 1px solid #e9ecef;
+  border-bottom: 1px solid #e9ecef;
+}
 
 .vende-kicker {
   letter-spacing: .08em;
@@ -196,7 +333,7 @@
   border-radius: 24px;
   overflow: hidden;
   background: #f8f9fa;
-  box-shadow: 0 10px 30px rgba(0,0,0,.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .06);
 }
 
 .vende-img-cover {
@@ -207,20 +344,36 @@
 }
 
 /* alturas coherentes por sección */
-.vende-media--plan { height: 320px; }
-.vende-media--visita { height: 360px; }
-.vende-media--online { height: 360px; }
+.vende-media--plan {
+  height: 320px;
+}
 
-@media (max-width: 991.98px){
-  .vende-media--plan { height: 240px; }
-  .vende-media--visita { height: 260px; }
-  .vende-media--online { height: 260px; }
+.vende-media--visita {
+  height: 360px;
+}
+
+.vende-media--online {
+  height: 360px;
+}
+
+@media (max-width: 991.98px) {
+  .vende-media--plan {
+    height: 240px;
+  }
+
+  .vende-media--visita {
+    height: 260px;
+  }
+
+  .vende-media--online {
+    height: 260px;
+  }
 }
 
 .vende-card {
   border-radius: 18px;
   border: 1px solid #e9ecef;
-  box-shadow: 0 10px 30px rgba(0,0,0,.04);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .04);
 }
 
 /* CTA banner */
@@ -230,13 +383,14 @@
   overflow: hidden;
 }
 
-.vende-cta::after{
-  content:"";
-  position:absolute; inset:0;
-  background: linear-gradient(90deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.15) 60%, rgba(0,0,0,0) 100%);
+.vende-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, .55) 0%, rgba(0, 0, 0, .15) 60%, rgba(0, 0, 0, 0) 100%);
 }
 
-.vende-cta-content{
+.vende-cta-content {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -262,7 +416,8 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #6c757d; /* Fallback color while image loads */
+  background-color: #6c757d;
+  /* Fallback color while image loads */
   min-height: 280px;
   display: flex;
   align-items: center;
