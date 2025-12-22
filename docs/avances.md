@@ -1832,3 +1832,171 @@ Esta modificación no compromete la seguridad (las contraseñas de aplicación d
 
 ---
 
+## ✅ 2025-12-22 (Optimización de Landing: Bloque Split CTA)
+
+**Tema:** Optimización de conversión en la landing page mediante bloque CTA dividido  
+**Tipo de avance:** Frontend / UX / Optimización de conversión
+
+### 🚀 Resumen
+
+Se ha reemplazado el formulario de contacto tradicional en la página de inicio por un **módulo CTA dividido** en dos tarjetas visuales (Tasación gratuita y Contacto), mejorando significativamente la experiencia de usuario y reduciendo la fricción hacia los dos objetivos principales del portal inmobiliario.
+
+---
+
+### 🔧 Cambios Realizados
+
+#### 1. Implementación del Bloque Split CTA
+
+**Archivo modificado:** `app/views/home.php` (líneas 133-175)
+
+- **Antes:** Formulario tradicional con 5 campos de entrada (Nombre, Email, Teléfono, Dirección, Comentarios) que generaba fricción y requería compromiso inmediato del usuario.
+- **Después:** Dos tarjetas visuales lado a lado con:
+  - **Tarjeta "Tasación gratuita":**
+    - Imagen de fondo con efecto blur (Picsum)
+    - Overlay oscuro para legibilidad
+    - Lista de beneficios (zona/características, informe sin compromiso, respuesta rápida)
+    - Botón ghost "Ir a Tasación" → `/tasacion`
+  - **Tarjeta "¿Hablamos?":**
+    - Imagen de fondo diferenciada
+    - Lista de beneficios (atención personalizada, compra/venta/alquiler, acompañamiento)
+    - Botón ghost "Contactar" → `/contacto?motivo=info`
+
+#### 2. Estilos CSS Responsive
+
+**Archivo modificado:** `public/assets/css/landing.css`
+
+- **Grid Layout:** Diseño de 2 columnas en desktop (`grid-template-columns: repeat(2, 1fr)`)
+- **Tarjetas (`.cta-card`):**
+  - `min-height: 450px`
+  - `background-size: cover` con `background-position: center`
+  - Transición suave en hover (`transform: translateY(-4px)`, sombra aumentada)
+- **Overlay (`.cta-overlay`):**
+  - Gradiente oscuro (`rgba(0,0,0,0.7)` a `rgba(0,0,0,0.5)`) para asegurar legibilidad del texto blanco
+- **Botones Ghost (`.btn-ghost`):**
+  - Borde blanco 2px, fondo transparente
+  - Hover: fondo blanco, texto oscuro, elevación con sombra
+- **Responsive:**
+  - `@media (max-width: 768px)`: Grid de 1 columna, botones full-width
+
+#### 3. Funcionalidad de Prefill Contextual
+
+**Archivo modificado:** `app/Controllers/ContactController.php`
+
+- Implementación de manejo del parámetro `?motivo=info` en la URL
+- **Lista blanca de valores permitidos:** `info`, `tasacion`, `venta`
+- **Mensajes prefill sanitizados:**
+  - `motivo=info`: *"Hola, me gustaría recibir más información sobre vuestros servicios. Gracias."*
+  - `motivo=tasacion`: *"Hola, estoy interesado en solicitar una tasación de mi propiedad. Gracias."*
+  - `motivo=venta`: *"Hola, me gustaría vender mi propiedad. Gracias."*
+- Sanitización con `htmlspecialchars($prefillMessage, ENT_QUOTES, 'UTF-8')` para prevenir XSS
+
+**Archivo modificado:** `app/views/contacto.php`
+
+- Actualización del textarea para usar la variable `$prefillMessage`:
+  ```php
+  <textarea id="mensaje" name="mensaje" class="form-control" rows="5" required><?= $prefillMessage ?></textarea>
+  ```
+
+---
+
+### 🐛 Problema Detectado y Solución
+
+#### Problema Inicial
+
+Durante la implementación, los cambios realizados en `app/views/landing.php` **no se reflejaban en el navegador** al acceder a `http://inmobiliaria.loc/`. El CSS estaba actualizado correctamente, pero la página seguía mostrando el formulario antiguo.
+
+#### Diagnóstico
+
+Tras investigación, se identificó que:
+- El `HomeController` carga la vista `app/views/home.php` (línea 42), **NO** `landing.php`
+- El archivo `landing.php` es una vista independiente que no se estaba utilizando en la ruta principal
+- Los cambios se habían aplicado al archivo incorrecto
+
+#### Solución
+
+Se aplicaron los mismos cambios del bloque Split CTA al archivo correcto (`home.php`), reemplazando las líneas 133-175 que contenían el formulario antiguo.
+
+---
+
+### 📊 Mejoras de UX Implementadas
+
+1. **Reducción de fricción:**
+   - Eliminación de formulario de 5 campos que requería compromiso inmediato
+   - Navegación clara hacia dos objetivos principales (tasación o contacto)
+   - Usuario decide su nivel de compromiso (explorar tasación vs. contacto directo)
+
+2. **Diseño visual atractivo:**
+   - Imágenes de fondo profesionales con blur para no distraer del contenido
+   - Overlay oscuro que garantiza legibilidad en cualquier imagen
+   - Efectos hover sutiles que indican interactividad
+
+3. **Accesibilidad:**
+   - Botones con estados hover y focus visibles
+   - Contraste adecuado (texto blanco sobre overlay oscuro)
+   - Diseño responsive que funciona en móvil y desktop
+
+4. **Conversión optimizada:**
+   - Llamadas a la acción claras y diferenciadas
+   - Beneficios listados con checkmarks (✓) para escaneo rápido
+   - Prefill contextual que facilita la comunicación del usuario
+
+---
+
+### 📝 Archivos clave creados/modificados
+
+- `app/views/home.php` (Bloque Split CTA, líneas 133-175)
+- `public/assets/css/landing.css` (Estilos `.cta-split`, `.cta-card`, `.btn-ghost`, responsive)
+- `app/Controllers/ContactController.php` (Prefill con lista blanca)
+- `app/views/contacto.php` (Textarea con `$prefillMessage`)
+
+---
+
+### ✅ Verificación Realizada
+
+- ✅ Desktop: Dos bloques mostrados lado a lado con espaciado correcto
+- ✅ Mobile: Apilado vertical con botones full-width
+- ✅ Hover effects: Opacidad, elevación y sombra funcionando
+- ✅ Navegación: Enlaces a `/tasacion` y `/contacto?motivo=info` operativos
+- ✅ Prefill: Mensaje prellenado correctamente en formulario de contacto
+- ✅ Seguridad: Sanitización XSS con `htmlspecialchars`
+
+---
+
+### 💡 Justificación Técnica para el Tribunal
+
+La decisión de reemplazar el formulario tradicional por un bloque CTA dividido se basa en principios de **diseño centrado en el usuario** y **optimización de conversión**:
+
+1. **Reducción de fricción cognitiva:** Un formulario de 5 campos en la landing page genera una barrera psicológica. El usuario debe decidir si está listo para compartir sus datos antes de explorar el servicio.
+
+2. **Arquitectura de decisión clara:** Las dos tarjetas presentan opciones diferenciadas:
+   - **Tasación:** Para usuarios en fase de exploración (bajo compromiso)
+   - **Contacto:** Para usuarios listos para interactuar (alto compromiso)
+
+3. **Diseño responsive moderno:** El uso de CSS Grid permite una adaptación fluida entre desktop (2 columnas) y móvil (apilado), manteniendo la jerarquía visual.
+
+4. **Prefill contextual:** El parámetro `?motivo=info` permite personalizar el mensaje inicial del formulario de contacto, reduciendo el esfuerzo del usuario y mejorando la tasa de conversión.
+
+Esta implementación demuestra conocimiento de:
+- Patrones de diseño UX para conversión
+- CSS Grid y diseño responsive
+- Manejo seguro de parámetros URL (lista blanca + sanitización)
+- Separación de responsabilidades (Controlador → Vista)
+
+---
+
+### ✅ 22/12/2025 — Micro-mejoras en Contacto: prefill robusto y allowlist centralizada
+
+**Mejora 1 (Vista contacto):** normalización consistente del parámetro `motivo` antes de validarlo.
+- Archivo: `app/views/contacto/form.php`
+- Cambio: se normaliza siempre `motivo` usando `trim + strtolower`, incluso si proviene de `$old['motivo']`, para evitar fallos por mayúsculas o espacios.
+- Beneficio: comportamiento más robusto en reintentos y validaciones.
+
+**Mejora 2 (Controlador):** centralización de la lista blanca de motivos en una constante.
+- Archivo: `app/Controllers/ContactController.php`
+- Cambio: creación de `private const MOTIVOS_VALIDOS = ['info','compra','venta','alquiler'];`
+- Uso: `index()` y `enviar()` validan contra `self::MOTIVOS_VALIDOS`.
+- Beneficio: *single source of truth*, mayor mantenibilidad y consistencia entre GET/POST.
+
+**Resultado:** el prefill contextual y los redirects mantienen el motivo correctamente y el flujo queda más limpio y profesional.
+
+---

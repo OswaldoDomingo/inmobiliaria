@@ -792,4 +792,109 @@ Durante la fase de integración final se detectaron y resolvieron incidencias cr
 *   **Renderizado de Plantillas de Email:** Ajuste en el búfer de salida (`ob_start` / `ob_get_clean`) en `MailService` para evitar la impresión de código PHP crudo en los correos y asegurar la correcta interpretación de HTML.
 *   **Sanitización en Vistas:** Estandarización del uso de `htmlspecialchars()` en lugar de helpers no definidos (`e()`), previniendo errores fatales en tiempo de ejecución.
 
+### 3.3.13. Optimización de la Landing para conversión (CTA Tasación / Contacto)
+
+Con el objetivo de mejorar la tasa de conversión en la página de inicio, se decidió reemplazar el formulario de contacto tradicional por un **módulo CTA dividido** que reduce la fricción y ofrece al usuario dos caminos claros hacia los objetivos principales del portal.
+
+#### Problema detectado
+
+El formulario original en la landing page presentaba 5 campos de entrada (Nombre, Email, Teléfono, Dirección del inmueble, Comentarios) que generaban una barrera psicológica significativa:
+- Requería compromiso inmediato del usuario antes de explorar el servicio
+- No diferenciaba entre usuarios en fase de exploración vs. usuarios listos para contactar
+- Generaba fricción cognitiva al obligar a decidir "¿estoy listo para dar mis datos?"
+
+#### Solución implementada
+
+Se sustituyó el formulario por un **bloque CTA dividido** en dos tarjetas visuales lado a lado:
+
+**Tarjeta "Tasación gratuita":**
+- Imagen de fondo profesional con efecto blur (Picsum)
+- Overlay oscuro para garantizar legibilidad
+- Lista de beneficios con checkmarks (✓):
+  - Basada en zona y características
+  - Informe claro y sin compromiso
+  - Respuesta rápida
+- Botón ghost "Ir a Tasación" → `/tasacion`
+
+**Tarjeta "¿Hablamos?":**
+- Imagen de fondo diferenciada
+- Lista de beneficios:
+  - Atención personalizada
+  - Compra, venta o alquiler
+  - Acompañamiento de principio a fin
+- Botón ghost "Contactar" → `/contacto?motivo=info`
+
+**Nota:** Las imágenes de fondo se obtienen de Picsum únicamente como recurso temporal (placeholder) durante el desarrollo. En un despliegue final se sustituirán por imágenes propias del proyecto para evitar dependencia de un servicio externo.
+
+#### Implementación técnica
+
+**Archivo modificado:** `app/views/home.php` (sección `<!-- 3. Bloque valoración -->`)
+
+Se reemplazó completamente la sección del formulario por la estructura de dos tarjetas con:
+- Contenedor `.cta-split` usando CSS Grid (2 columnas en desktop)
+- Tarjetas `.cta-card` con imágenes de fondo, overlay oscuro y contenido centrado
+- Botones `.btn-ghost` con efectos hover (elevación, cambio de color, sombra)
+
+**Estilos CSS:** `public/assets/css/landing.css`
+
+- **Grid responsive:** 2 columnas en desktop (`grid-template-columns: repeat(2, 1fr)`), apilado en móvil
+- **Tarjetas con altura mínima:** Se definió una altura mínima para mantener proporción visual (ajustable por breakpoint)
+- **Overlay con gradiente:** `rgba(0,0,0,0.7)` a `rgba(0,0,0,0.5)` para legibilidad del texto blanco
+- **Efectos hover suaves:** `transform: translateY(-4px)` y sombra aumentada en las tarjetas
+- **Botones ghost:** Borde blanco 2px, fondo transparente que se invierte en hover
+- **Media query:** `@media (max-width: 768px)` para grid de 1 columna y botones full-width
+
+**Prefill contextual:** `app/Controllers/ContactController.php`
+
+Se implementó el manejo del parámetro `?motivo=info` en la URL para prellenar el mensaje del formulario de contacto:
+- **Validación por lista blanca:** Solo se aceptan los valores `info`, `tasacion`, `venta`
+- **Escape de salida:** El mensaje predefinido se envía a la vista y se muestra con escape de salida (p. ej. `htmlspecialchars`) para prevenir XSS
+- **Integración en vista:** El textarea del formulario usa la variable `$prefillMessage`
+- **Respeto al usuario:** El prefill se aplica únicamente cuando el campo de mensaje está vacío, evitando sobrescribir el texto introducido por el usuario tras validaciones o reintentos
+
+#### Mejoras de UX y conversión
+
+1. **Reducción de fricción cognitiva:**
+   - Eliminación de formulario de 5 campos que requería compromiso inmediato
+   - Usuario decide su nivel de compromiso: explorar tasación (bajo) vs. contacto directo (alto)
+
+2. **Arquitectura de decisión clara:**
+   - Dos opciones diferenciadas y visualmente atractivas
+   - Navegación directa hacia objetivos principales del portal
+
+3. **Diseño visual profesional:**
+   - Imágenes de fondo con blur que no distraen del contenido
+   - Overlay oscuro garantiza legibilidad en cualquier imagen
+   - Efectos hover sutiles que indican interactividad
+
+4. **Accesibilidad y responsive:**
+   - Botones con estados hover y focus visibles
+   - Contraste adecuado (texto blanco sobre overlay oscuro)
+   - Diseño que funciona en móvil y desktop
+
+#### Incidencia técnica y resolución
+
+Durante la implementación inicial, los cambios realizados en `app/views/landing.php` no se reflejaban en el navegador. Tras investigación, se identificó que:
+- El `HomeController` renderiza `home.php`, NO `landing.php`
+- El archivo `landing.php` es una vista independiente no utilizada en la ruta principal
+- **Solución:** Se aplicaron los mismos cambios al archivo correcto (`home.php`)
+
+#### Justificación técnica
+
+Esta implementación demuestra conocimiento de:
+- **Patrones de diseño UX para conversión:** Reducción de fricción, arquitectura de decisión clara
+- **CSS Grid y diseño responsive:** Adaptación fluida entre desktop (2 columnas) y móvil (apilado)
+- **Manejo seguro de parámetros URL:** Lista blanca + escape de salida para prevenir XSS
+- **Separación de responsabilidades MVC:** La vista solo renderiza; la lógica de prefill vive en el controlador; los estilos en CSS
+
+Con esta optimización, la landing page pasa de ser una barrera de entrada a ser un facilitador de conversión, ofreciendo caminos claros según el nivel de compromiso del usuario.
+
+#### Refinamientos técnicos (robustez y mantenibilidad)
+
+Como mejora adicional, se reforzó el flujo del parámetro `motivo` para asegurar consistencia entre navegación, validaciones y reintentos:
+
+- **Normalización consistente en vista:** el valor de `motivo` se normaliza siempre (`trim` + `strtolower`) antes de validarlo, incluso cuando proviene de datos persistidos del formulario (`$old`). Esto evita fallos por mayúsculas o espacios inesperados.
+- **Lista blanca centralizada en el controlador:** se definió una constante de clase (`MOTIVOS_VALIDOS`) para que tanto `index()` como `enviar()` validen contra la misma fuente. Esto mejora la mantenibilidad y reduce errores al evolucionar el sistema.
+
+Estas mejoras consolidan la seguridad (allowlist) y la coherencia del flujo sin aumentar la complejidad del formulario.
 
