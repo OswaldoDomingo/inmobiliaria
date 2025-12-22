@@ -70,3 +70,5 @@ docs/presentacion_tribunal_optimizado.md
 # Docs locales generados (no versionar)
 estructura_proyecto.*
 docs/estructura_proyecto.*
+
+servidor/

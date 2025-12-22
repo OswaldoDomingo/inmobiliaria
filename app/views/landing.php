@@ -85,38 +85,36 @@
             CONFÍA TU PROPIEDAD A EXPERTOS
         </h2>
 
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-10 col-lg-8">
-                <div class="valoracion-box p-4">
-                    <form class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">Nombre</label>
-                            <input type="text" class="form-control">
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">Correo electrónico</label>
-                            <input type="email" class="form-control">
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">Teléfono</label>
-                            <input type="tel" class="form-control">
-                        </div>
-                        <div class="col-12 col-md-6">
-                            <label class="form-label">Dirección del inmueble</label>
-                            <input type="text" class="form-control">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Comentarios</label>
-                            <textarea class="form-control" rows="3"></textarea>
-                        </div>
-                        <div class="col-12 text-center">
-                            <button type="submit" class="btn btn-dark px-5">
-                                Enviar solicitud
-                            </button>
-                        </div>
-                    </form>
+        <div class="cta-split">
+            <!-- Bloque Tasación -->
+            <article class="cta-card" style="background-image: url('https://picsum.photos/id/1015/1600/1067?blur=3');">
+                <div class="cta-overlay"></div>
+                <div class="cta-content">
+                    <h3 class="h2 fw-bold mb-2">Tasación gratuita</h3>
+                    <p class="mb-3">Calcula el valor orientativo de tu vivienda en minutos.</p>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2">✓ Basada en zona y características</li>
+                        <li class="mb-2">✓ Informe claro y sin compromiso</li>
+                        <li class="mb-2">✓ Respuesta rápida</li>
+                    </ul>
+                    <a href="/tasacion" class="btn btn-ghost">Ir a Tasación</a>
                 </div>
-            </div>
+            </article>
+
+            <!-- Bloque Contacto -->
+            <article class="cta-card" style="background-image: url('https://picsum.photos/id/1011/1600/1067?blur=3');">
+                <div class="cta-overlay"></div>
+                <div class="cta-content">
+                    <h3 class="h2 fw-bold mb-2">¿Hablamos?</h3>
+                    <p class="mb-3">Cuéntanos qué necesitas y te respondemos lo antes posible.</p>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2">✓ Atención personalizada</li>
+                        <li class="mb-2">✓ Compra, venta o alquiler</li>
+                        <li class="mb-2">✓ Acompañamiento de principio a fin</li>
+                    </ul>
+                    <a href="/contacto?motivo=info" class="btn btn-ghost">Ir a Contacto</a>
+                </div>
+            </article>
         </div>
 
     </div>

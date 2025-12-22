@@ -34,10 +34,21 @@
                     <?php endif; ?>
 
                     <form action="/contacto/enviar" method="POST" novalidate>
-                        <input type="hidden" name="csrf_token" value="<?= $csrfToken ?? '' ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8') ?>">
                         
                         <?php if (isset($inmueble['id_inmueble'])): ?>
                             <input type="hidden" name="id_inmueble" value="<?= htmlspecialchars($inmueble['id_inmueble']) ?>">
+                        <?php endif; ?>
+                        
+                        <?php 
+                        // Mantener motivo con preferencia: $old['motivo'] > $_GET['motivo']
+                        // Normalizar siempre para evitar fallos si viene con mayúsculas/espacios
+                        $motivoRaw = (string)($old['motivo'] ?? ($_GET['motivo'] ?? ''));
+                        $motivoValue = strtolower(trim($motivoRaw));
+                        $motivosValidos = ['info', 'compra', 'venta', 'alquiler'];
+                        if (in_array($motivoValue, $motivosValidos, true)): 
+                        ?>
+                            <input type="hidden" name="motivo" value="<?= htmlspecialchars($motivoValue, ENT_QUOTES, 'UTF-8') ?>">
                         <?php endif; ?>
 
                         <!-- Honeypot -->
@@ -100,7 +111,7 @@
                                           id="mensaje" 
                                           name="mensaje" 
                                           rows="4" 
-                                          maxlength="1000"><?= htmlspecialchars($old['mensaje'] ?? '') ?></textarea>
+                                          maxlength="1000"><?= htmlspecialchars($old['mensaje'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
                                 <?php if (isset($errors['mensaje'])): ?>
                                     <div class="invalid-feedback"><?= htmlspecialchars($errors['mensaje']) ?></div>
                                 <?php endif; ?>

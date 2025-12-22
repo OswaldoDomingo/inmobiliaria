@@ -14,6 +14,8 @@ use Throwable;
 class ContactController
 {
     private const LOG_FILE = 'storage/logs/contacto.log';
+    private const MOTIVOS_VALIDOS = ['info', 'compra', 'venta', 'alquiler'];
+    
     private Inmueble $inmuebleModel;
 
     public function __construct()
@@ -30,6 +32,17 @@ class ContactController
      */
     public function index(): void
     {
+        // 1. Generar token CSRF
+        $csrfToken = Csrf::token();
+        
+        // 2. Recuperar errores y datos previos de sesión (si existen por validación fallida)
+        $errors = $_SESSION['contact_errors'] ?? [];
+        $old = $_SESSION['contact_old'] ?? [];
+        
+        // Limpiar sesión después de recuperar (para que no persistan en siguientes cargas)
+        unset($_SESSION['contact_errors'], $_SESSION['contact_old']);
+        
+        // 3. Procesar inmueble si viene por parámetro
         $idInmueble = (int)($_GET['id_inmueble'] ?? 0);
         $inmueble = null;
 
@@ -50,9 +63,21 @@ class ContactController
             }
         }
 
-        $csrfToken = Csrf::token();
-        $errors = [];
-        $old = [];
+        // 4. Manejar prefill de mensaje según motivo (GET parameter)
+        // IMPORTANTE: Solo aplicar si NO hay mensaje previo del usuario
+        $motivo = strtolower(trim((string)($_GET['motivo'] ?? '')));
+        
+        // Solo prefill si motivo es válido Y el mensaje está vacío (no pisar datos del usuario)
+        if (in_array($motivo, self::MOTIVOS_VALIDOS, true) && empty($old['mensaje'])) {
+            $mensajesPorMotivo = [
+                'info' => 'Hola, me gustaría recibir más información sobre vuestros servicios. Gracias.',
+                'compra' => 'Hola, estoy interesado/a en comprar una propiedad. ¿Podríais ayudarme? Gracias.',
+                'venta' => 'Hola, me gustaría vender mi propiedad. ¿Podríais contactarme? Gracias.',
+                'alquiler' => 'Hola, estoy buscando una propiedad en alquiler. ¿Podríais ayudarme? Gracias.',
+            ];
+            
+            $old['mensaje'] = $mensajesPorMotivo[$motivo];
+        }
 
         require VIEW . '/layouts/header.php';
         require VIEW . '/contacto/form.php';
@@ -130,6 +155,7 @@ class ContactController
             'mensaje' => trim(strip_tags($_POST['mensaje'] ?? '')),
             'politica_privacidad' => (int)($_POST['politica_privacidad'] ?? 0),
             'id_inmueble' => (int)($_POST['id_inmueble'] ?? 0),
+            'motivo' => strtolower(trim((string)($_POST['motivo'] ?? ''))),
         ];
 
         $errors = [];
@@ -177,12 +203,27 @@ class ContactController
         // Si hay errores de validación
         if (!empty($errors)) {
             $this->logContacto('VALIDATION_ERROR', array_keys($errors));
-            $old = $input; // Devolver datos sanitizados
-            $csrfToken = Csrf::token();
-            require VIEW . '/layouts/header.php';
-            require VIEW . '/contacto/form.php';
-            require VIEW . '/layouts/footer.php';
-            return;
+            
+            // Guardar errores y datos en sesión para que index() los recupere
+            $_SESSION['contact_errors'] = $errors;
+            $_SESSION['contact_old'] = $input;
+            
+            // Redirigir a index() para que muestre el formulario con errores
+            // Mantener parámetros GET si existen (id_inmueble, motivo)
+            $queryParams = [];
+            
+            if ($input['id_inmueble'] > 0) {
+                $queryParams['id_inmueble'] = $input['id_inmueble'];
+            }
+            
+            // Validar y añadir motivo si es válido
+            if (!empty($input['motivo']) && in_array($input['motivo'], self::MOTIVOS_VALIDOS, true)) {
+                $queryParams['motivo'] = $input['motivo'];
+            }
+            
+            $redirectUrl = '/contacto' . (!empty($queryParams) ? '?' . http_build_query($queryParams) : '');
+            header("Location: $redirectUrl");
+            exit;
         }
 
         // 5. Todo OK - Preparar envío
