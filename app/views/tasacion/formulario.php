@@ -8,7 +8,7 @@
                 <i data-lucide="calculator" class="w-8 h-8 opacity-90"></i>
                 <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Tasación Online</h2>
             </div>
-            <p class="text-indigo-100 opacity-90">Valoración profesional basada en datos de mercado actuales.</p>
+            <p class="text-indigo-100 opacity-90">Valoración profesional basada en datos de mercado actuales en la provincia de Valencia.</p>
         </div>
 
         <div class="p-6 sm:p-8 grid lg:grid-cols-12 gap-8 relative">
@@ -205,7 +205,7 @@
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" id="check-privacy" class="gdpr-checkbox mt-1">
                                 <span class="text-xs text-gray-600 leading-tight">
-                                    He leído y acepto la <a href="#" class="text-indigo-600 underline">política de
+                                    He leído y acepto la <a href="/legal/privacidad" class="text-indigo-600 underline" target="_blank">política de
                                         privacidad</a> y el tratamiento de mis datos.
                                 </span>
                             </label>
