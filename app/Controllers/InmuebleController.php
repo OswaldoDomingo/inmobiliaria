@@ -58,7 +58,10 @@ final class InmuebleController
         // Leer y validar return_to desde GET
         $returnTo = $this->validateReturnTo($_GET['return_to'] ?? null);
 
-        $propietarios = $this->clientes->listForSelect();
+        // Pass user context to listForSelect
+        $userId = $this->currentUserId();
+        $rol = $this->currentUserRole();
+        $propietarios = $this->clientes->listForSelect($userId, $rol);
         $comerciales  = $this->getComerciales(); // Helper
         $csrfToken = $this->csrfToken();
         $errors = [];
@@ -112,6 +115,15 @@ final class InmuebleController
             $prop = $this->clientes->findById((int)$data['propietario_id']);
             if (!$prop) {
                 $errors['propietario_id'] = 'Propietario no válido.';
+            } else {
+                // Validación para comerciales: el cliente debe ser suyo
+                $rol = $this->currentUserRole();
+                $userId = $this->currentUserId();
+                if ($rol === 'comercial') {
+                    if ((int)$prop->usuario_id !== $userId) {
+                         $errors['propietario_id'] = 'Propietario no válido o no asignado.';
+                    }
+                }
             }
         }
 
@@ -130,7 +142,9 @@ final class InmuebleController
                 $propietarioPre = $this->clientes->findById($propietarioId);
             }
 
-            $propietarios = $this->clientes->listForSelect();
+            $userId = $this->currentUserId();
+            $rol = $this->currentUserRole();
+            $propietarios = $this->clientes->listForSelect($userId, $rol);
             $comerciales  = $this->getComerciales();
             $csrfToken = $this->csrfToken();
             $old = $data;

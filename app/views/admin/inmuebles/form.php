@@ -83,7 +83,12 @@ require VIEW . '/layouts/header.php';
                         <!-- Sección: Propietario y Comercial -->
                         <div class="col-md-6">
                             <label class="form-label">Propietario *</label>
-                            <select name="propietario_id" class="form-select <?= $isInvalid('propietario_id') ?>" required>
+                            <?php if (empty($propietarios)): ?>
+                                <div class="alert alert-warning py-2 mb-2">
+                                    <small><i class="bi bi-exclamation-circle"></i> No tienes clientes asignados. Crea primero un cliente.</small>
+                                </div>
+                            <?php endif; ?>
+                            <select name="propietario_id" class="form-select <?= $isInvalid('propietario_id') ?>" required <?= empty($propietarios) ? 'disabled' : '' ?>>
                                 <option value="">-- Seleccionar Propietario --</option>
                                 <?php foreach (($propietarios ?? []) as $p): 
                                     $pid = is_array($p) ? $p['id_cliente'] : $p->id_cliente;

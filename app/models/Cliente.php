@@ -130,13 +130,32 @@ class Cliente
      * Lista básica de clientes para selects de propietario.
      * Devuelve id_cliente, nombre y apellidos ordenados alfabéticamente.
      */
-    public function listForSelect(): array
+    public function listForSelect(?int $usuarioId = null, string $rol = 'admin'): array
     {
         $pdo = Database::conectar();
-        $sql = "SELECT id_cliente, nombre, apellidos
-                FROM clientes
-                ORDER BY nombre ASC, apellidos ASC";
-        $stmt = $pdo->query($sql);
-        return $stmt->fetchAll() ?: [];
+
+        // 1. Roles privilegiados: Ven todos
+        if (in_array($rol, ['admin', 'coordinador'], true)) {
+            $sql = "SELECT id_cliente, nombre, apellidos
+                    FROM clientes
+                    WHERE activo = 1
+                    ORDER BY nombre ASC, apellidos ASC";
+            return $pdo->query($sql)->fetchAll() ?: [];
+        }
+
+        // 2. Comercial (o cualquier otro rol no admin): Solo sus clientes
+        // Se asume comportamiento restrictivo por defecto
+        if ($rol === 'comercial' || true) {
+             $sql = "SELECT id_cliente, nombre, apellidos
+                    FROM clientes
+                    WHERE usuario_id = :uid AND activo = 1
+                    ORDER BY nombre ASC, apellidos ASC";
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindValue(':uid', $usuarioId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll() ?: [];
+        }
+        
+        return [];
     }
 }
