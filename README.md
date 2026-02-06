@@ -203,10 +203,10 @@ sudo find logs storage/logs public/uploads -type f -exec chmod 664 {} \;
 │   └── views/                   # Vistas (admin, auth, propiedades, tasación, legal, layouts, partials...)
 │
 ├── config/                      # Configuración centralizada (.env, BD, rutas...)
-├── database/                    # Esquema y migraciones de la base de datos
-│   ├── migrations/              # Scripts incrementales (CRM, imágenes, etc.)
-│   ├── p261985_inmobiliaria.sql # Dump de referencia
-│   └── schema.sql               # Esquema general
+├── database/                    # Esquema y datos de la base de datos
+│   ├── inmobiliaria_db_datos.sql      # Datos iniciales
+│   ├── inmobiliaria_db_estructura.sql # Estructura completa de la BD
+│   └── old/                           # Backups y scripts antiguos
 │
 ├── docs/                        # Documentación del proyecto
 │   ├── memoria_proyecto.md      # Memoria oficial para el módulo de Proyecto
