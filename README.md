@@ -77,26 +77,113 @@ Este proyecto incorpora:
 
 ---
 
-## 🛠 Puesta en marcha rápida
+## 🚀 Instalación y Despliegue en Servidor
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone https://github.com/OswaldoDomingo/inmobiliaria.git
-   cd inmobiliaria
-   ```
+Para desplegar la aplicación en un entorno de producción o servidor de pruebas, sigue estos pasos.
 
-2. **Base de datos:**
-   - Crear una base de datos en MySQL/MariaDB.
-   - Importar los scripts SQL ubicados en `database/`.
+### 1) Requisitos del sistema
+- **PHP:** 8.0 o superior
+- **Base de datos:** MySQL o MariaDB
+- **Servidor web:** Apache (con `mod_rewrite`) o Nginx
+- **Extensiones PHP recomendadas:** `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `json`
 
-3. **Configuración del entorno:**
-   - Copiar el archivo de ejemplo: `cp config/.env.example config/.env`
-   - Editar `config/.env` con tus credenciales de base de datos.
-   - Establecer `APP_ENV=local` para desarrollo.
+---
 
-4. **Servidor Web:**
-   - Configurar VirtualHost en Apache apuntando a la carpeta `/public`.
-   - Acceder a `http://inmobiliaria.loc/` (Portal) o `http://inmobiliaria.loc/login` (Admin).
+### 2) Configuración de la Base de Datos
+1. Crea una base de datos (ej.: `inmobiliaria_db`).
+2. Importa la base de datos:
+   - Estructura: `database/inmobiliaria_db_estructura.sql`
+   - Datos: `database/inmobiliaria_db_datos.sql`
+
+---
+
+### 3) Configuración del entorno (.env)
+Por seguridad, las credenciales sensibles no se incluyen en el repositorio.
+
+1. Usa la plantilla **de la raíz**: `.env.example`
+2. Copia la plantilla a `config/.env`
+3. Edita `config/.env` con las credenciales reales:
+
+```ini
+DB_HOST=localhost
+DB_NAME=nombre_tu_base_datos
+DB_USER=usuario_mysql
+DB_PASS=contraseña_mysql
+
+APP_URL=https://midominio.com
+APP_ENV=production
+```
+
+> **Nota:** No subas `config/.env` al repositorio.
+
+### 4) Publicación en servidor web (Apache)
+
+✅ **Recomendado:** el `DocumentRoot` debe apuntar a `public/` (evita exponer `config/`, `app/`, etc.)
+
+**Ejemplo de VirtualHost:**
+
+```apache
+<VirtualHost *:80>
+    ServerName midominio.com
+    DocumentRoot "/var/www/inmobiliaria/public"
+
+    <Directory "/var/www/inmobiliaria/public">
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/inmobiliaria_error.log
+    CustomLog ${APACHE_LOG_DIR}/inmobiliaria_access.log combined
+</VirtualHost>
+```
+
+### 5) (Opcional) Publicación en Nginx
+
+**Ejemplo básico:**
+
+```nginx
+server {
+    server_name midominio.com;
+    root /var/www/inmobiliaria/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock; # ajusta versión/socket
+    }
+
+    # Bloquear acceso a archivos ocultos
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
+
+### 6) Permisos de carpetas
+
+Asegúrate de que el usuario del servidor web (ej.: `www-data`) tenga permisos de escritura en:
+
+* `logs/` (logs de autenticación/correo)
+* `storage/logs/` (si se usa para logs adicionales)
+* `public/uploads/` (imágenes de inmuebles y perfiles)
+
+**Ejemplo (Linux):**
+
+```bash
+sudo chown -R www-data:www-data logs storage/logs public/uploads
+sudo find logs storage/logs public/uploads -type d -exec chmod 775 {} \;
+sudo find logs storage/logs public/uploads -type f -exec chmod 664 {} \;
+```
+
+### 7) Hardening recomendado (producción)
+
+* Protege o elimina `public/test/` (contiene diagnósticos y páginas de debug).
+* Verifica que la reescritura hacia `public/index.php` funciona y que no hay listado de directorios.
 
 ---
 
