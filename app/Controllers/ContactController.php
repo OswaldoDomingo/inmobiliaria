@@ -347,7 +347,7 @@ class ContactController
         $dir = dirname($logPath);
         
         if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+            @mkdir($dir, 0755, true);
         }
 
         $timestamp = date('Y-m-d H:i:s');
@@ -359,6 +359,6 @@ class ContactController
 
         $line = "[$timestamp] [$ip] [$status] $contextStr | UA: $ua" . PHP_EOL;
 
-        file_put_contents($logPath, $line, FILE_APPEND | LOCK_EX);
+        @file_put_contents($logPath, $line, FILE_APPEND | LOCK_EX);
     }
 }

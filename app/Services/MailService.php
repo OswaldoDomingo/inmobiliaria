@@ -184,11 +184,12 @@ class MailService
      */
     private static function log(string $message, string $level = 'info'): void
     {
-        $logDir = __DIR__ . '/../../logs';
+        // Usar ruta consistente con el resto del proyecto (storage/logs/)
+        $logDir = defined('ROOT') ? ROOT . '/storage/logs' : __DIR__ . '/../../storage/logs';
         
-        // Crear directorio de logs si no existe
+        // Crear directorio de logs si no existe (con suppress de errores por si falla permisos)
         if (!is_dir($logDir)) {
-            mkdir($logDir, 0755, true);
+            @mkdir($logDir, 0755, true);
         }
 
         $logFile = $logDir . '/mail.log';

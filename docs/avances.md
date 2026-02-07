@@ -2010,3 +2010,42 @@ Se ajustó el layout base para que el pie de página permanezca en la parte infe
 - Resultado: en páginas con poco contenido (login, legales, etc.) el footer no queda “flotando” a mitad de pantalla.
 
 ---
+
+### ✅ 07/02/2026 — Corrección de rutas de logs en producción
+
+**Problema detectado:**  
+Al solicitar información de un inmueble desde el formulario de contacto en el servidor de producción, aparecían tres warnings de PHP visibles al usuario:
+
+1. `mkdir(): Permission denied` en `ContactController.php:350`
+2. `file_put_contents(...contacto.log): No such file or directory` en `ContactController.php:362`
+3. `file_put_contents(...mail.log): Permission denied` en `MailService.php:199`
+
+**Causa raíz:**
+
+- **Ruta inconsistente en `MailService`:** Usaba `__DIR__ . '/../../logs'` (resolvía a `/srv/www/inmobiliaria/logs`), mientras que `ContactController` usaba `ROOT . '/storage/logs'`. Esto provocaba que cada servicio intentara escribir en directorios diferentes.
+- **Directorio inexistente:** El directorio `storage/logs/` no existía en el servidor de producción.
+- **Permisos:** El usuario de Apache (`www-data`) no tenía permisos para crear el directorio ni escribir en él.
+
+**Solución aplicada:**
+
+1. **Unificación de rutas en `MailService.php`:**
+   - Cambiado de `__DIR__ . '/../../logs'` a `ROOT . '/storage/logs'` para que todos los logs vayan al mismo directorio.
+   
+2. **Supresión de warnings con `@`:**
+   - Añadido operador `@` antes de `mkdir()` y `file_put_contents()` en ambos archivos para evitar que los warnings de permisos se muestren al usuario final.
+   - Los logs son funcionalidad secundaria; su fallo no debe romper la experiencia del usuario.
+
+3. **Creación del directorio en servidor:**
+   ```bash
+   mkdir -p /srv/www/inmobiliaria/storage/logs
+   chmod 775 /srv/www/inmobiliaria/storage/logs
+   sudo chown www-data:www-data /srv/www/inmobiliaria/storage/logs
+   ```
+
+**Archivos modificados:**
+- `app/Services/MailService.php` (líneas 187-194)
+- `app/Controllers/ContactController.php` (líneas 350, 362)
+
+**Resultado:** El formulario de contacto funciona correctamente sin mostrar warnings al usuario, y los logs se escriben en `storage/logs/` cuando los permisos son correctos.
+
+---
