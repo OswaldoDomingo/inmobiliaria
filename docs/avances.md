@@ -2000,3 +2000,13 @@ Esta implementación demuestra conocimiento de:
 **Resultado:** el prefill contextual y los redirects mantienen el motivo correctamente y el flujo queda más limpio y profesional.
 
 ---
+
+### ✅ 07/02/2026 — Footer siempre abajo (sticky footer)
+
+Se ajustó el layout base para que el pie de página permanezca en la parte inferior de la ventana incluso cuando el contenido no llena toda la altura.
+
+- Archivo: `app/views/layouts/header.php`
+- Cambio: `body` pasa a `d-flex flex-column min-vh-100` y `main` a `flex-grow-1` para que el `footer` (con `mt-auto`) se empuje hacia abajo.
+- Resultado: en páginas con poco contenido (login, legales, etc.) el footer no queda “flotando” a mitad de pantalla.
+
+---
