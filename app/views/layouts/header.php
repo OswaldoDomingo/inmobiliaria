@@ -10,7 +10,7 @@
     <!-- Estilos adicionales (opcional) -->
     <?php if (isset($extraCss)) echo $extraCss; ?>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
     <!-- 1. Navbar + Hero -->
     <header class="mb-4">
@@ -80,4 +80,4 @@
         <?php endif; ?>
     </header>
     
-    <main>
+    <main class="flex-grow-1">
