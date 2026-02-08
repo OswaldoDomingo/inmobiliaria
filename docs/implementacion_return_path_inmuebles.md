@@ -271,6 +271,6 @@ Se crearon copias de seguridad con extensión `.bak`:
 
 ---
 
-**Implementado**: Imolab  
+**Implementado**: Imobiliaria
 **Revisado**: VB  
 **Estado**: ✅ Completado
