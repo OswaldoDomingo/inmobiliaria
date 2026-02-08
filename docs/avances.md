@@ -2049,3 +2049,17 @@ Al solicitar información de un inmueble desde el formulario de contacto en el s
 **Resultado:** El formulario de contacto funciona correctamente sin mostrar warnings al usuario, y los logs se escriben en `storage/logs/` cuando los permisos son correctos.
 
 ---
+
+### ✅ 08/02/2026 — Anexo A: Wireframes (Markdown/PDF)
+
+Se generó el **Anexo A de wireframes** a partir de las imágenes `WF-*` ubicadas en `docs/servidor/img/`.
+
+- Solo incluye archivos que empiezan por `WF-` (ordenados alfabéticamente).
+- Cada wireframe va con título `A.n — <nombre>` y se renderiza con `<img>` a `95%` de ancho.
+- Entre wireframes se inserta salto de página con `<div style="page-break-after: always;"></div>` para exportación a PDF.
+
+**Archivos generados:**
+- `docs/anexos/Anexo_A_Wireframes.md`
+- `docs/anexos/Anexo_A_Wireframes.pdf`
+
+---
