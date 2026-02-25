@@ -72,3 +72,4 @@ estructura_proyecto.*
 docs/estructura_proyecto.*
 
 servidor/
+.AGENTS.md
